@@ -34,14 +34,9 @@ export function Footer() {
     <footer className="border-t border-line">
       <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-16 lg:grid-cols-12 lg:px-9">
         <div className="lg:col-span-5">
-          <p className="max-w-sm text-[1.625rem] leading-none tracking-[-0.03em] lg:text-[2rem]">
-            Contact us
-          </p>
-          <div className="mt-6">
-            <Button href="/contact">
-              Contact us <ArrowRight />
-            </Button>
-          </div>
+          <Button href="/contact">
+            Contact us <ArrowRight />
+          </Button>
         </div>
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-7">
           {columns.map((column) => (

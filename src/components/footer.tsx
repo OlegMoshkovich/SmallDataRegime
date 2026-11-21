@@ -8,15 +8,14 @@ const columns = [
       { href: "/research", label: "Research" },
       { href: "/docs", label: "Docs" },
       { href: "/contact", label: "Contact" },
-      { href: "/product#review", label: "Pair review" },
-      { href: "/platform#security", label: "Security" },
+      { href: "/product#security", label: "Security" },
     ],
   },
   {
     title: "Company",
     links: [
       { href: "/company", label: "About" },
-      { href: "/platform", label: "Platform" },
+      { href: "/product", label: "Product" },
       { href: "/company#careers", label: "Careers" },
       { href: "/pricing", label: "Pricing" },
     ],
@@ -36,11 +35,11 @@ export function Footer() {
       <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-16 lg:grid-cols-12 lg:px-9">
         <div className="lg:col-span-5">
           <p className="max-w-sm text-[1.625rem] leading-none tracking-[-0.03em] lg:text-[2rem]">
-            Ready to train on the data you have?
+            Contact us
           </p>
           <div className="mt-6">
             <Button href="/contact">
-              Start a run <ArrowRight />
+              Contact us <ArrowRight />
             </Button>
           </div>
         </div>
@@ -64,7 +63,7 @@ export function Footer() {
         </div>
       </div>
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 border-t border-line px-4 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between lg:px-9">
-        <p>© SmallDataRegime.ai 2026. RL post-training for the small-data regime.</p>
+        <p>© MIResearch Lab 2026. RL post-training for the small-data regime.</p>
         <p className="font-mono tracking-[-0.01em] uppercase">Sample efficient</p>
       </div>
     </footer>

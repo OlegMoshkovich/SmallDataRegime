@@ -4,15 +4,16 @@ import { Interior } from "@/components/interior";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Request a small-data post-training run.",
+  description:
+    "SmallDataRegime.ai is the platform where a small set of your preferences becomes a reasoning system, model agnostic, with ownership and privacy.",
 };
 
 export default function ContactPage() {
   return (
     <Interior
       eyebrow="Contact"
-      title="Tell us the behavior that is still wrong."
-      lede="Bring the task, the size of the labeled set you can actually produce, and the eval that has to pass. We will say whether it belongs in the small-data regime."
+      title="Ready to create a reasoning system based on your data."
+      lede="SmallDataRegime.ai is the platform where a small set of your preferences becomes a reasoning system, model agnostic, with ownership and privacy."
     >
       <ContactForm />
     </Interior>

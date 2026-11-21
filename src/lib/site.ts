@@ -1,6 +1,5 @@
 export const nav = [
   { href: "/product", label: "Product" },
-  { href: "/platform", label: "Platform" },
   { href: "/pricing", label: "Pricing" },
   { href: "/research", label: "Research" },
   { href: "/company", label: "Company" },
@@ -48,26 +47,6 @@ export const features = [
     slug: "control",
     title: "Run control",
     body: "Live view of active runs, worker progress, and the eval gate sitting in front of release.",
-  },
-  {
-    slug: "loops",
-    title: "Loops",
-    body: "Collect, rank, train, and validate on one shared context, then run it again when new signal arrives.",
-  },
-  {
-    slug: "routing",
-    title: "Model routing",
-    body: "Send the policy, the reward model, and the judge to different models by quality, speed, and cost.",
-  },
-  {
-    slug: "review",
-    title: "Pair review",
-    body: "Read a preference before it trains anything, with the trace and the reason beside it.",
-  },
-  {
-    slug: "wiki",
-    title: "Spec wiki",
-    body: "A living page for every reward spec, eval, and policy version, kept current as the run history changes.",
   },
 ] as const;
 

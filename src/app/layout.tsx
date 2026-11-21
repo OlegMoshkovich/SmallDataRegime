@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | SmallDataRegime.ai",
   },
   description:
-    "Post-train language and policy models from a small, curated set of preferences, traces, and reward specs. Sample efficient. Deployed anywhere.",
+    "Post-train language and policy models from a small, curated set of preferences, traces, and reward specs. Sample efficient. Model agnostic.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

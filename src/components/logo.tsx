@@ -42,15 +42,6 @@ export function Mark({
       }
       onMouseLeave={controlled ? undefined : () => setLocal(null)}
     >
-      <rect
-        x="0.75"
-        y="0.75"
-        width="34.5"
-        height="34.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="0.75"
-      />
       {cells.map((cell, index) => {
         const hollow = Boolean(open?.[index]);
         return (

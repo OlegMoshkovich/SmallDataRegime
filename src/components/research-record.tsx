@@ -61,7 +61,7 @@ export function ResearchRecord() {
             2006 – 2011
           </p>
           <p className="text-base leading-snug">
-            Yasin Abbasi-Yadkori identifies a problem and provides a groundbreaking
+            Our chief scientist identifies a problem and provides a groundbreaking
             solution.
           </p>
           <div className="bg-accent p-5 text-paper">

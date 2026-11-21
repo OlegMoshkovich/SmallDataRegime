@@ -19,7 +19,7 @@ export default function HomePage() {
           <span className="block">for small data</span>
         </h1>
         <p className="mt-5 font-mono text-[clamp(0.75rem,1.15vw,1.15rem)] text-muted">
-          Sample efficient. Deployed anywhere.
+          Sample efficient. Model agnostic.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Button href="/contact">Start a run</Button>

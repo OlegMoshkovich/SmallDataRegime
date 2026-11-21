@@ -59,7 +59,7 @@ export function Footer() {
       </div>
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 border-t border-line px-4 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between lg:px-9">
         <p>© MIResearch Lab 2026. RL post-training for the small-data regime.</p>
-        <p className="font-mono tracking-[-0.01em] uppercase">Sample efficient</p>
+        <p className="hidden font-mono tracking-[-0.01em] uppercase sm:block">Sample efficient</p>
       </div>
     </footer>
   );

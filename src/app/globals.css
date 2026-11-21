@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f9f9f9;
+  --foreground: #020202;
+  --surface: #ffffff;
+  --sunken: #ebebeb;
+  --ink: #101010;
+  --muted: #8a8380;
+  --faint: #5c5855;
+  --line: #d6d3d2;
+  --line-strong: #b8b3b0;
+  --accent: #ee6018;
+  --paper: #fafafa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-paper: var(--paper);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+*,
+*::before,
+*::after {
+  border-radius: 0;
+}
+
+::selection {
+  background: #ef6f2e;
+  color: #fafafa;
+}
+
+@keyframes slide-pattern {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 7px 7px;
+  }
+}
+
+.stripe-hover {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0px,
+    transparent 2px,
+    var(--stripe, rgba(255, 255, 255, 0.16)) 2px,
+    var(--stripe, rgba(255, 255, 255, 0.16)) 3px,
+    transparent 3px,
+    transparent 5px
+  );
+  background-size: 7px 7px;
+  animation: slide-pattern 2s linear infinite;
+}
+
+@keyframes cursor-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: cursor-blink 1.1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .stripe-hover,
+  .cursor-blink {
+    animation: none;
+  }
+}

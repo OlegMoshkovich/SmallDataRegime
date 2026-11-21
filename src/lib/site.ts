@@ -1,0 +1,74 @@
+export const nav = [
+  { href: "/product", label: "Product" },
+  { href: "/platform", label: "Platform" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/research", label: "Research" },
+  { href: "/company", label: "Company" },
+  { href: "/docs", label: "Docs" },
+] as const;
+
+export const pillars = [
+  {
+    index: "01",
+    kicker: "Signal",
+    title: "Deliberately small, high-leverage data",
+    body: "Choose the traces, rankings, and corrections that enter the loop. The set stays small because each example has to earn its place.",
+  },
+  {
+    index: "02",
+    kicker: "Governance",
+    title: "A reward spec with a release gate",
+    body: "Every update is checked against held-out evals, a written reward, and a human review before it can leave the lab.",
+  },
+  {
+    index: "03",
+    kicker: "Value",
+    title: "Lift per labeled example",
+    body: "Tie win rate, sample use, and task quality to the cost of the next preference — not to the size of the corpus.",
+  },
+];
+
+export const features = [
+  {
+    slug: "yield",
+    title: "Yield",
+    body: "See which preferences actually move the policy, by task, labeler, and team.",
+  },
+  {
+    slug: "machines",
+    title: "Lab machines",
+    body: "Dedicated machines that keep weights, traces, and reward models on hardware you control.",
+  },
+  {
+    slug: "readiness",
+    title: "Readiness",
+    body: "A score for whether a task can be post-trained from a small set, tracked as the spec changes.",
+  },
+  {
+    slug: "control",
+    title: "Run control",
+    body: "Live view of active runs, worker progress, and the eval gate sitting in front of release.",
+  },
+  {
+    slug: "loops",
+    title: "Loops",
+    body: "Collect, rank, train, and validate on one shared context, then run it again when new signal arrives.",
+  },
+  {
+    slug: "routing",
+    title: "Model routing",
+    body: "Send the policy, the reward model, and the judge to different models by quality, speed, and cost.",
+  },
+  {
+    slug: "review",
+    title: "Pair review",
+    body: "Read a preference before it trains anything, with the trace and the reason beside it.",
+  },
+  {
+    slug: "wiki",
+    title: "Spec wiki",
+    body: "A living page for every reward spec, eval, and policy version, kept current as the run history changes.",
+  },
+] as const;
+
+export const command = "smalldataregime train --budget 200 --reward prefs.jsonl";

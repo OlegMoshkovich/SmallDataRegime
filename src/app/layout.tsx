@@ -1,0 +1,40 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: "SmallDataRegime.ai | RL Post-Training for the Small-Data Regime",
+    template: "%s | SmallDataRegime.ai",
+  },
+  description:
+    "Post-train language and policy models from a small, curated set of preferences, traces, and reward specs. Sample efficient. Deployed anywhere.",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
+        <Header />
+        <div aria-hidden className="h-[72px] shrink-0" />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}

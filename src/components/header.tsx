@@ -26,7 +26,10 @@ export function Header() {
         <Link href="/" aria-label="SmallDataRegime.ai home" onClick={() => setOpen(false)}>
           <Wordmark />
         </Link>
-        <nav className="hidden lg:block" aria-label="Main">
+        <nav
+          className="absolute left-1/2 hidden -translate-x-1/2 lg:block"
+          aria-label="Main"
+        >
           <ul className="group/menu flex items-center gap-8">
             {nav.map((item) => (
               <li

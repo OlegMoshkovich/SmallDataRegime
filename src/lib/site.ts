@@ -1,9 +1,7 @@
 export const nav = [
   { href: "/product", label: "Product" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/research", label: "Research" },
   { href: "/company", label: "Company" },
-  { href: "/docs", label: "Docs" },
 ] as const;
 
 export const pillars = [

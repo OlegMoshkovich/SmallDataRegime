@@ -6,7 +6,6 @@ const columns = [
     title: "Resources",
     links: [
       { href: "/research", label: "Research" },
-      { href: "/docs", label: "Docs" },
       { href: "/contact", label: "Contact" },
       { href: "/product#security", label: "Security" },
     ],
@@ -17,7 +16,6 @@ const columns = [
       { href: "/company", label: "About" },
       { href: "/product", label: "Product" },
       { href: "/company#careers", label: "Careers" },
-      { href: "/pricing", label: "Pricing" },
     ],
   },
   {

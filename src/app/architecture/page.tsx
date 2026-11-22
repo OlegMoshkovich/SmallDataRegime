@@ -8,58 +8,59 @@ export const metadata: Metadata = {
     "A bank employee chats with one orchestrator. It opens the right document, calls the right agent, and runs the model the privacy of the request allows.",
 };
 
-const sources = ["Box", "SharePoint", "Internal system", "Google Drive"];
-const agents = [
+const governance = [
   {
-    name: "Compliance",
-    body: "Answers against the policy and the file the orchestrator opened.",
+    name: "Privacy",
+    body: "Whether this request may leave the bank.",
   },
   {
-    name: "Notes taker",
-    body: "Drafts the meeting. A person approves before it is written into the record.",
+    name: "Access",
+    body: "Read, a draft, or a preview before a write.",
   },
   {
-    name: "Customer support",
-    body: "Answers the client-facing question from those same documents.",
+    name: "Budget",
+    body: "A token cap on the use case.",
   },
 ];
+const models = ["DeepSeek", "Qwen", "OpenAI"];
 
-function Person() {
+function Question({ className = "h-10 w-10 shrink-0" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 72" className="h-16 w-10 shrink-0" aria-hidden>
+    <svg viewBox="0 0 48 48" className={className} aria-hidden>
+      <rect x="1.5" y="1.5" width="45" height="45" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path
+        d="M19 19.5c0-4.2 2.6-7 5.8-7 3.4 0 5.7 2.2 5.7 5.2 0 3.6-2.8 5-5.6 6.6-.4.2-.9.6-.9 1.2V29"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <circle cx="24" cy="34.5" r="1.3" fill="currentColor" />
+    </svg>
+  );
+}
+
+function Person({ className = "h-16 w-10 shrink-0" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 72" className={className} aria-hidden>
       <circle cx="24" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.6" />
       <path d="M10 70V42h28v28" fill="none" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );
 }
 
-function Arrow() {
+function Arrow({ className = "h-4 w-8 shrink-0" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 16" className="h-4 w-8 shrink-0" aria-hidden>
+    <svg viewBox="0 0 32 16" className={className} aria-hidden>
       <path d="M0 8h26M20 2l8 6-8 6" fill="none" stroke="currentColor" strokeWidth="1.4" />
     </svg>
   );
 }
 
-function Lane({
-  label,
-  note,
-  children,
-}: {
-  label: string;
-  note: string;
-  children: React.ReactNode;
-}) {
+function ArrowDown() {
   return (
-    <section className="grid items-start gap-4 border border-line bg-surface p-4 sm:grid-cols-[9.5rem_minmax(0,1fr)]">
-      <div>
-        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-          {label}
-        </p>
-        <p className="mt-2 text-sm leading-snug text-faint">{note}</p>
-      </div>
-      <div>{children}</div>
-    </section>
+    <svg viewBox="0 0 16 28" className="h-7 w-4 text-accent" aria-hidden>
+      <path d="M8 0v22M2 16l6 8 6-8" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
   );
 }
 
@@ -76,210 +77,292 @@ export default function ArchitecturePage() {
         </Button>
       </div>
       <figure
-        className="grid gap-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-10"
-        aria-label="A person chats with the orchestrator. It opens a document in the system that holds it, routes the request to an agent, and chooses an on-prem or frontier model."
+        className="border border-line bg-surface"
+        aria-label="The orchestrator routes a fraud question to the anti-fraud agent, which opens KYC and AML, or sends a general question straight to a model. It also holds privacy, access, and budget."
       >
-        <div className="flex items-center gap-4">
-          <div className="grid justify-items-center gap-2">
-            <Person />
-            <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
-              Chat
-            </p>
+        <div className="grid gap-6 border-b border-line p-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:p-6">
+          <div className="flex items-center gap-4">
+            <div className="grid justify-items-center gap-2">
+              <Person />
+              <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
+                Question
+              </p>
+            </div>
+            <Arrow />
+            <div className="border border-foreground px-5 py-6">
+              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+                Orchestrator
+              </p>
+              <p className="mt-2 max-w-[14rem] text-sm leading-snug text-faint">
+                Chooses an agent, or calls a model itself.
+              </p>
+            </div>
           </div>
-          <Arrow />
-          <div className="border border-foreground bg-surface px-5 py-6">
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
-              Orchestrator
-            </p>
-            <p className="mt-2 max-w-[12rem] text-sm leading-snug text-faint">
-              Every request comes here, and only here.
-            </p>
-          </div>
+          <ul className="grid gap-2 sm:grid-cols-3">
+            {governance.map((rule) => (
+              <li key={rule.name} className="border border-line px-3 py-3">
+                <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">
+                  {rule.name}
+                </p>
+                <p className="mt-2 text-sm leading-snug text-faint">{rule.body}</p>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className="grid gap-4">
-          <Lane label="Documents" note="The right file, in the system that holds it.">
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {sources.map((item) => (
-                <li key={item} className="border border-line px-3 py-2 text-sm">
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <ul className="mt-2 grid grid-cols-3 gap-2">
-              {["Doc", "Doc", "Doc"].map((doc, index) => (
-                <li key={index} className="border border-line px-3 py-2 text-center text-sm">
-                  {doc}
-                </li>
-              ))}
-            </ul>
-          </Lane>
-
-          <Lane label="Agent" note="The one whose job the question is.">
-            <ul className="grid gap-2">
-              {agents.map((agent) => (
-                <li key={agent.name} className="border border-line px-3 py-2">
-                  <p className="text-sm">{agent.name}</p>
-                  <p className="mt-1 text-sm leading-snug text-faint">{agent.body}</p>
-                </li>
-              ))}
-            </ul>
-          </Lane>
-
-          <Lane label="Model" note="Chosen by whether the request may leave the bank.">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="border border-line p-3">
+        <div className="grid lg:grid-cols-2">
+          <div className="grid gap-4 border-b border-line p-4 lg:border-r lg:border-b-0 lg:p-6">
+            <div className="flex items-center gap-3">
+              <div className="grid justify-items-center gap-1">
+                <Question className="h-7 w-7 shrink-0" />
                 <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
-                  On-prem
-                </p>
-                <p className="mt-2 text-sm">Qwen 30B</p>
-                <p className="mt-1 text-sm">DeepSeek</p>
-                <p className="mt-2 text-sm leading-snug text-faint">
-                  Hosted on the bank’s machines. The file stays there.
+                  Fraud
                 </p>
               </div>
-              <div className="border border-line p-3">
-                <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
-                  Frontier
+              <Arrow className="h-4 w-8 shrink-0" />
+              <div>
+                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                  Through an agent
                 </p>
-                <p className="mt-2 text-sm">Claude</p>
                 <p className="mt-2 text-sm leading-snug text-faint">
-                  Called only when the request carries nothing that has to stay inside.
+                  The question arrives on the case surface and is handed to the anti-fraud agent.
                 </p>
               </div>
             </div>
-          </Lane>
+            <div className="border border-foreground px-4 py-4">
+              <p className="text-sm">Anti-fraud agent</p>
+              <p className="mt-1 text-sm leading-snug text-faint">
+                Opens the systems the question needs, then calls a model.
+              </p>
+            </div>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {["KYC", "AML"].map((system) => (
+                <li key={system} className="border border-line px-3 py-3">
+                  <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
+                    MCP
+                  </p>
+                  <p className="mt-2 text-sm">{system}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="grid content-start gap-4 p-4 lg:p-6">
+            <div className="flex items-center gap-3">
+              <div className="grid justify-items-center gap-1">
+                <Question className="h-7 w-7 shrink-0" />
+                <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
+                  General
+                </p>
+              </div>
+              <Arrow className="h-4 w-8 shrink-0" />
+              <div>
+                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                  Straight to a model
+                </p>
+                <p className="mt-2 text-sm leading-snug text-faint">
+                  The question arrives on the chat surface and goes to a model.
+                </p>
+              </div>
+            </div>
+            <div className="border border-line px-4 py-4">
+              <p className="text-sm">The orchestrator calls the model.</p>
+              <p className="mt-1 text-sm leading-snug text-faint">
+                Privacy, access, and budget still apply to the call.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-line p-4 lg:p-6">
+          <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+            Model
+          </p>
+          <p className="mt-2 text-sm leading-snug text-faint">
+            Both paths end here. The orchestrator picks the one the request is allowed to use.
+          </p>
+          <ul className="mt-4 grid gap-2 sm:grid-cols-3">
+            {models.map((model) => (
+              <li key={model} className="border border-line px-3 py-3 text-sm">
+                {model}
+              </li>
+            ))}
+          </ul>
         </div>
       </figure>
 
       <div className="mt-20 grid gap-16">
         <section className="border-t border-line pt-8">
           <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-            Two systems in production
+            A use case
           </p>
           <h2 className="mt-3 max-w-3xl text-2xl tracking-[-0.04em]">
-            Revolut holds the gateway. Block holds the agent.
+            One gateway for the use case.
           </h2>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-faint">
-            Both companies put one door in front of their people. Revolut’s door is a
-            governed gateway: every product calls a model through it. Block’s door is
-            an agent on the desk: the person talks to Goose, and Goose calls a vetted
-            system.
+            A product calls a model through one door. The use case keeps the risk,
+            the budget, and the rules.
           </p>
 
-          <div className="mt-10 grid gap-12">
-            <figure className="grid gap-4" aria-label="Revolut’s control plane">
-              <div className="border border-foreground bg-surface px-5 py-6">
+          <figure
+            className="mt-10 border border-line"
+            aria-label="A product calls one gateway. The use case keeps its risk, budget, and rules. The gateway picks a model and can fall back. The call is stored, judged, and sampled. A person owns a decision that changes a customer."
+          >
+              <div className="border-b border-line px-4 py-5 lg:px-6">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-                  Revolut
+                  The call
                 </p>
-                <p className="mt-2 text-lg tracking-[-0.03em]">Gateway</p>
-                <p className="mt-2 max-w-xl text-sm leading-snug text-faint">
-                  One entry for every model call. A product does not keep its own
-                  library. If a model fails, traffic moves to the fallback.
+                <p className="mt-2 max-w-3xl text-sm leading-snug text-faint">
+                  One path. A product enters the gateway, the use case carries the
+                  rules, a model answers, and the answer is kept.
                 </p>
               </div>
-              <Lane label="Products" note="Each use case plugs into the same gateway.">
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  {["Support chat", "Voice", "AIR, the in-app assistant", "FinCrime agents", "Cross-sell", "Credit"].map(
-                    (item) => (
-                      <li key={item} className="border border-line px-3 py-2 text-sm">
-                        {item}
-                      </li>
-                    ),
-                  )}
-                </ul>
-              </Lane>
-              <Lane label="Governance" note="The rule belongs to the use case.">
-                <p className="border border-line px-3 py-2 text-sm leading-snug">
-                  Risk, budget, and rules sit on the use case. Swap the model and the
-                  policy stays. A decision that changes a customer’s position stays
-                  with a person.
-                </p>
-              </Lane>
-              <Lane label="Models" note="Right-sized, then moved.">
-                <ul className="grid gap-2 sm:grid-cols-3">
-                  {[
-                    ["Frontier APIs", "Where a use case starts."],
-                    ["Open models", "Heavy steps, on Revolut’s own GPUs."],
-                    ["PRAGMA", "Their transaction model, shared across fraud, cross-sell, and credit."],
-                  ].map(([name, body]) => (
-                    <li key={name} className="border border-line px-3 py-2">
-                      <p className="text-sm">{name}</p>
-                      <p className="mt-1 text-sm leading-snug text-faint">{body}</p>
-                    </li>
-                  ))}
-                </ul>
-              </Lane>
-              <Lane label="Evaluation" note="The answer is kept.">
-                <ol className="grid gap-2">
-                  {[
-                    "Every input and output is stored, so a decision can be replayed.",
-                    "Judges score live traffic, including one judge for hallucination.",
-                    "People sample the chats. Each model is watched on its own, not only the screen in front of it.",
-                  ].map((item) => (
-                    <li key={item} className="border border-line px-3 py-2 text-sm leading-snug">
-                      {item}
-                    </li>
-                  ))}
-                </ol>
-              </Lane>
-            </figure>
-
-            <figure className="grid gap-4" aria-label="Block’s agent">
-              <div className="border border-foreground bg-surface px-5 py-6">
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-                  Block
-                </p>
-                <p className="mt-2 text-lg tracking-[-0.03em]">Goose</p>
-                <p className="mt-2 max-w-xl text-sm leading-snug text-faint">
-                  One agent, on the desk, for every role. The model calls a tool.
-                  Goose runs it and returns the result. It is installed for people,
-                  not left for them to set up.
-                </p>
-              </div>
-              <Lane label="Catalogue" note="One vetted connection per system.">
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  {["Slack", "Google Drive", "Calendar", "Snowflake", "Databricks", "Internal systems"].map(
-                    (item) => (
-                      <li key={item} className="border border-line px-3 py-2 text-sm">
-                        {item}
-                      </li>
-                    ),
-                  )}
-                </ul>
-                <p className="mt-2 text-sm leading-snug text-faint">
-                  Internal connections are pre-approved. A third-party tool does not
-                  join the catalogue on its own. Only the tools the request needs
-                  switch on.
-                </p>
-              </Lane>
-              <Lane label="Build" note="A sentence becomes a tool that keeps running.">
-                <p className="border border-line px-3 py-2 text-sm leading-snug">
-                  G2 turns a sentence into an app that runs on its own. A person
-                  outside engineering can build the workflow. The same agent is what
-                  they use to ask the warehouse a question in plain language.
-                </p>
-              </Lane>
-              <Lane label="Customer" note="The internal stack becomes the product.">
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  <li className="border border-line px-3 py-2">
-                    <p className="text-sm">Moneybot</p>
-                    <p className="mt-1 text-sm leading-snug text-faint">
-                      The agent, facing a Cash App customer.
+              <ol>
+                <li className="border-b border-line">
+                  <div className="grid gap-4 p-4 sm:grid-cols-[8.5rem_minmax(0,1fr)] lg:p-6">
+                    <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                      01 Surfaces
                     </p>
-                  </li>
-                  <li className="border border-line px-3 py-2">
-                    <p className="text-sm">Managerbot</p>
-                    <p className="mt-1 text-sm leading-snug text-faint">
-                      Watches a Square seller’s inventory, staffing, and sales. A
-                      write is shown first. The seller approves it.
+                    <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {[
+                        ["Chat", "Support chat"],
+                        ["Voice", "Phone"],
+                        ["App", "Assistant"],
+                        ["Case", "Fraud"],
+                        ["Offer", "Cross-sell"],
+                        ["File", "Credit"],
+                      ].map(([surface, product]) => (
+                        <li
+                          key={surface}
+                          className="flex items-center gap-3 border border-line bg-surface px-3 py-3"
+                        >
+                          <div className="grid justify-items-center gap-1">
+                            <Person className="h-10 w-6" />
+                            <p className="font-mono text-[0.6rem] tracking-[-0.01em] text-muted uppercase">
+                              {surface}
+                            </p>
+                          </div>
+                          <Arrow className="h-4 w-6 shrink-0" />
+                          <p className="text-sm">{product}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex justify-center border-t border-line py-3">
+                    <ArrowDown />
+                  </div>
+                </li>
+                <li className="border-b border-line">
+                  <div className="grid gap-4 p-4 sm:grid-cols-[8.5rem_minmax(0,1fr)] lg:p-6">
+                    <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                      02 Gateway
                     </p>
-                  </li>
-                </ul>
-              </Lane>
-            </figure>
-          </div>
+                    <div className="border border-foreground bg-surface px-4 py-4">
+                      <p className="text-sm">One entry for every model call.</p>
+                      <p className="mt-1 text-sm leading-snug text-faint">
+                        The product arrives here. If the chosen model fails, the call
+                        moves to the fallback.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-center border-t border-line py-3">
+                    <ArrowDown />
+                  </div>
+                </li>
+                <li className="border-b border-line">
+                  <div className="grid gap-4 p-4 sm:grid-cols-[8.5rem_minmax(0,1fr)] lg:p-6">
+                    <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                      03 Governance
+                    </p>
+                    <div>
+                      <ol className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        {[
+                          ["Risk", "What the use case is allowed to do."],
+                          ["Budget", "How much the call may spend."],
+                          ["Rules", "What must stay with a person."],
+                        ].map(([name, body], index, list) => (
+                          <li key={name} className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+                            <div className="flex-1 border border-line bg-surface px-3 py-3">
+                              <p className="text-sm">{name}</p>
+                              <p className="mt-1 text-sm leading-snug text-faint">{body}</p>
+                            </div>
+                            {index < list.length - 1 ? (
+                              <>
+                                <div className="flex justify-center sm:hidden">
+                                  <ArrowDown />
+                                </div>
+                                <Arrow className="hidden h-4 w-8 shrink-0 text-accent sm:block" />
+                              </>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ol>
+                      <p className="mt-3 text-sm leading-snug text-faint">
+                        The policy sits on the use case. A new model inherits it.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-center border-t border-line py-3">
+                    <ArrowDown />
+                  </div>
+                </li>
+                <li className="border-b border-line">
+                  <div className="grid gap-4 p-4 sm:grid-cols-[8.5rem_minmax(0,1fr)] lg:p-6">
+                    <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                      04 Model
+                    </p>
+                    <ol className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      {[
+                        ["Frontier APIs", "A new use case starts here."],
+                        ["Open models", "Heavy steps, on the bank’s own machines."],
+                        ["Shared model", "Used across fraud, cross-sell, and credit."],
+                      ].map(([name, body], index, list) => (
+                        <li key={name} className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+                          <div className="flex-1 border border-line bg-surface px-3 py-3">
+                            <p className="text-sm">{name}</p>
+                            <p className="mt-1 text-sm leading-snug text-faint">{body}</p>
+                          </div>
+                          {index < list.length - 1 ? (
+                            <>
+                              <div className="flex justify-center sm:hidden">
+                                <ArrowDown />
+                              </div>
+                              <Arrow className="hidden h-4 w-8 shrink-0 text-accent sm:block" />
+                            </>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div className="flex justify-center border-t border-line py-3">
+                    <ArrowDown />
+                  </div>
+                </li>
+                <li>
+                  <div className="grid gap-4 p-4 sm:grid-cols-[8.5rem_minmax(0,1fr)] lg:p-6">
+                    <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+                      05 Record
+                    </p>
+                    <ol className="grid gap-2">
+                      {[
+                        "The input and the output are stored, so the decision can be replayed.",
+                        "Judges score the live answer, including one judge for hallucination.",
+                        "People sample the chats. Each model is watched on its own.",
+                      ].map((item) => (
+                        <li
+                          key={item}
+                          className="border border-line bg-surface px-3 py-2 text-sm leading-snug"
+                        >
+                          {item}
+                        </li>
+                      ))}
+                      <li className="border border-foreground bg-surface px-3 py-2 text-sm leading-snug">
+                        A decision that changes a customer’s position stays with a person.
+                      </li>
+                    </ol>
+                  </div>
+                </li>
+              </ol>
+          </figure>
         </section>
 
         <section className="max-w-3xl border-t border-line pt-8">
@@ -288,43 +371,62 @@ export default function ArchitecturePage() {
           </p>
           <h2 className="mt-3 text-2xl tracking-[-0.04em]">One conversation.</h2>
           <p className="mt-4 text-base leading-relaxed text-faint">
-            The person does not open Box, SharePoint, the internal system, or Google
-            Drive. They do not pick Compliance, and they do not pick a model. They
-            type into one chat. The orchestrator replies in that same chat, naming the
-            document it opened and the agent that answered.
+            The person does not open a specific system. They do not pick the agent
+            for a document to retrieve, and they do not pick a model. They type into
+            one chat. The orchestrator
+            replies in that same chat, naming the document it opened and the agent
+            that answered.
           </p>
         </section>
 
         <section className="border-t border-line pt-8">
           <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-            An example
+            Examples
           </p>
-          <h2 className="mt-3 text-2xl tracking-[-0.04em]">A question about a facility.</h2>
+          <h2 className="mt-3 text-2xl tracking-[-0.04em]">A few questions, one chat.</h2>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-faint">
-            A relationship manager asks, in the chat. This is the experience we
-            envision, not a client of record.
+            A person asks, in the chat. This is the experience we envision, not a
+            client of record.
           </p>
           <ol className="mt-8 grid max-w-3xl gap-4">
             <li className="border border-line bg-surface p-4">
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                The person
+                A facility
               </p>
               <p className="mt-2 text-base">Can we waive the covenant on this facility?</p>
-            </li>
-            <li className="border border-line bg-surface p-4">
-              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-                The orchestrator
-              </p>
-              <p className="mt-2 text-base leading-relaxed text-faint">
-                Opens the credit policy in SharePoint and the facility file in the
-                internal system. The question names a client, so the file does not
-                leave the bank. Hands the question to Compliance. Compliance answers
-                on Qwen 30B, on the bank’s machines.
+              <p className="mt-3 text-base leading-relaxed text-faint">
+                The orchestrator opens the credit policy and the facility file where
+                they already live. The question names a client, so the file does not
+                leave the bank. It hands the question to Compliance. Compliance
+                answers on Qwen 30B, on the bank’s machines.
               </p>
             </li>
             <li className="border border-line bg-surface p-4">
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                The same person, a different question
+                A document
+              </p>
+              <p className="mt-2 text-base">Find the policy that covers this covenant.</p>
+              <p className="mt-3 text-base leading-relaxed text-faint">
+                The orchestrator finds the document and opens it where it already
+                lives. The passage comes back in the chat. The person does not open
+                the system, and the file is not copied out.
+              </p>
+            </li>
+            <li className="border border-line bg-surface p-4">
+              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                A fraud alert
+              </p>
+              <p className="mt-2 text-base">What should we do with this fraud alert?</p>
+              <p className="mt-3 text-base leading-relaxed text-faint">
+                The orchestrator opens the alert and the account activity, then hands
+                the question to the anti-fraud agent. The agent drafts what it found.
+                A person decides. Nothing is filed. The alert names a client, so the
+                model stays on the bank’s machines.
+              </p>
+            </li>
+            <li className="border border-line bg-surface p-4">
+              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                A public question
               </p>
               <p className="mt-2 text-base">
                 How should we describe this product on the public site?

@@ -11,6 +11,11 @@ type Doc = {
 };
 
 const docs: Record<string, Doc> = {
+  "metric-active": {
+    title: "Active customer",
+    system: "Semantic layer",
+    body: "Certified metrics.\n\nActive customer: no certified definition.\nOwner: unassigned.\n\nA count is not allowed until this row is filled.",
+  },
   "crm-active": {
     title: "Active customer",
     system: "Internal system",
@@ -61,6 +66,31 @@ const docs: Record<string, Doc> = {
     system: "Internal system",
     body: "Retail client. The file stays in the internal system.\n\nOpened for this question only. Not copied out.",
   },
+  "alert-record": {
+    title: "Alert TM-1842",
+    system: "Transaction monitoring",
+    body: "Sample alert. Not a live case.\n\nScenario: velocity. Status: open.\nThe alert names a customer. The disposition is blank.",
+  },
+  "account-activity": {
+    title: "Account activity",
+    system: "Core banking",
+    body: "Twelve months of activity, opened in place.\n\nThe file stays on the bank's machines. No copy is made.",
+  },
+  "case-narrative": {
+    title: "Case narrative",
+    system: "Case management",
+    body: "Draft. Not filed.\n\nRecommended disposition: blank until an analyst decides.\nNo report is prepared.",
+  },
+  "operating-account": {
+    title: "Operating account",
+    system: "Core banking",
+    body: "Balance read for the preview.\n\nThe file stays on the bank's machines. No transfer is created.",
+  },
+  "payroll-file": {
+    title: "Payroll file",
+    system: "Cash management",
+    body: "Prepared from last month's file.\n\nStatus: preview. Two new rows are marked.\nNothing has been submitted.",
+  },
 };
 
 type Gate = {
@@ -70,6 +100,7 @@ type Gate = {
 
 type Route = {
   documents: string[];
+  access?: Record<string, string>;
   agent: string;
   model: string;
   placement: Placement;
@@ -88,16 +119,21 @@ const samples: { label: string; query: string; route: Route }[] = [
     label: "Active customers",
     query: "How many active customers do we have?",
     route: {
-      documents: ["crm-active", "web-active"],
+      documents: ["metric-active", "crm-active", "web-active"],
+      access: {
+        "Semantic layer": "Read",
+        "Internal system": "Read",
+        Website: "Read",
+      },
       agent: "Orchestrator",
       model: "Not called",
       placement: "Held",
       gate: {
         label: "Definition",
-        text: "No agreed definition of active. Nothing queried.",
+        text: "No certified definition. Nothing queried.",
       },
       reply:
-        "Active is not one definition. The CRM says a login in the last 30 days. The website says a funded account. Nothing is queried, I will not return a count, and the model stays held.",
+        "Active is not a certified metric. The semantic layer has no owner and no definition. The CRM says a login in the last 30 days. The website says a funded account. Nothing is queried, I will not return a count, and the model stays held. The question is logged at the gateway.",
     },
   },
   {
@@ -181,6 +217,47 @@ const samples: { label: string; query: string; route: Route }[] = [
     },
   },
   {
+    label: "AML alert",
+    query: "Investigate this transaction monitoring alert.",
+    route: {
+      documents: ["alert-record", "account-activity", "case-narrative"],
+      access: {
+        "Transaction monitoring": "Read",
+        "Core banking": "Read",
+        "Case management": "Draft",
+      },
+      agent: "AML investigation",
+      model: "Qwen 30B",
+      placement: "On-prem",
+      gate: {
+        label: "Draft",
+        text: "Narrative drafted. A person owns the disposition. Nothing filed.",
+      },
+      reply:
+        "Opened the alert and the account activity. Both name a customer, so this stays on the bank's machines. A short pass scored the alert, then Qwen 30B drafted the narrative. A judge checked that the cited items exist. The disposition is blank. A person owns it. Nothing is filed. The call is stored at the gateway.",
+    },
+  },
+  {
+    label: "Payroll file",
+    query: "Prepare this month's payroll from last month's file.",
+    route: {
+      documents: ["operating-account", "payroll-file"],
+      access: {
+        "Core banking": "Read",
+        "Cash management": "Draft",
+      },
+      agent: "SME manager",
+      model: "Qwen 30B",
+      placement: "On-prem",
+      gate: {
+        label: "Preview",
+        text: "File prepared. Waiting for the owner. Nothing submitted.",
+      },
+      reply:
+        "Read the operating account and prepared the payroll file. The owner sees the preview, including the two new rows. Nothing is submitted until they approve. It stays on the bank's machines. The preview is stored at the gateway.",
+    },
+  },
+  {
     label: "Public wording",
     query: "How should we describe this product on the public site?",
     route: {
@@ -209,6 +286,8 @@ function routeQuery(text: string): Route {
   if (/checklist/.test(query)) return sampleRoute("Compliance checklist");
   if (/nightly|held-out|guardrail|can we ship|prompt/.test(query)) return sampleRoute("Nightly tests");
   if (/active customer|how many active|\bnps\b/.test(query)) return sampleRoute("Active customers");
+  if (/aml|transaction monitoring|\balert\b/.test(query)) return sampleRoute("AML alert");
+  if (/payroll/.test(query)) return sampleRoute("Payroll file");
   if (/public|wording|website|\bsite\b|describe/.test(query)) return sampleRoute("Public wording");
   if (/note|meeting|minutes/.test(query)) return sampleRoute("Meeting notes");
   if (/wire/.test(query)) return sampleRoute("A client's wire");
@@ -408,6 +487,9 @@ export function DemoChat() {
                   {systems.map((system) => (
                     <li key={system} className="border border-line px-3 py-2 text-sm">
                       {system}
+                      {route?.access?.[system] ? (
+                        <span className="mt-1 block text-faint">{route.access[system]}</span>
+                      ) : null}
                     </li>
                   ))}
                 </ul>

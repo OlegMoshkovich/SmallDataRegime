@@ -225,10 +225,7 @@ export default function ArchitecturePage() {
                     <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       {[
                         ["Chat", "Support chat"],
-                        ["Voice", "Phone"],
-                        ["App", "Assistant"],
                         ["Case", "Fraud"],
-                        ["Offer", "Cross-sell"],
                         ["File", "Credit"],
                       ].map(([surface, product]) => (
                         <li

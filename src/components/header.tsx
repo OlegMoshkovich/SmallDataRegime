@@ -17,10 +17,11 @@ export function Header() {
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 text-foreground">
+    <header className="fixed inset-x-0 top-0 z-50 bg-background text-foreground lg:bg-transparent">
+      <div aria-hidden className="absolute inset-x-0 bottom-full h-screen bg-background lg:hidden" />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-6 h-28 backdrop-blur-3xl [mask-image:linear-gradient(to_bottom,black_0%,black_40%,transparent_100%)]"
+        className="pointer-events-none absolute inset-x-0 -top-6 hidden h-28 backdrop-blur-3xl [mask-image:linear-gradient(to_bottom,black_0%,black_40%,transparent_100%)] lg:block"
       />
       <div className="relative z-50 mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-4 lg:px-6">
         <Link href="/" aria-label="SmallDataRegime.ai home" onClick={() => setOpen(false)}>

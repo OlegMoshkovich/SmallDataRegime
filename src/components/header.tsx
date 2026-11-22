@@ -24,7 +24,7 @@ export function Header() {
         className="pointer-events-none absolute inset-x-0 -top-6 hidden h-28 backdrop-blur-3xl [mask-image:linear-gradient(to_bottom,black_0%,black_40%,transparent_100%)] lg:block"
       />
       <div className="relative z-50 mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-4 lg:px-6">
-        <Link href="/" aria-label="SmallDataRegime.ai home" onClick={() => setOpen(false)}>
+        <Link href="/" aria-label="MIResearchLab home" onClick={() => setOpen(false)}>
           <Wordmark />
         </Link>
         <nav
@@ -51,7 +51,7 @@ export function Header() {
           <div className="hidden items-center gap-3 md:flex">
             <Link
               href="/signin"
-              className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase"
+              className="font-mono text-[0.75rem] tracking-[-0.015rem] capitalize"
             >
               Sign in
             </Link>

@@ -152,7 +152,7 @@ export default function ResearchPage() {
   return (
     <Interior
       eyebrow="Research"
-      title="Notes from the small-data regime."
+      title="Notes about Small Data Regime"
       lede="Post-training gets more sample-efficient when the target is narrow, the negatives are real, and a held-out eval can say no."
     >
       <div className="grid gap-10">

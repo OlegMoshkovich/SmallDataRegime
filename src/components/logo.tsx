@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const cells = [0, 1, 2].flatMap((row) =>
   [0, 1, 2].map((column) => ({
@@ -20,13 +20,23 @@ function pickOutlined() {
 export function Mark({
   className = "size-8",
   outlined,
+  shuffle = false,
 }: {
   className?: string;
   outlined?: boolean[] | null;
+  shuffle?: boolean;
 }) {
   const controlled = outlined !== undefined;
   const [local, setLocal] = useState<boolean[] | null>(null);
+  const [rest, setRest] = useState<boolean[] | null>(null);
   const open = controlled ? outlined : local;
+
+  useEffect(() => {
+    if (controlled || !shuffle) return;
+    const next = pickOutlined();
+    setRest(next);
+    setLocal(next);
+  }, [controlled, shuffle]);
 
   return (
     <svg
@@ -40,7 +50,7 @@ export function Mark({
               setLocal(pickOutlined());
             }
       }
-      onMouseLeave={controlled ? undefined : () => setLocal(null)}
+      onMouseLeave={controlled ? undefined : () => setLocal(shuffle ? rest : null)}
     >
       {cells.map((cell, index) => {
         const hollow = Boolean(open?.[index]);
@@ -73,7 +83,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
     >
       <Mark className="size-7" outlined={outlined} />
       <span className="text-[0.95rem] font-medium tracking-[-0.045em] whitespace-nowrap">
-        SmallDataRegime.ai
+        MIResearchLab
       </span>
     </span>
   );

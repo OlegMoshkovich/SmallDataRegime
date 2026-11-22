@@ -34,7 +34,7 @@ export function SignInForm() {
       </label>
       <button
         type="submit"
-        className="h-[31px] w-max bg-ink px-3.5 font-mono text-[0.8125rem] tracking-[-0.0175rem] text-paper uppercase"
+        className="h-[31px] w-max bg-ink px-3.5 font-mono text-[0.8125rem] tracking-[-0.0175rem] text-paper capitalize"
       >
         Continue
       </button>

@@ -21,7 +21,7 @@ export function Button({
   return (
     <Link
       href={href}
-      className={`group relative inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] uppercase ${tone} ${className}`}
+      className={`group relative inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize ${tone} ${className}`}
     >
       <span className="relative z-10 flex items-center gap-2">{children}</span>
       <span

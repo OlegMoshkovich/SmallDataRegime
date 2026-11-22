@@ -52,7 +52,7 @@ export function FeatureArt({ slug }: { slug: string }) {
         <div className="mt-8 flex flex-1 items-center justify-center">
           <div className="relative size-36 border border-white/20">
             <div className="absolute inset-3 border border-white/15" />
-            <div className="absolute inset-[22px] bg-[#ee6018]" />
+            <div className="absolute inset-[22px] bg-[#de5c36]" />
             <span className="absolute -bottom-7 left-0 font-mono text-[0.65rem] text-[#a49d9a] uppercase">
               Weights stay local
             </span>

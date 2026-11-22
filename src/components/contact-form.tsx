@@ -60,7 +60,7 @@ export function ContactForm() {
       </label>
       <button
         type="submit"
-        className="mt-2 h-[31px] w-max bg-ink px-3.5 font-mono text-[0.8125rem] tracking-[-0.0175rem] text-paper uppercase"
+        className="mt-2 h-[31px] w-max bg-ink px-3.5 font-mono text-[0.8125rem] tracking-[-0.0175rem] text-paper capitalize"
       >
         Talk to us
       </button>

@@ -5,13 +5,13 @@ import { useState } from "react";
 const scoreBars = [
   { name: "ChatGPT", value: 92.43, color: "#3b6cff" },
   { name: "Claude", value: 93.8, color: "#7c5cff" },
-  { name: "AIR", value: 97.9, color: "#ee6018" },
+  { name: "AIR", value: 97.9, color: "#de5c36" },
 ];
 
 const costBars = [
   { name: "ChatGPT", value: 6.67, color: "#3b6cff" },
   { name: "Claude", value: 6.62, color: "#7c5cff" },
-  { name: "AIR", value: 1.93, color: "#ee6018" },
+  { name: "AIR", value: 1.93, color: "#de5c36" },
 ];
 
 const tasks = [
@@ -43,7 +43,7 @@ const taskResults: Record<"air" | "codex" | "claude", { score: number; cost: num
 ];
 
 const series = [
-  { key: "air", name: "AIR Agent", color: "#ee6018", kind: "air" },
+  { key: "air", name: "AIR Agent", color: "#de5c36", kind: "air" },
   { key: "codex", name: "Codex + GPT 6 Astra", color: "#3b6cff", kind: "codex" },
   { key: "claude", name: "Claude + Fable 5.1", color: "#7c5cff", kind: "claude" },
 ] as const;
@@ -117,7 +117,7 @@ function Bars({
 }
 
 function Mark({ kind, x, y }: { kind: (typeof points)[number]["kind"]; x: number; y: number }) {
-  if (kind === "air") return <circle cx={x} cy={y} r="5" fill="#ee6018" />;
+  if (kind === "air") return <circle cx={x} cy={y} r="5" fill="#de5c36" />;
   if (kind === "deepseek") return <circle cx={x} cy={y} r="5" fill="#3d9a4a" />;
   if (kind === "codex") {
     return <path d={`M${x} ${y - 6} L${x + 6} ${y} L${x} ${y + 6} L${x - 6} ${y} Z`} fill="#3b6cff" />;
@@ -241,7 +241,7 @@ export function Evaluation() {
                         style={{
                           background:
                             point.kind === "air"
-                              ? "#ee6018"
+                              ? "#de5c36"
                               : point.kind === "codex"
                                 ? "#3b6cff"
                                 : point.kind === "claude"

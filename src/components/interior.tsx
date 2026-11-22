@@ -3,15 +3,19 @@ export function Interior({
   title,
   lede,
   children,
+  accent = false,
 }: {
   eyebrow: string;
   title: string;
   lede: string;
   children: React.ReactNode;
+  accent?: boolean;
 }) {
   return (
     <article className="mx-auto w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
-      <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+      <p
+        className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${accent ? "text-accent" : "text-muted"}`}
+      >
         {eyebrow}
       </p>
       <h1 className="mt-4 max-w-3xl text-[2.125rem] leading-[1.08] tracking-[-0.045em] lg:text-[2.75rem]">

@@ -13,8 +13,8 @@ export default function HomePage() {
   return (
     <>
       <section className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-4 pt-16 pb-12 text-center lg:px-9 lg:pt-24 lg:pb-16">
-        <Mark className="mb-8 hidden size-14 md:block" />
-        <h1 className="max-w-5xl text-[clamp(2rem,4.2vw,4rem)] leading-none font-medium tracking-[-0.04em] uppercase">
+        <Mark shuffle className="mb-8 hidden size-14 md:block" />
+        <h1 className="max-w-5xl text-[clamp(2rem,4.2vw,4rem)] leading-none font-medium tracking-[-0.04em] capitalize">
           <span className="block">RL post-training</span>
           <span className="block">for small data</span>
         </h1>
@@ -41,7 +41,8 @@ export default function HomePage() {
       <section className="mx-auto w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <h2 className="text-[2rem] leading-[1.12] tracking-[-0.04em] lg:text-[2.75rem]">
-            The foundation for small-data post-training
+            The foundation for small-data{" "}
+            <span className="block whitespace-nowrap">post-training</span>
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-snug text-faint lg:text-base">
             Shape a reward, train on a small set, and ship only the policies that

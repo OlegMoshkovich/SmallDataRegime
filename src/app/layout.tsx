@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SmallDataRegime.ai | RL Post-Training for the Small-Data Regime",
-    template: "%s | SmallDataRegime.ai",
+    default: "MIResearchLab",
+    template: "%s | MIResearchLab",
   },
   description:
     "Post-train language and policy models from a small, curated set of preferences, traces, and reward specs. Sample efficient. Model agnostic.",

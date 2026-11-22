@@ -40,26 +40,6 @@ export const roles = [
     ],
   },
   {
-    slug: "software-engineer-data",
-    tag: "Engineering",
-    title: "Software Engineer, Data",
-    type: "Full time",
-    lede: "Build the store for preferences, traces, and reward specs, and show which examples actually move the policy.",
-    about:
-      "The data is small on purpose. It still has to be versioned, private, and tied to the run that used it. You make that set trustworthy enough that a lab will train on it.",
-    duties: [
-      "Version preference stores and reward specs with the run that consumed them.",
-      "Take a trace from capture to a ranked pair to a gated release.",
-      "Show which new pairs are worth labeling, by task and by labeler.",
-      "Keep raw traces on the lab's machines unless that export is turned on.",
-    ],
-    qualifications: [
-      "You have built data systems people trust with private records.",
-      "You know the difference between an example that was stored and one that was useful.",
-      "You can make a small set queryable, versioned, and auditable.",
-    ],
-  },
-  {
     slug: "account-executive",
     tag: "GTM",
     title: "Account Executive",
@@ -77,26 +57,6 @@ export const roles = [
       "You have sold a technical product to engineers, or to the people who fund them.",
       "You can explain a preference budget, a held-out eval, and why the weights can stay in the lab.",
       "You would rather walk away from a bad fit than add a logo.",
-    ],
-  },
-  {
-    slug: "product-marketing",
-    tag: "GTM",
-    title: "Product Marketing",
-    type: "Full time",
-    lede: "Say what the product is, in the language of a lab that has little data and a task that still has to work.",
-    about:
-      "The product is a platform where a small set of preferences becomes a reasoning system. Model agnostic, with ownership and privacy. Your job is to make that sentence hold in public: the site, the page a buyer reads, and the story a deployed engineer can stand behind.",
-    duties: [
-      "Write the product in the words a lab uses for a reward, a budget, and a gate.",
-      "Turn a finished run into a story that names the constraint.",
-      "Keep the site and the sales conversation on the same claims.",
-      "Say what we do not do, so a buyer is not sold a corpus we will never collect.",
-    ],
-    qualifications: [
-      "You have written for a technical product people buy.",
-      "You can tell a scarce-data story without inventing a number.",
-      "You would rather cut a claim than add one the product cannot keep.",
     ],
   },
 ] as const;

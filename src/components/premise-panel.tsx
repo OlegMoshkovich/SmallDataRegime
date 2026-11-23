@@ -164,7 +164,7 @@ function RequestLifecycle() {
 
 export function PremisePanel() {
   return (
-    <div className="grid gap-6">
+    <div className="grid min-w-0 gap-6 *:min-w-0">
       <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
         <Eyebrow>System</Eyebrow>
         <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
@@ -336,7 +336,7 @@ export function PremisePanel() {
         <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
           Machines and how they are reached
         </h2>
-        <div className="mt-10 overflow-x-auto border border-line">
+        <div className="mt-10 max-w-full min-w-0 overflow-x-auto border border-line">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
               <tr>
@@ -374,7 +374,7 @@ export function PremisePanel() {
         <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
           What it is built with
         </h2>
-        <div className="mt-10 overflow-x-auto border border-line">
+        <div className="mt-10 max-w-full min-w-0 overflow-x-auto border border-line">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
               <tr>

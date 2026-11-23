@@ -46,7 +46,7 @@ function CodeLine({ code, note }: { code: string; note?: string }) {
 
 export function AgentsPanel() {
   return (
-    <div className="grid gap-6">
+    <div className="grid min-w-0 gap-6 *:min-w-0">
     <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
       <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
         <span className="size-1.5 bg-accent" aria-hidden />
@@ -56,7 +56,7 @@ export function AgentsPanel() {
         Each one is a versioned harness.
       </h2>
 
-      <div className="mt-10 grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      <div className="mt-10 grid min-w-0 items-start gap-10 *:min-w-0 lg:grid-cols-2 lg:gap-16">
         <div className="grid gap-8">
           <div>
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">What an agent is</p>
@@ -85,7 +85,7 @@ export function AgentsPanel() {
           </div>
         </div>
 
-        <div className="overflow-x-auto border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
+        <div className="max-w-full min-w-0 overflow-x-auto border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
           <CodeLine code="interface AgentDefinition<In, Out> {" />
           <CodeLine code="  id: string;" note='// "compliance"' />
           <CodeLine code="  version: string;" note="// semver" />
@@ -115,7 +115,7 @@ export function AgentsPanel() {
       <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
         One TypeScript monorepo
       </h2>
-      <div className="mt-10 grid gap-4 lg:grid-cols-2">
+      <div className="mt-10 grid min-w-0 gap-4 *:min-w-0 lg:grid-cols-2">
         <div className="border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
           <p>apps/</p>
           {apps.map(([path, note]) => (

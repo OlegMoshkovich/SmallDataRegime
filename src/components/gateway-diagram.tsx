@@ -66,7 +66,7 @@ export function GatewayDiagram() {
       aria-label="A question enters one gateway. The gateway holds risk, budget, and rules, routes a fraud question to the anti-fraud agent, or sends a general question straight to a model. If the chosen model fails, the call moves to the fallback. The call is stored, judged, and sampled, and a person owns a decision that changes a customer."
     >
       <div className="grid gap-6 border-b border-line p-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:p-6">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-4">
           <div className="grid justify-items-center gap-2">
             <Person />
             <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">

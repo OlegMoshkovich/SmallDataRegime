@@ -34,7 +34,7 @@ const notes = [
 
 export function ModelsPanel() {
   return (
-    <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
+    <section className="min-w-0 border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
       <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
         <span className="size-1.5 bg-accent" aria-hidden />
         Models
@@ -49,7 +49,7 @@ export function ModelsPanel() {
         stay on a lab machine and serve on these local GPUs.
       </p>
 
-      <div className="mt-10 overflow-x-auto border border-line">
+      <div className="mt-10 max-w-full min-w-0 overflow-x-auto border border-line">
         <table className="w-full min-w-[40rem] text-left text-sm">
           <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
             <tr>

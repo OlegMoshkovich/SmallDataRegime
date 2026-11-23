@@ -25,7 +25,7 @@ export function ArchitectureSwitch() {
   const [view, setView] = useState<View>("summary");
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="mb-4 flex flex-wrap items-center gap-4">
         <button
           type="button"
@@ -40,7 +40,11 @@ export function ArchitectureSwitch() {
             className="stripe-hover pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
           />
         </button>
-        <div className="ml-auto flex max-w-full flex-wrap border border-line" role="group" aria-label="View">
+        <div
+          className="flex w-full flex-wrap gap-2 lg:ml-auto lg:w-auto lg:gap-0 lg:border lg:border-line"
+          role="group"
+          aria-label="View"
+        >
           {views.map((item, index) => {
             const selected = view === item.id;
             return (
@@ -49,8 +53,8 @@ export function ArchitectureSwitch() {
                 type="button"
                 aria-pressed={selected}
                 onClick={() => setView(item.id)}
-                className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
-                  index > 0 ? "border-l border-line" : ""
+                className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
+                  index > 0 ? "lg:border-l lg:border-line" : ""
                 } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
               >
                 {item.label}
@@ -60,7 +64,7 @@ export function ArchitectureSwitch() {
         </div>
       </div>
       {view === "summary" ? (
-        <div className="grid gap-16">
+        <div className="grid min-w-0 gap-16 *:min-w-0">
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
               For an enterprise
@@ -130,7 +134,7 @@ export function ArchitectureSwitch() {
                 that pilot there is one URL, one API, two working products, a log of every request,
                 and a baseline score for each model.
               </p>
-              <div className="mt-6 overflow-x-auto border border-line">
+              <div className="mt-6 max-w-full min-w-0 overflow-x-auto border border-line">
                 <table className="w-full min-w-[40rem] text-left text-sm">
                   <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
                     <tr>
@@ -371,8 +375,8 @@ export function ArchitectureSwitch() {
       {view === "premise" ? <PremisePanel /> : null}
       {view === "models" ? <ModelsPanel /> : null}
       {view === "demo" ? (
-        <div className="flex flex-col lg:h-[calc(100dvh-72px)] lg:overflow-hidden">
-          <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+        <div className="flex min-w-0 flex-col lg:h-[calc(100dvh-72px)] lg:overflow-hidden">
+          <div className="grid min-w-0 items-end gap-4 *:min-w-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
             <div>
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
                 Demo

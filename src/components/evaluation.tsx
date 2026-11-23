@@ -135,7 +135,7 @@ export function Evaluation() {
         Sample evaluation results
       </p>
       <h2 className="mt-4 max-w-4xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        We create systems which outperform today&apos;s leading AI models on expert reasoning tasks.
+        We create agents which outperform today&apos;s leading AI models on expert reasoning tasks.
       </h2>
       <p className="mt-4 text-sm leading-snug lg:text-base">
         <span className="text-accent">Corporate M&amp;A Agent</span> against Claude and ChatGPT in

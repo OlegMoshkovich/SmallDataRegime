@@ -36,26 +36,6 @@ const docs: Record<string, Doc> = {
     system: "Internal system",
     body: "Retail customer. Onboarded 2024.\n\nSanctions screen: clear, 12 March.\nSource of funds: not on file.\nKYC refresh: not started.",
   },
-  "held-out": {
-    title: "Held-out Q&A",
-    system: "Internal system",
-    body: "1. What is NPS among salary customers?\nExpected: ask which period.\nNew prompt: answered 42. Fail.\n\n2. Can a prompt change ship the same day?\nExpected: no, the set must pass.\nNew prompt: yes. Fail.",
-  },
-  "credit-policy": {
-    title: "Credit policy",
-    system: "SharePoint",
-    body: "A covenant waiver needs the credit exception on the facility file.\n\nSection 4. The exception is recorded by credit, not by the relationship manager.",
-  },
-  "facility-file": {
-    title: "Facility file",
-    system: "Internal system",
-    body: "Facility 220. Client named on the file.\n\nCredit exception: not on file.\nCovenant: in force.",
-  },
-  "meeting-notes": {
-    title: "Credit meeting",
-    system: "Google Drive",
-    body: "This morning. Two client names in the notes.\n\nDecision: no waiver without the exception on file.\nFollow-up: credit to confirm by Friday.",
-  },
   "wire-record": {
     title: "Wire record",
     system: "Internal system",
@@ -153,54 +133,6 @@ const samples: { label: string; query: string; route: Route }[] = [
     },
   },
   {
-    label: "Nightly tests",
-    query: "We changed the prompt on the NPS bot. Can we ship it?",
-    route: {
-      documents: ["held-out"],
-      agent: "Orchestrator",
-      model: "Qwen 30B",
-      placement: "On-prem",
-      gate: {
-        label: "Evaluation",
-        text: "Prompt and both failing answers stored. Judge marked them. Does not ship.",
-      },
-      reply:
-        "The new prompt and both failing answers are stored. A judge marked the two cases that passed yesterday and now fail, so this does not ship. The nightly 500 still run. This set is the gate in front of them.",
-    },
-  },
-  {
-    label: "Covenant",
-    query: "Can we waive the covenant on this facility?",
-    route: {
-      documents: ["credit-policy", "facility-file"],
-      agent: "Compliance",
-      model: "Qwen 30B",
-      placement: "On-prem",
-      gate: {
-        label: "Decision",
-        text: "No waiver recorded. A person owns the exception.",
-      },
-      reply:
-        "Opened the credit policy and the facility file. The exception is not on file, so no waiver is recorded. The question names a client, so it stays on the bank's machines. A person owns the decision.",
-    },
-  },
-  {
-    label: "Meeting notes",
-    query: "Write up the notes from this morning's credit meeting.",
-    route: {
-      documents: ["meeting-notes"],
-      agent: "Notes taker",
-      model: "DeepSeek",
-      placement: "On-prem",
-      gate: {
-        label: "Write",
-        text: "Ready to file. Waiting for a person.",
-      },
-      reply:
-        "Opened the meeting notes in Google Drive. They name clients, so they stay on the bank's machines. DeepSeek drafted them. They are ready to file, and a person has to approve the write. Nothing has been written into the internal system.",
-    },
-  },
-  {
     label: "A client's wire",
     query: "What can I tell the client about their wire?",
     route: {
@@ -257,22 +189,6 @@ const samples: { label: string; query: string; route: Route }[] = [
         "Read the operating account and prepared the payroll file. The owner sees the preview, including the two new rows. Nothing is submitted until they approve. It stays on the bank's machines. The preview is stored at the gateway.",
     },
   },
-  {
-    label: "Public wording",
-    query: "How should we describe this product on the public site?",
-    route: {
-      documents: [],
-      agent: "Orchestrator",
-      model: "Claude",
-      placement: "Frontier",
-      gate: {
-        label: "Decision",
-        text: "No client file. A frontier model is allowed.",
-      },
-      reply:
-        "No client file is opened. Nothing in the question has to stay inside the bank, so a frontier model is allowed. The orchestrator asks Claude for the public wording.",
-    },
-  },
 ];
 
 function sampleRoute(label: string) {
@@ -284,14 +200,10 @@ function sampleRoute(label: string) {
 function routeQuery(text: string): Route {
   const query = text.toLowerCase();
   if (/checklist/.test(query)) return sampleRoute("Compliance checklist");
-  if (/nightly|held-out|guardrail|can we ship|prompt/.test(query)) return sampleRoute("Nightly tests");
   if (/active customer|how many active|\bnps\b/.test(query)) return sampleRoute("Active customers");
   if (/aml|transaction monitoring|\balert\b/.test(query)) return sampleRoute("AML alert");
   if (/payroll/.test(query)) return sampleRoute("Payroll file");
-  if (/public|wording|website|\bsite\b|describe/.test(query)) return sampleRoute("Public wording");
-  if (/note|meeting|minutes/.test(query)) return sampleRoute("Meeting notes");
   if (/wire/.test(query)) return sampleRoute("A client's wire");
-  if (/covenant|waive|facility|compliance|policy|credit/.test(query)) return sampleRoute("Covenant");
   if (/client|customer|account|position|loan|confidential/.test(query)) {
     return {
       documents: ["client-file"],
@@ -306,7 +218,18 @@ function routeQuery(text: string): Route {
         "Opened the client file. It stays on the bank's machines. This is read only. A person owns the next step.",
     };
   }
-  return sampleRoute("Public wording");
+  return {
+    documents: [],
+    agent: "Orchestrator",
+    model: "Not called",
+    placement: "Held",
+    gate: {
+      label: "Decision",
+      text: "No matching case. Nothing opened.",
+    },
+    reply:
+      "This question does not match a case the orchestrator can open. Nothing is queried, and the model stays held.",
+  };
 }
 
 export function DemoChat() {
@@ -322,19 +245,10 @@ export function DemoChat() {
 
   useLayoutEffect(() => {
     const html = document.documentElement;
-    const body = document.body;
     const previousBehavior = html.style.scrollBehavior;
-    const previousHtmlOverflow = html.style.overflow;
-    const previousBodyOverflow = body.style.overflow;
     html.style.scrollBehavior = "auto";
     window.scrollTo(0, 0);
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    return () => {
-      html.style.overflow = previousHtmlOverflow;
-      body.style.overflow = previousBodyOverflow;
-      html.style.scrollBehavior = previousBehavior;
-    };
+    html.style.scrollBehavior = previousBehavior;
   }, []);
 
   useEffect(() => {
@@ -344,7 +258,13 @@ export function DemoChat() {
   }, []);
 
   useEffect(() => {
-    thread.current?.scrollTo({ top: thread.current.scrollHeight });
+    const el = thread.current;
+    if (!el) return;
+    if (el.scrollHeight > el.clientHeight + 1) {
+      el.scrollTo({ top: el.scrollHeight });
+      return;
+    }
+    el.lastElementChild?.scrollIntoView({ block: "nearest" });
   }, [messages, step]);
 
   function ask(text: string, preset?: Route) {
@@ -385,8 +305,8 @@ export function DemoChat() {
   const opened = openDoc ? docs[openDoc] : null;
 
   return (
-    <div className="mt-3 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4 overflow-hidden lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:grid-rows-1">
-      <div className="flex min-h-0 flex-col border border-line bg-surface">
+    <div className="mt-3 grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:grid-rows-1 lg:overflow-hidden">
+      <div className="flex flex-col border border-line bg-surface lg:min-h-0">
         <div className="flex shrink-0 flex-wrap gap-2 border-b border-line p-3">
           {samples.map((sample) => (
             <button
@@ -399,7 +319,7 @@ export function DemoChat() {
             </button>
           ))}
         </div>
-        <div ref={thread} className="grid min-h-0 flex-1 content-start gap-3 overflow-y-auto p-4">
+        <div ref={thread} className="grid content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {messages.length === 0 ? (
             <p className="text-sm leading-relaxed text-faint">
               Choose a sample, or type a question. The orchestrator will show the
@@ -449,12 +369,12 @@ export function DemoChat() {
         </form>
       </div>
 
-      <aside className="grid min-h-0 content-start gap-3 overflow-y-auto" aria-live="polite">
-        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+      <aside className="grid content-start gap-3 lg:min-h-0 lg:overflow-y-auto" aria-live="polite">
+        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:hidden">
           How the system operates
         </p>
         {opened ? (
-          <article className="flex min-h-0 flex-col border border-foreground bg-surface">
+          <article className="flex min-h-0 flex-col border border-line bg-surface">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
                 {opened.system}
@@ -475,7 +395,7 @@ export function DemoChat() {
         ) : (
           <>
             <article
-              className={`border bg-surface p-4 ${systemsLive ? "border-foreground" : "border-line"}`}
+              className="border border-line bg-surface p-4"
             >
               <p
                 className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${systemsLive ? "text-accent" : "text-muted"}`}
@@ -500,7 +420,7 @@ export function DemoChat() {
               )}
             </article>
             <article
-              className={`border bg-surface p-4 ${documentsLive ? "border-foreground" : "border-line"}`}
+              className="border border-line bg-surface p-4"
             >
               <p
                 className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${documentsLive ? "text-accent" : "text-muted"}`}
@@ -532,7 +452,7 @@ export function DemoChat() {
               )}
             </article>
             <article
-              className={`border bg-surface p-4 ${step >= 3 ? "border-foreground" : "border-line"}`}
+              className="border border-line bg-surface p-4"
             >
               <p
                 className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${step >= 3 ? "text-accent" : "text-muted"}`}
@@ -544,7 +464,7 @@ export function DemoChat() {
               </p>
             </article>
             <article
-              className={`border bg-surface p-4 ${step >= 4 ? "border-foreground" : "border-line"}`}
+              className="border border-line bg-surface p-4"
             >
               <p
                 className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${step >= 4 ? "text-accent" : "text-muted"}`}
@@ -561,7 +481,7 @@ export function DemoChat() {
               ) : null}
             </article>
             <article
-              className={`border bg-surface p-4 ${step >= 5 ? "border-foreground" : "border-line"}`}
+              className="border border-line bg-surface p-4"
             >
               <p
                 className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${step >= 5 ? "text-accent" : "text-muted"}`}

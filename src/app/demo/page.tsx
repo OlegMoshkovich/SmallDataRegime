@@ -9,12 +9,19 @@ export const metadata: Metadata = {
 
 export default function DemoPage() {
   return (
-    <article className="fixed inset-x-0 top-[72px] bottom-0 z-10 overflow-hidden bg-background">
-      <div className="mx-auto flex h-full max-w-[1440px] flex-col px-4 py-4 lg:px-9">
-        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-          Demo
-        </p>
-        <h1 className="mt-1 text-2xl tracking-[-0.04em]">Ask the orchestrator.</h1>
+    <article className="bg-background lg:h-[calc(100dvh-72px)] lg:overflow-hidden">
+      <div className="mx-auto flex max-w-[1440px] flex-col px-4 py-4 lg:h-full lg:px-9">
+        <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+          <div>
+            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+              Demo
+            </p>
+            <h1 className="mt-1 text-2xl tracking-[-0.04em]">Ask the orchestrator.</h1>
+          </div>
+          <p className="hidden font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:block">
+            How the system operates
+          </p>
+        </div>
         <DemoChat />
       </div>
     </article>

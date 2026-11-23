@@ -5,7 +5,7 @@ import { Interior } from "@/components/interior";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "SmallDataRegime.ai is the platform where a small set of your preferences becomes a reasoning system, model agnostic, with ownership and privacy.",
+    "Our platform turns a small set of your preferences into a reasoning system, model agnostic, with ownership and privacy.",
 };
 
 export default function ContactPage() {
@@ -13,7 +13,7 @@ export default function ContactPage() {
     <Interior
       eyebrow="Contact"
       title="Ready to create a reasoning system based on your data."
-      lede="SmallDataRegime.ai is the platform where a small set of your preferences becomes a reasoning system, model agnostic, with ownership and privacy."
+      lede="Our platform turns a small set of your preferences into a reasoning system, model agnostic, with ownership and privacy."
     >
       <ContactForm />
     </Interior>

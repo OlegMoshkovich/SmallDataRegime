@@ -55,10 +55,7 @@ export function Header() {
             >
               Sign in
             </Link>
-            <Button href="/contact" variant="ghost">
-              Contact
-            </Button>
-            <Button href="/contact">Start a run</Button>
+            <Button href="/contact">Contact</Button>
           </div>
           <button
             type="button"
@@ -93,11 +90,8 @@ export function Header() {
               <Button href="/signin" variant="ghost" className="w-full">
                 Sign in
               </Button>
-              <Button href="/contact" variant="ghost" className="w-full">
-                Contact
-              </Button>
               <Button href="/contact" className="w-full">
-                Start a run
+                Contact
               </Button>
             </div>
           </div>

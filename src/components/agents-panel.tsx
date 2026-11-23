@@ -1,3 +1,40 @@
+const apps = [
+  ["gateway/", "9-stage pipeline, API"],
+  ["agent-worker/", "pg-boss agent jobs"],
+  ["ingestion/", "sync, extract, embed"],
+  ["chat-ui/", "internal chat UI"],
+  ["mcp-sharepoint/", "Graph, on behalf of"],
+  ["mcp-coredb/", "read-only views"],
+  ["mcp-sanctions/", "screening service"],
+] as const;
+
+const roots = [
+  ["policies/", "YAML rules"],
+  ["evals/", "sets, rubrics, judges"],
+  ["deploy/", "compose, model proxy, helm"],
+  ["docs/", "spec, runbooks"],
+] as const;
+
+const packages = [
+  ["core/", "shared types, errors"],
+  ["policy/", "loader, schemas, reload"],
+  ["router/", "match, classify, locality"],
+  ["sensitivity/", "TCKN, IBAN, card, names"],
+  ["budgets/", "reserve and settle"],
+  ["audit/", "logs, encryption"],
+  ["retrieval/", "hybrid, ACL, rerank"],
+  ["agent-sdk/", "definition, replay"],
+] as const;
+
+function TreeRow({ path, note, depth = 0 }: { path: string; note?: string; depth?: number }) {
+  return (
+    <div className="grid grid-cols-[10.5rem_minmax(0,1fr)] gap-3" style={{ paddingLeft: depth * 16 }}>
+      <span>{path}</span>
+      {note ? <span className="text-faint">{note}</span> : null}
+    </div>
+  );
+}
+
 function CodeLine({ code, note }: { code: string; note?: string }) {
   return (
     <div className="whitespace-pre">
@@ -9,6 +46,7 @@ function CodeLine({ code, note }: { code: string; note?: string }) {
 
 export function AgentsPanel() {
   return (
+    <div className="grid gap-6">
     <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
       <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
         <span className="size-1.5 bg-accent" aria-hidden />
@@ -68,5 +106,41 @@ export function AgentsPanel() {
         </div>
       </div>
     </section>
+
+    <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
+      <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+        <span className="size-1.5 bg-accent" aria-hidden />
+        Repository
+      </p>
+      <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
+        One TypeScript monorepo
+      </h2>
+      <div className="mt-10 grid gap-4 lg:grid-cols-2">
+        <div className="border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
+          <p>apps/</p>
+          {apps.map(([path, note]) => (
+            <TreeRow key={path} path={path} note={note} depth={1} />
+          ))}
+          <div className="h-4" />
+          {roots.map(([path, note]) => (
+            <TreeRow key={path} path={path} note={note} />
+          ))}
+        </div>
+        <div className="border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
+          <p>packages/</p>
+          {packages.map(([path, note]) => (
+            <TreeRow key={path} path={path} note={note} depth={1} />
+          ))}
+          <p className="mt-4 pl-4">agents/</p>
+          <TreeRow path="compliance/" note="the compliance agent" depth={2} />
+          <TreeRow path="sdk/" note="client for enterprise apps" />
+        </div>
+      </div>
+      <p className="mt-6 max-w-3xl text-base leading-relaxed text-faint">
+        pnpm workspaces and Turborepo build every image. One commit records which code ran under
+        which rules.
+      </p>
+    </section>
+    </div>
   );
 }

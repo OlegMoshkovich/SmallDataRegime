@@ -63,12 +63,16 @@ export function ArchitectureSwitch() {
         <div className="grid gap-16">
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-              The experience
+              For an enterprise
             </p>
-            <h2 className="mt-3 max-w-4xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-              One gateway, on the enterprise’s machines.
-            </h2>
-            <p className="mt-4 max-w-4xl text-base leading-relaxed text-faint">
+            <h1 className="mt-4 max-w-3xl text-[2.125rem] leading-[1.08] tracking-[-0.045em] lg:text-[2.75rem]">
+              Orchestration through a centralized gateway is at the core of our system.
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
+              The orchestrator is the main agent the person interacts with. It opens the right
+              document, calls the right agent, and runs the model the privacy of the request allows.
+            </p>
+            <p className="mt-5 max-w-4xl text-base leading-relaxed text-faint">
               Staff type into one chat. Applications call one API. Both reach the same gateway.
               The person does not open a system, pick an agent, or pick a model. The orchestrator
               replies in that same chat, naming the document it opened and the agent that answered.

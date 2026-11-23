@@ -15,7 +15,7 @@ export function AgentsPanel() {
         Agents
       </p>
       <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        Agents are versioned harnesses
+        Each one is a versioned harness.
       </h2>
 
       <div className="mt-10 grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
@@ -23,8 +23,9 @@ export function AgentsPanel() {
           <div>
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">What an agent is</p>
             <p className="mt-2 max-w-xl text-base leading-relaxed text-faint">
-              A TypeScript package declaring its steps, tools, allowed models and output schema. An
-              agent-worker container runs it.
+              A harness put together in the small-data regime, with explicit management of state,
+              uncertainty, goal, and policy. It is a TypeScript package declaring its steps, tools,
+              allowed models and output schema. An agent-worker container runs it.
             </p>
           </div>
           <div>

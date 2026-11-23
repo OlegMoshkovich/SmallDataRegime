@@ -35,11 +35,7 @@ function ArrowDown() {
 
 export default function ArchitecturePage() {
   return (
-    <Interior
-      eyebrow="For an enterprise"
-      title="Orchestration through a centralized gateway is at the core of our system."
-      lede="The orchestrator is the main agent the person interacts with. It opens the right document, calls the right agent, and runs the model the privacy of the request allows."
-    >
+    <Interior>
       <ArchitectureSwitch />
 
       <div className="mt-20 grid gap-16">

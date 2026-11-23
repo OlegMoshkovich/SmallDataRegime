@@ -61,15 +61,16 @@ export function ResearchRecord() {
             2006 – 2011
           </p>
           <p className="text-base leading-snug">
-            Our chief scientist identifies a problem and provides a groundbreaking
-            solution.
+            Our chief scientist has a track record of identifying foundational problems
+            pertaining to machine intelligence and providing fundamental solutions that
+            are widely recognized and applied across industries.
           </p>
           <div className="bg-accent p-5 text-paper">
             <p className="text-lg leading-snug tracking-[-0.03em]">
               “Improved Algorithms for Linear Stochastic Bandits”
             </p>
             <p className="mt-3 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
-              2,900 citations
+              3,006 citations
             </p>
           </div>
           <p className="text-sm leading-snug text-faint lg:text-base">

@@ -38,11 +38,13 @@ export default function HomePage() {
         </div>
       </div>
 
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
+      <section className="mx-auto hidden w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <h2 className="text-[2rem] leading-[1.12] tracking-[-0.04em] lg:text-[2.75rem]">
-            The foundation for small-data{" "}
-            <span className="block whitespace-nowrap">post-training</span>
+            The foundation for{" "}
+            <span className="whitespace-nowrap lg:whitespace-normal">
+              small-data <span className="lg:block">post-training</span>
+            </span>
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-snug text-faint lg:text-base">
             Shape a reward, train on a small set, and ship only the policies that
@@ -78,9 +80,9 @@ export default function HomePage() {
             Build a post-training regime
           </h2>
           <p className="mt-4 text-sm leading-snug text-faint lg:text-base">
-            Turn a short stack of demonstrations and preferences into a policy that
-            holds up outside the notebook. SmallDataRegime.ai plans the run, applies the update,
-            and validates it against the evals you wrote.
+            Using our methods, turn a short stack of demonstrations and preferences into a policy that
+            holds up outside the notebook. We plan the run, apply the update, and validate
+            it against the evals you wrote.
           </p>
         </div>
         <ul className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-y-16">

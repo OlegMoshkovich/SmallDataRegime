@@ -53,8 +53,8 @@ const docs: Record<string, Doc> = {
   },
   "account-activity": {
     title: "Account activity",
-    system: "Core banking",
-    body: "Twelve months of activity, opened in place.\n\nThe file stays on the bank's machines. No copy is made.",
+    system: "Core enterprise",
+    body: "Twelve months of activity, opened in place.\n\nThe file stays on the enterprise's machines. No copy is made.",
   },
   "case-narrative": {
     title: "Case narrative",
@@ -63,8 +63,8 @@ const docs: Record<string, Doc> = {
   },
   "operating-account": {
     title: "Operating account",
-    system: "Core banking",
-    body: "Balance read for the preview.\n\nThe file stays on the bank's machines. No transfer is created.",
+    system: "Core enterprise",
+    body: "Balance read for the preview.\n\nThe file stays on the enterprise's machines. No transfer is created.",
   },
   "payroll-file": {
     title: "Payroll file",
@@ -129,7 +129,7 @@ const samples: { label: string; query: string; route: Route }[] = [
         text: "Unsupported items left blank. A person owns the case.",
       },
       reply:
-        "Opened the checklist items SharePoint can identify, and the case file in the internal system. Three items have no usable metadata, so they are marked unsupported rather than filled in. A person owns the case. It stays on the bank's machines.",
+        "Opened the checklist items SharePoint can identify, and the case file in the internal system. Three items have no usable metadata, so they are marked unsupported rather than filled in. A person owns the case. It stays on the enterprise's machines.",
     },
   },
   {
@@ -145,7 +145,7 @@ const samples: { label: string; query: string; route: Route }[] = [
         text: "Read only. No message sent.",
       },
       reply:
-        "Opened the wire record. It names a client, so it stays on the bank's machines. Customer support can say the wire is received and under review. This is read only. No message is sent.",
+        "Opened the wire record. It names a client, so it stays on the enterprise's machines. Customer support can say the wire is received and under review. This is read only. No message is sent.",
     },
   },
   {
@@ -155,7 +155,7 @@ const samples: { label: string; query: string; route: Route }[] = [
       documents: ["alert-record", "account-activity", "case-narrative"],
       access: {
         "Transaction monitoring": "Read",
-        "Core banking": "Read",
+        "Core enterprise": "Read",
         "Case management": "Draft",
       },
       agent: "AML investigation",
@@ -166,7 +166,7 @@ const samples: { label: string; query: string; route: Route }[] = [
         text: "Narrative drafted. A person owns the disposition. Nothing filed.",
       },
       reply:
-        "Opened the alert and the account activity. Both name a customer, so this stays on the bank's machines. A short pass scored the alert, then Qwen 30B drafted the narrative. A judge checked that the cited items exist. The disposition is blank. A person owns it. Nothing is filed. The call is stored at the gateway.",
+        "Opened the alert and the account activity. Both name a customer, so this stays on the enterprise's machines. A short pass scored the alert, then Qwen 30B drafted the narrative. A judge checked that the cited items exist. The disposition is blank. A person owns it. Nothing is filed. The call is stored at the gateway.",
     },
   },
   {
@@ -175,7 +175,7 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       documents: ["operating-account", "payroll-file"],
       access: {
-        "Core banking": "Read",
+        "Core enterprise": "Read",
         "Cash management": "Draft",
       },
       agent: "SME manager",
@@ -186,7 +186,7 @@ const samples: { label: string; query: string; route: Route }[] = [
         text: "File prepared. Waiting for the owner. Nothing submitted.",
       },
       reply:
-        "Read the operating account and prepared the payroll file. The owner sees the preview, including the two new rows. Nothing is submitted until they approve. It stays on the bank's machines. The preview is stored at the gateway.",
+        "Read the operating account and prepared the payroll file. The owner sees the preview, including the two new rows. Nothing is submitted until they approve. It stays on the enterprise's machines. The preview is stored at the gateway.",
     },
   },
 ];
@@ -195,6 +195,177 @@ function sampleRoute(label: string) {
   const sample = samples.find((item) => item.label === label);
   if (!sample) throw new Error(`Missing sample: ${label}`);
   return sample.route;
+}
+
+function agentNote(route: Route) {
+  const does: Record<string, string> = {
+    Orchestrator:
+      "The person talks only to the orchestrator. It opens the document, picks the agent, and runs the model the request is allowed to use.",
+    Compliance:
+      "Answers a covenant question from the documents it was handed. It does not go looking for a file on its own. A person owns the case.",
+    "Customer support":
+      "Answers what the client can be told. This is read only. No message is sent.",
+    "AML investigation":
+      "Drafts what it found in the alert. A person owns the disposition. Nothing is filed.",
+    "SME manager":
+      "Prepares the file for the owner to preview, including the new rows. Nothing is submitted until they approve.",
+  };
+  const work = does[route.agent] ?? route.agent;
+  const call =
+    route.model === "Not called"
+      ? "The model stays held."
+      : `It calls ${route.model} on the enterprise's machines.`;
+  return `${work} ${call}`;
+}
+
+function OperateDiagram({ route, step }: { route: Route | null; step: number }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const systems = route ? [...new Set(route.documents.map((id) => docs[id].system))] : [];
+  const waiting = (id: string): { id: string; label: string; note: string } => ({
+    id,
+    label: "Waiting",
+    note: "",
+  });
+  const nodes: {
+    id: string;
+    title: string;
+    accent?: boolean;
+    items: { id: string; label: string; note: string }[];
+  }[] = [
+    {
+      id: "systems",
+      title: "Systems",
+      items:
+        route && step >= 1
+          ? systems.length > 0
+            ? systems.map((system) => ({
+                id: `system:${system}`,
+                label: system,
+                note: [
+                  route.access?.[system],
+                  ...route.documents
+                    .filter((id) => docs[id].system === system)
+                    .map((id) => docs[id].title),
+                ]
+                  .filter(Boolean)
+                  .join("\n"),
+              }))
+            : [{ id: "system:none", label: "None", note: "Nothing opened." }]
+          : [waiting("systems")],
+    },
+    {
+      id: "documents",
+      title: "Documents",
+      items:
+        route && step >= 2
+          ? route.documents.length > 0
+            ? route.documents.map((id) => ({
+                id: `doc:${id}`,
+                label: docs[id].title,
+                note: docs[id].body,
+              }))
+            : [{ id: "doc:none", label: "None", note: "No client file opened." }]
+          : [waiting("documents")],
+    },
+    {
+      id: "agent",
+      title: "Agent",
+      items:
+        route && step >= 3
+          ? [{ id: "agent", label: route.agent, note: agentNote(route) }]
+          : [waiting("agent")],
+    },
+    {
+      id: "model",
+      title: "Model",
+      accent: Boolean(route && step >= 4),
+      items:
+        route && step >= 4
+          ? [
+              {
+                id: "model",
+                label: route.model,
+                note:
+                  route.placement === "On-prem"
+                    ? "Frontier not allowed. Stays on the enterprise's machines."
+                    : route.placement === "Held"
+                      ? "The model stays held."
+                      : `${route.model} · ${route.placement}.`,
+              },
+            ]
+          : [waiting("model")],
+    },
+    {
+      id: "gate",
+      title: "Decision",
+      items:
+        route && step >= 5
+          ? [{ id: "gate", label: route.gate.label, note: route.gate.text }]
+          : [waiting("gate")],
+    },
+  ];
+
+  return (
+    <div className="border border-line bg-surface px-4 py-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
+        <p className="flex items-center justify-end gap-1.5 pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase">
+          <span className="size-1.5 bg-accent" />
+          Gateway
+        </p>
+        <span className="block size-10 bg-foreground" />
+        <div />
+      </div>
+      {nodes.map((node, index) => {
+        const note = node.items.find((item) => item.id === openId);
+        return (
+          <div key={node.id} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+            <p className="mt-6 pr-3 text-right font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">
+              {node.title}
+            </p>
+            <div className="flex h-full flex-col items-center">
+              <span className="h-6 w-px shrink-0 bg-foreground" />
+              <div
+                className={`grid max-w-56 shrink-0 gap-1 border bg-surface px-3 py-2 text-center ${
+                  node.accent ? "border-accent" : "border-foreground"
+                }`}
+              >
+                {node.items.map((item) =>
+                  item.note ? (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-expanded={openId === item.id}
+                      onClick={() => setOpenId(openId === item.id ? null : item.id)}
+                      className={`font-mono text-[0.65rem] tracking-[-0.01em] uppercase ${
+                        openId === item.id ? "text-accent" : ""
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <p
+                      key={item.id}
+                      className="font-mono text-[0.65rem] tracking-[-0.01em] text-faint uppercase"
+                    >
+                      {item.label}
+                    </p>
+                  ),
+                )}
+              </div>
+              {index < nodes.length - 1 ? <span className="w-px flex-1 bg-foreground" /> : null}
+            </div>
+            <div className="mt-6 pl-4">
+              {note ? (
+                <p className="max-w-56 border border-line px-3 py-2 text-left text-sm leading-relaxed whitespace-pre-line text-faint">
+                  {note.note}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function routeQuery(text: string): Route {
@@ -215,7 +386,7 @@ function routeQuery(text: string): Route {
         text: "Read only. A person owns the next step.",
       },
       reply:
-        "Opened the client file. It stays on the bank's machines. This is read only. A person owns the next step.",
+        "Opened the client file. It stays on the enterprise's machines. This is read only. A person owns the next step.",
     };
   }
   return {
@@ -232,24 +403,27 @@ function routeQuery(text: string): Route {
   };
 }
 
-export function DemoChat() {
+export function DemoChat({ embedded = false }: { embedded?: boolean }) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
   const [step, setStep] = useState(0);
   const [openDoc, setOpenDoc] = useState<string | null>(null);
+  const [questionsOpen, setQuestionsOpen] = useState(false);
+  const [operateView, setOperateView] = useState<"detail" | "diagram">("detail");
   const run = useRef(0);
   const timers = useRef<number[]>([]);
   const thread = useRef<HTMLDivElement>(null);
   const nextId = useRef(1);
 
   useLayoutEffect(() => {
+    if (embedded) return;
     const html = document.documentElement;
     const previousBehavior = html.style.scrollBehavior;
     html.style.scrollBehavior = "auto";
     window.scrollTo(0, 0);
     html.style.scrollBehavior = previousBehavior;
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
     return () => {
@@ -270,6 +444,7 @@ export function DemoChat() {
   function ask(text: string, preset?: Route) {
     const trimmed = text.trim();
     if (!trimmed) return;
+    setQuestionsOpen(false);
     timers.current.forEach((timer) => window.clearTimeout(timer));
     timers.current = [];
     const id = ++run.current;
@@ -322,8 +497,8 @@ export function DemoChat() {
         <div ref={thread} className="grid content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {messages.length === 0 ? (
             <p className="text-sm leading-relaxed text-faint">
-              Choose a sample, or type a question. The orchestrator will show the
-              systems, the document, the agent, the model, and the decision.
+              Choose a question. The orchestrator will show the systems, the
+              document, the agent, the model, and the decision.
             </p>
           ) : (
             messages.map((message) => (
@@ -353,13 +528,55 @@ export function DemoChat() {
           <label className="sr-only" htmlFor="demo-question">
             Question
           </label>
-          <input
-            id="demo-question"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder="Ask the orchestrator"
-            className="min-w-0 flex-1 border border-line bg-background px-3 py-2 text-sm outline-none"
-          />
+          <div className="relative min-w-0 flex-1">
+            {questionsOpen ? (
+              <ul
+                id="demo-questions"
+                role="listbox"
+                aria-label="Questions"
+                className="absolute right-0 bottom-full left-0 z-10 mb-1 border border-line bg-surface"
+              >
+                {samples.map((sample) => (
+                  <li key={sample.label} role="presentation">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={draft === sample.query}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => ask(sample.query, sample.route)}
+                      className="block w-full px-3 py-2 text-left text-sm hover:bg-background"
+                    >
+                      {sample.query}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <input
+              id="demo-question"
+              role="combobox"
+              aria-expanded={questionsOpen}
+              aria-controls="demo-questions"
+              aria-autocomplete="list"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onMouseDown={() => setQuestionsOpen(true)}
+              onFocus={() => setQuestionsOpen(true)}
+              onBlur={(event) => {
+                const next = event.relatedTarget;
+                if (next instanceof Node && event.currentTarget.parentElement?.contains(next)) return;
+                window.setTimeout(() => {
+                  if (document.activeElement?.id === "demo-question") return;
+                  setQuestionsOpen(false);
+                }, 0);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setQuestionsOpen(false);
+              }}
+              placeholder="Ask the orchestrator"
+              className="w-full border border-line bg-background px-3 py-2 text-sm outline-none"
+            />
+          </div>
           <button
             type="submit"
             className="bg-ink px-3.5 font-mono text-[0.8125rem] tracking-[-0.0175rem] text-paper capitalize"
@@ -370,10 +587,37 @@ export function DemoChat() {
       </div>
 
       <aside className="grid content-start gap-3 lg:min-h-0 lg:overflow-y-auto" aria-live="polite">
-        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:hidden">
-          How the system operates
-        </p>
-        {opened ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex border border-line" role="group" aria-label="How the system operates">
+            {(
+              [
+                { id: "detail", label: "Detail" },
+                { id: "diagram", label: "Diagram" },
+              ] as const
+            ).map((item, index) => {
+              const selected = operateView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setOperateView(item.id)}
+                  className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
+                    index > 0 ? "border-l border-line" : ""
+                  } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:hidden">
+            How the system operates
+          </p>
+        </div>
+        {operateView === "diagram" ? (
+          <OperateDiagram route={route} step={step} />
+        ) : opened ? (
           <article className="flex min-h-0 flex-col border border-line bg-surface">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
@@ -476,7 +720,7 @@ export function DemoChat() {
               </p>
               {step >= 4 && route?.placement === "On-prem" ? (
                 <p className="mt-2 text-sm leading-snug text-faint">
-                  Frontier not allowed. Stays on the bank's machines.
+                  Frontier not allowed. Stays on the enterprise's machines.
                 </p>
               ) : null}
             </article>

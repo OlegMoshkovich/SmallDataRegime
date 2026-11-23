@@ -19,7 +19,7 @@ const places = [
   },
   {
     title: "Air-gapped host",
-    body: "Bring the same loop into a network that does not call out. Model routing falls back to the checkpoints you already approved.",
+    body: "Bring the same system into a network that does not call out. Model routing falls back to the checkpoints you already approved.",
   },
 ];
 
@@ -46,7 +46,7 @@ export default function ProductPage() {
   return (
     <Interior
       eyebrow="Product"
-      title="A loop built for scarce signal."
+      title="A system built for scarce signal."
       lede="SmallDataRegime.ai is the post-training system for teams that cannot label a million examples, and should not have to. The unit of work is a small, reviewed set tied to a written reward."
     >
       <ol className="grid gap-6 md:grid-cols-2">
@@ -70,7 +70,7 @@ export default function ProductPage() {
       </div>
       <section id="platform" className="mt-16 scroll-mt-28">
         <h2 className="text-2xl tracking-[-0.04em]">
-          The same loop, wherever the weights are allowed to live.
+          The same system, wherever the weights are allowed to live.
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-snug text-faint lg:text-base">
           Small-data post-training is often the work that cannot leave the building.

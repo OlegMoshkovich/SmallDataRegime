@@ -44,7 +44,7 @@ export default function PricingPage() {
   return (
     <Interior
       eyebrow="Pricing"
-      title="Pay for the loop, not for a pile of tokens."
+      title="Pay for the system, not for a pile of tokens."
       lede="Plans follow where the run lives and how many people touch the preference set. Usage is the labeled examples and the eval compute, not a blank pretraining corpus."
     >
       <div className="grid gap-6 lg:grid-cols-3">

@@ -9,7 +9,7 @@ export const pillars = [
     index: "01",
     kicker: "Signal",
     title: "Deliberately small, high-leverage data",
-    body: "Choose the traces, rankings, and corrections that enter the loop. The set stays small because each example has to earn its place.",
+    body: "Choose the traces, rankings, and corrections that enter the system. The set stays small because each example has to earn its place.",
   },
   {
     index: "02",

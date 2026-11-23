@@ -80,9 +80,8 @@ export default function HomePage() {
             Build a post-training regime
           </h2>
           <p className="mt-4 text-sm leading-snug text-faint lg:text-base">
-            Using our methods, turn a short stack of demonstrations and preferences into a policy that
-            holds up outside the notebook. We plan the run, apply the update, and validate
-            it against the evals you wrote.
+            Using our methods, turn a short stack of demonstrations and preferences into a policy. We
+            plan the run, apply the update, and validate it against the evals you wrote.
           </p>
         </div>
         <ul className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-y-16">

@@ -9,7 +9,7 @@ export const roles = [
       "This is a hands-on role with a customer in the room. You take a task from the first conversation through a run they can repeat: the reward, the preference budget, the eval that can stop it, and the machine the weights are allowed to live on.",
     duties: [
       "Learn the task, who owns the judgment, and what a first run has to prove.",
-      "Stand the loop up on a shared cluster, a lab machine, or an air-gapped host.",
+      "Stand the system up on a shared cluster, a lab machine, or an air-gapped host.",
       "Write the reward with the people who will accept or reject the result.",
       "Leave them a spec, a budget, and a gate, not a one-off notebook.",
     ],
@@ -24,14 +24,14 @@ export const roles = [
     tag: "Engineering",
     title: "Software Engineer, AI",
     type: "Full time",
-    lede: "Build the training loop: a reward model, a policy step under a budget, and an eval that can refuse the release.",
+    lede: "Build the training system: a reward model, a policy step under a budget, and an eval that can refuse the release.",
     about:
-      "Members of technical staff here work on the post-training system itself. The scarce resource is a correct preference. Your job is the loop that turns a small, reviewed set into a policy, on whatever open base model the lab already trusts.",
+      "Members of technical staff here work on the post-training system itself. The scarce resource is a correct preference. Your job is the system that turns a small, reviewed set into a policy, on whatever open base model the lab already trusts.",
     duties: [
       "Fit reward models on small preference sets and keep the budget explicit.",
       "Step a policy with a KL cap so it does not drift away from the base model.",
       "Build held-out evals that can block a release when the spec says they should.",
-      "Keep the loop model agnostic across the checkpoints a lab is allowed to use.",
+      "Keep the system model agnostic across the checkpoints a lab is allowed to use.",
     ],
     qualifications: [
       "You have trained or post-trained a model, or built the system that did.",
@@ -51,7 +51,7 @@ export const roles = [
       "Find teams whose judgment is scarce and whose base model is already chosen.",
       "Turn a first call into a scoped run: the workflow, who owns it, and what it has to prove.",
       "Stay through the handoff to deployed staff, and say when a deal is not a fit.",
-      "Bring back what buyers actually ask, in their words, to the people building the loop.",
+      "Bring back what buyers actually ask, in their words, to the people building the system.",
     ],
     qualifications: [
       "You have sold a technical product to engineers, or to the people who fund them.",

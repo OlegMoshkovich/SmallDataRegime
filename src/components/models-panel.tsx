@@ -44,7 +44,7 @@ export function ModelsPanel() {
       </h2>
       <p className="mt-4 max-w-3xl text-base leading-relaxed text-faint">
         We post-train and fine-tune open-weights models by applying our small-data regime. A short
-        stack of demonstrations and preferences becomes a policy that holds up outside the notebook.
+        stack of demonstrations and preferences becomes a policy.
         We plan the run, apply the update, and validate it against the evals you wrote. The weights
         stay on a lab machine and serve on these local GPUs.
       </p>

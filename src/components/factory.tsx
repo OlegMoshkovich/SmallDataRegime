@@ -51,7 +51,10 @@ export function Factory() {
         Proprietory methods
       </p>
       <h2 className="mt-4 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        Our recursive self-improving loop.
+        Our recursive{" "}
+        <span className="max-lg:block">
+          <span className="whitespace-nowrap">self-improving</span> system.
+        </span>
       </h2>
 
       <div className="mt-12 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
@@ -107,7 +110,7 @@ export function Factory() {
       <div className="mt-6 border border-line bg-sunken px-5 py-6 lg:px-8">
         <div className="grid items-center gap-8 lg:grid-cols-[11rem_minmax(0,1fr)_auto_minmax(0,1.3fr)]">
           <p className="text-lg leading-snug tracking-[-0.03em]">
-            Our planner vs typical agentic loops
+            Our planner vs typical agentic systems
           </p>
 
           <div className="flex items-center justify-center gap-3">

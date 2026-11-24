@@ -13,30 +13,27 @@ const citationBars = [8, 12, 16, 18, 22, 28, 34, 40, 48, 55, 62, 70, 78, 88, 100
 function Marker({ active = false }: { active?: boolean }) {
   return (
     <span
-      className={`relative z-10 size-2 shrink-0 ${active ? "bg-accent" : "bg-line-strong"}`}
+      className={`relative z-10 size-2 shrink-0 ${active ? "bg-foreground" : "bg-line-strong"}`}
     />
   );
 }
 
 export function ResearchRecord() {
   return (
-    <section id="validation" className="mx-auto w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
+    <section id="validation" className="mx-auto w-full max-w-[1440px] px-4 pt-40 pb-16 lg:px-9 lg:pt-64 lg:pb-24">
       <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-        Foundational research
+        Foundational research applied at scale
       </p>
-      <h2 className="mt-4 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        Built on decades of our own research applied at scale.
-      </h2>
 
-      <div className="mt-12 grid grid-cols-[auto_minmax(1.25rem,1fr)_auto_minmax(2.5rem,1.6fr)_auto_minmax(0.75rem,0.45fr)_auto] items-center gap-x-2 sm:gap-x-3">
+      <div className="mt-5 grid grid-cols-[auto_minmax(1.25rem,1fr)_auto_minmax(2.5rem,1.6fr)_auto_minmax(0.75rem,0.45fr)_auto] items-center gap-x-2 sm:gap-x-3">
         <span className="flex items-center gap-2">
           <Marker active />
-          <span className="font-mono text-[0.75rem] text-accent">2006</span>
+          <span className="font-mono text-[0.75rem] text-foreground">2006</span>
         </span>
-        <span className="h-px bg-accent" />
+        <span className="h-px bg-foreground" />
         <span className="flex items-center gap-2">
           <Marker active />
-          <span className="font-mono text-[0.75rem] text-accent">2011</span>
+          <span className="font-mono text-[0.75rem] text-foreground">2011</span>
         </span>
         <span className="relative flex items-center justify-evenly">
           <span className="absolute inset-x-0 top-1/2 h-px bg-line" />
@@ -46,12 +43,12 @@ export function ResearchRecord() {
         </span>
         <span className="flex items-center gap-2">
           <Marker active />
-          <span className="font-mono text-[0.75rem] text-accent">2025</span>
+          <span className="font-mono text-[0.75rem] text-foreground">2025</span>
         </span>
         <span className="h-px bg-line" />
         <span className="flex items-center gap-2">
           <Marker active />
-          <span className="font-mono text-[0.75rem] text-accent">2026</span>
+          <span className="font-mono text-[0.75rem] text-foreground">2026</span>
         </span>
       </div>
 

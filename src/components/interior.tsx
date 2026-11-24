@@ -4,12 +4,14 @@ export function Interior({
   lede,
   children,
   accent = false,
+  space,
 }: {
   eyebrow?: string;
   title?: string;
   lede?: string;
   children: React.ReactNode;
   accent?: boolean;
+  space?: string;
 }) {
   const hasIntro = Boolean(eyebrow || title || lede);
   return (
@@ -35,7 +37,7 @@ export function Interior({
           ) : null}
         </>
       ) : null}
-      <div className={hasIntro ? "mt-14" : undefined}>{children}</div>
+      <div className={hasIntro ? (space ?? "mt-14") : space}>{children}</div>
     </article>
   );
 }

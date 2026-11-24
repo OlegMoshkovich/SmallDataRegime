@@ -39,10 +39,7 @@ export function ModelsPanel() {
         <span className="size-1.5 bg-accent" aria-hidden />
         Models
       </p>
-      <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        Served on the local GPUs.
-      </h2>
-      <p className="mt-4 max-w-3xl text-base leading-relaxed text-faint">
+      <p className="mt-8 max-w-3xl text-base leading-relaxed text-faint">
         We post-train and fine-tune open-weights models by applying our small-data regime. A short
         stack of demonstrations and preferences becomes a policy.
         We plan the run, apply the update, and validate it against the evals you wrote. The weights

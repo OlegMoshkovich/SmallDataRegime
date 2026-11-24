@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Interior } from "@/components/interior";
 import { ArchitectureSwitch } from "@/components/architecture-switch";
 
 export const metadata: Metadata = {
@@ -35,7 +34,8 @@ function ArrowDown() {
 
 export default function ArchitecturePage() {
   return (
-    <Interior>
+    <article className="bg-background">
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
       <ArchitectureSwitch />
 
       <div className="mt-20 grid gap-16">
@@ -210,6 +210,7 @@ export default function ArchitecturePage() {
           </figure>
         </section>
       </div>
-    </Interior>
+      </div>
+    </article>
   );
 }

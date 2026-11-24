@@ -167,9 +167,6 @@ export function PremisePanel() {
     <div className="grid min-w-0 gap-6 *:min-w-0">
       <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
         <Eyebrow>System</Eyebrow>
-        <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-          What we stand up.
-        </h2>
         <div className="mt-8 grid max-w-4xl gap-5 text-base leading-relaxed text-faint">
           <p>
             The system runs on the enterprise’s machines. A reverse proxy on TLS 443 serves one

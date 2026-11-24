@@ -16,7 +16,7 @@ function usdPerMillion(value: number) {
   return `$${value.toFixed(value >= 1 ? 2 : 3)}`;
 }
 
-export function CodingAgent({ enabled, initialReady = false }: { enabled: boolean; initialReady?: boolean }) {
+export function CodingAgent({ enabled, initialReady = false, headerLeft }: { enabled: boolean; initialReady?: boolean; headerLeft?: React.ReactNode }) {
   const [prompt, setPrompt] = useState("");
   const [key, setKey] = useState("");
   const [ready, setReady] = useState(initialReady);
@@ -336,9 +336,14 @@ export function CodingAgent({ enabled, initialReady = false }: { enabled: boolea
   }
 
   return (
-    <>
-      <div className="grid gap-4 lg:col-start-2 lg:row-start-1">
-        <div className="flex border border-line" role="group" aria-label="Agent settings">
+    <div className="min-w-0">
+      <div className="mb-4 flex flex-wrap items-center gap-4">
+        {headerLeft}
+        <div
+          className="flex w-full flex-wrap gap-2 lg:ml-auto lg:w-auto lg:gap-0 lg:border lg:border-line"
+          role="group"
+          aria-label="Agent settings"
+        >
           {(
             [
               ["key", "Key"],
@@ -351,14 +356,64 @@ export function CodingAgent({ enabled, initialReady = false }: { enabled: boolea
               type="button"
               aria-pressed={panel === id}
               onClick={() => setPanel(id)}
-              className={`h-[31px] flex-1 px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
-                index > 0 ? "border-l border-line" : ""
+              className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
+                index > 0 ? "lg:border-l lg:border-line" : ""
               } ${panel === id ? "bg-foreground text-background" : "bg-surface text-muted"}`}
             >
               {label}
             </button>
           ))}
         </div>
+      </div>
+      <div ref={frame} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
+      <div className="flex min-h-0 flex-col border border-line bg-surface">
+      <div ref={thread} className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-4">
+        {lines.length === 0 ? (
+          <p className="text-sm text-muted">
+            {ready
+              ? "Ask it to draft a file in the workspace."
+              : "Add an OpenRouter API key to turn the agent on."}
+          </p>
+        ) : (
+          lines.map((line) => (
+            <p
+              key={line.id}
+              className={
+                line.role === "note"
+                  ? "font-mono text-xs tracking-[-0.01em] text-muted"
+                  : line.role === "you"
+                    ? "text-sm"
+                    : "whitespace-pre-wrap text-sm"
+              }
+            >
+              {line.role === "you" ? "You. " : line.role === "note" ? "" : "Agent. "}
+              {line.text || (busy && line.role === "agent" ? "…" : "")}
+            </p>
+          ))
+        )}
+      </div>
+      <form onSubmit={submit} className="flex shrink-0 items-end gap-3 border-t border-line p-4">
+        <label className="grid min-w-0 flex-1 gap-2">
+          <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted">Prompt</span>
+          <textarea
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            disabled={!enabled || !ready || !selectedModel || busy}
+            rows={3}
+            placeholder="Write a short note in the workspace about the current change."
+            className="w-full resize-none border border-line bg-background px-3 py-2 text-sm outline-none"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={!enabled || !ready || !selectedModel || busy || prompt.trim().length === 0}
+          className="h-[31px] border border-transparent bg-ink px-3.5 font-mono text-[0.8125rem] capitalize text-paper disabled:opacity-40"
+        >
+          Send
+        </button>
+      </form>
+      </div>
+      <div className="grid content-start gap-4">
         <div className="grid">
         <form
           onSubmit={saveKey}
@@ -543,53 +598,7 @@ export function CodingAgent({ enabled, initialReady = false }: { enabled: boolea
           </dl>
         ) : null}
       </div>
-      <div ref={frame} className="flex min-h-0 flex-col border border-line bg-surface lg:col-start-1 lg:row-start-1">
-      <div ref={thread} className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-4">
-        {lines.length === 0 ? (
-          <p className="text-sm text-muted">
-            {ready
-              ? "Ask it to draft a file in the workspace."
-              : "Add an OpenRouter API key to turn the agent on."}
-          </p>
-        ) : (
-          lines.map((line) => (
-            <p
-              key={line.id}
-              className={
-                line.role === "note"
-                  ? "font-mono text-xs tracking-[-0.01em] text-muted"
-                  : line.role === "you"
-                    ? "text-sm"
-                    : "whitespace-pre-wrap text-sm"
-              }
-            >
-              {line.role === "you" ? "You. " : line.role === "note" ? "" : "Agent. "}
-              {line.text || (busy && line.role === "agent" ? "…" : "")}
-            </p>
-          ))
-        )}
       </div>
-      <form onSubmit={submit} className="flex shrink-0 items-end gap-3 border-t border-line p-4">
-        <label className="grid min-w-0 flex-1 gap-2">
-          <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted">Prompt</span>
-          <textarea
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-            disabled={!enabled || !ready || !selectedModel || busy}
-            rows={3}
-            placeholder="Write a short note in the workspace about the current change."
-            className="w-full resize-none border border-line bg-background px-3 py-2 text-sm outline-none"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={!enabled || !ready || !selectedModel || busy || prompt.trim().length === 0}
-          className="h-[31px] border border-transparent bg-ink px-3.5 font-mono text-[0.8125rem] capitalize text-paper disabled:opacity-40"
-        >
-          Send
-        </button>
-      </form>
-      </div>
-    </>
+    </div>
   );
 }

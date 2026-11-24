@@ -12,8 +12,8 @@ export default function ContactPage() {
   return (
     <Interior
       eyebrow="Contact"
-      title="Ready to create a reasoning system based on your data."
       lede="Our platform turns a small set of your preferences into a reasoning system, model agnostic, with ownership and privacy."
+      space="mt-5"
     >
       <ContactForm />
     </Interior>

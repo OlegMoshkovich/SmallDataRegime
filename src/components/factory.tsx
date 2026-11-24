@@ -48,16 +48,10 @@ export function Factory() {
   return (
     <section id="factory" className="mx-auto w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
       <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-        Proprietory methods
+        Proprietory methods : Recursive self-improving factory
       </p>
-      <h2 className="mt-4 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        Our recursive{" "}
-        <span className="max-lg:block">
-          <span className="whitespace-nowrap">self-improving</span> systems.
-        </span>
-      </h2>
 
-      <div className="mt-12 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
+      <div className="mt-5 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
         <div className="lg:col-start-3 lg:row-start-1">
           <Block title="Optimizer">
             Optimizes the components of the system to improve success criteria over

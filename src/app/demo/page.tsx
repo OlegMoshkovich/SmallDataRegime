@@ -11,7 +11,7 @@ export default function DemoPage() {
   return (
     <article className="bg-background">
       <div className="mx-auto flex max-w-[1440px] flex-col px-4 py-4 lg:px-9">
-        <DemoChat titleLevel="h1" />
+        <DemoChat />
       </div>
     </article>
   );

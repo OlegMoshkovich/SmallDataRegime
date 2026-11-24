@@ -439,10 +439,8 @@ function OperateToggle({
 
 export function DemoChat({
   embedded = false,
-  titleLevel = "h2",
 }: {
   embedded?: boolean;
-  titleLevel?: "h1" | "h2";
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
@@ -450,7 +448,6 @@ export function DemoChat({
   const [openDoc, setOpenDoc] = useState<string | null>(null);
   const [choice, setChoice] = useState<"detail" | "diagram" | null>(null);
   const operateView = choice ?? "diagram";
-  const Title = titleLevel === "h1" ? "h1" : "h2";
 
   function choose(id: "detail" | "diagram") {
     const desktop = window.matchMedia("(min-width: 1024px)").matches;
@@ -526,10 +523,6 @@ export function DemoChat({
           <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
             Demo
           </p>
-          <Title className="mt-1 text-2xl tracking-[-0.04em]">
-            <span className="lg:hidden">Orchestrator</span>
-            <span className="hidden lg:inline">Ask the orchestrator.</span>
-          </Title>
         </div>
         <div className="ml-auto shrink-0 lg:hidden">
           <OperateToggle value={choice} onSelect={choose} />

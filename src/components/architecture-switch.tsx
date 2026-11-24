@@ -17,6 +17,7 @@ const views = [
   { id: "premise", label: "System" },
   { id: "trajectory", label: "Flow" },
   { id: "demo", label: "Demo" },
+  { id: "setup", label: "Setup" },
 ] as const;
 
 type View = (typeof views)[number]["id"];
@@ -504,12 +505,9 @@ function SummaryHosting() {
     <section ref={sectionRef} className="relative border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
       <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
         <span aria-hidden className="size-1.5 bg-accent" />
-        On premise hosting
+        On premise pilot
       </p>
-      <h2 className="mt-3 text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        Our initial deployment runs on one VM for a Dockerized system, plus a GPU server.
-      </h2>
-      <div className="mt-10 lg:hidden">
+      <div className="mt-5 lg:hidden">
         <HostingMobile
           onShow={showTip}
           onPress={pressTip}
@@ -519,7 +517,7 @@ function SummaryHosting() {
           }}
         />
       </div>
-      <div className="mt-10 hidden max-w-full min-w-0 overflow-x-auto lg:block">
+      <div className="mt-5 hidden max-w-full min-w-0 overflow-x-auto lg:block">
         <svg
           onClick={() => {
             if (coarsePointer()) setTip(null);
@@ -960,16 +958,13 @@ export function ArchitectureSwitch() {
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
               For an enterprise
             </p>
-            <h1 className="mt-4 max-w-3xl text-[2.125rem] leading-[1.08] tracking-[-0.045em] lg:text-[2.75rem]">
-              Orchestration through a centralized gateway is at the core of our system.
-            </h1>
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               The orchestrator is the main agent the person interacts with. It opens the right
               document, calls the right agent, and runs the model the privacy of the request allows.
             </p>
             <p className="mt-5 max-w-4xl text-base leading-relaxed text-faint">
-              A person types into one chat. Applications call one API. Both reach the same gateway.
-              The person does not open a system, pick an agent, or pick a model. The orchestrator
+              The Human types into one chat. Applications call one API. Both reach the same gateway.
+              The Human does not open a system, pick an agent, or pick a model. The orchestrator
               replies in that same chat, naming the document it opened and the agent that answered.
               Behind the chat, the gateway decides every request.
             </p>
@@ -1018,7 +1013,6 @@ export function ArchitectureSwitch() {
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                 A request
               </p>
-              <h3 className="mt-3 text-2xl tracking-[-0.04em]">Nine stages, in this order.</h3>
               <p className="mt-3 max-w-4xl text-base leading-relaxed text-faint">
                 The gateway is a stateless service. Policy, logs, and runs live in Postgres. Caches
                 and budget counters live in Redis. Chat answers stream back. The output check reads
@@ -1052,7 +1046,6 @@ export function ArchitectureSwitch() {
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                   Where it runs
                 </p>
-                <h3 className="mt-3 text-2xl tracking-[-0.04em]">The file sets the locality.</h3>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   The router picks what serves the request, then applies a hard rule for where it
                   may run. A use case can only tighten that rule. Customer data stays local. A
@@ -1072,7 +1065,6 @@ export function ArchitectureSwitch() {
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                   Products
                 </p>
-                <h3 className="mt-3 text-2xl tracking-[-0.04em]">Search, then a compliance agent.</h3>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   Document search has two paths. Live search asks the document store with the person’s
                   own token, so a file they cannot open never reaches the model. An index keeps changed
@@ -1103,7 +1095,6 @@ export function ArchitectureSwitch() {
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                   Models
                 </p>
-                <h3 className="mt-3 text-2xl tracking-[-0.04em]">Shared GPUs, one pool.</h3>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   Qwen serves chat, retrieval answers, and the router. DeepSeek serves the
                   compliance agent’s reasoning. A small embedding model and a reranker share a GPU
@@ -1118,7 +1109,6 @@ export function ArchitectureSwitch() {
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                   Machines
                 </p>
-                <h3 className="mt-3 text-2xl tracking-[-0.04em]">Two machines, one URL.</h3>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   The application machine holds the chat, the gateway, the workers, the connectors,
                   Postgres, and Redis. The GPU machine serves the models, and its firewall accepts
@@ -1136,8 +1126,7 @@ export function ArchitectureSwitch() {
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
               Examples
             </p>
-            <h2 className="mt-3 text-2xl tracking-[-0.04em]">A few questions, one chat.</h2>
-            <p className="mt-4 max-w-3xl text-base leading-relaxed text-faint">
+            <p className="mt-3 max-w-3xl text-base leading-relaxed text-faint">
               A person asks, in the chat. This is the experience we envision, not a client of
               record.
             </p>
@@ -1193,10 +1182,7 @@ export function ArchitectureSwitch() {
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
               The privacy rule
             </p>
-            <h2 className="mt-3 max-w-3xl text-2xl tracking-[-0.04em]">
-              On premise deployment.
-            </h2>
-            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
               <article className="border border-line bg-surface p-5">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
                   Stays on the enterprise’s machines
@@ -1219,7 +1205,6 @@ export function ArchitectureSwitch() {
               </article>
             </div>
           </section>
-          <SummaryHosting />
         </div>
       ) : null}
       {view === "gateway" ? <GatewayDiagram /> : null}
@@ -1232,6 +1217,7 @@ export function ArchitectureSwitch() {
           <DemoChat embedded />
         </div>
       ) : null}
+      {view === "setup" ? <SummaryHosting /> : null}
     </div>
   );
 }

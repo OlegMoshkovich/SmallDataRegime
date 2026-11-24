@@ -29,6 +29,18 @@ export function SignInForm() {
         <input
           required
           type="email"
+          autoComplete="username"
+          className="h-11 border border-line bg-surface px-3 outline-none focus:border-foreground"
+        />
+      </label>
+      <label className="grid gap-2 text-sm">
+        <span className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+          Password
+        </span>
+        <input
+          required
+          type="password"
+          autoComplete="current-password"
           className="h-11 border border-line bg-surface px-3 outline-none focus:border-foreground"
         />
       </label>

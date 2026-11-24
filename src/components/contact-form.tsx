@@ -5,7 +5,6 @@ import { useState } from "react";
 const fields = [
   { name: "name", label: "Name", type: "text" },
   { name: "email", label: "Work email", type: "email" },
-  { name: "org", label: "Lab or company", type: "text" },
 ] as const;
 
 export function ContactForm() {
@@ -48,14 +47,14 @@ export function ContactForm() {
       ))}
       <label className="grid gap-2 text-sm">
         <span className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
-          What should we scope
+          Note
         </span>
         <textarea
           required
           name="task"
           rows={5}
           className="border border-line bg-surface px-3 py-3 outline-none focus:border-foreground"
-          placeholder="The workflow, who owns it, and what a first run has to prove."
+          placeholder="..."
         />
       </label>
       <button

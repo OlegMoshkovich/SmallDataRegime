@@ -13,7 +13,6 @@ export default function CompanyPage() {
   return (
     <Interior
       eyebrow="Company"
-      title="Post-training for teams who are done collecting for its own sake."
       lede="SmallDataRegime by MIResearchLab exists because the valuable update is usually the small one: a reward written carefully, a few hundred preferences that disagree with the base model, and an eval that can stop the run."
     >
       <div className="grid max-w-3xl gap-8 text-base leading-relaxed text-faint">
@@ -28,13 +27,9 @@ export default function CompanyPage() {
           have budgets. Releases wait on evals. The hardware can sit in your lab.
         </p>
       </div>
-      <section id="careers" className="mt-16 scroll-mt-28 border-t border-line pt-8">
+      <section id="careers" className="mt-16 scroll-mt-28 pt-8">
         <h2 className="text-2xl tracking-[-0.04em]">Careers</h2>
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-faint">
-          Technical staff and go-to-market. We hire people who would rather delete a
-          bad example than add a thousand more.
-        </p>
-        <ul className="mt-8 border-b border-line">
+        <ul className="mt-5 border-b border-line">
           {roles.map((role) => (
             <li
               key={role.slug}

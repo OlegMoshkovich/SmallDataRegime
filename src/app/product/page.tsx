@@ -44,11 +44,7 @@ const steps = [
 
 export default function ProductPage() {
   return (
-    <Interior
-      eyebrow="Product"
-      title="A system built for scarce signal."
-      lede="SmallDataRegime is the post-training system for teams that cannot label a million examples, and should not have to. The unit of work is a small, reviewed set tied to a written reward."
-    >
+    <Interior eyebrow="Product">
       <ol className="grid gap-6 md:grid-cols-2">
         {steps.map((step, index) => (
           <li key={step.title} className="border border-line bg-surface p-6">
@@ -69,14 +65,7 @@ export default function ProductPage() {
         ))}
       </div>
       <section id="platform" className="mt-16 scroll-mt-28">
-        <h2 className="text-2xl tracking-[-0.04em]">
-          The same system, wherever the weights are allowed to live.
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-snug text-faint lg:text-base">
-          Small-data post-training is often the work that cannot leave the building.
-          SmallDataRegime runs the collect, train, and gate steps without assuming a public API.
-        </p>
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           {places.map((place, index) => (
             <section key={place.title} className="border border-line bg-surface p-6">
               <p className="font-mono text-[0.75rem] text-muted uppercase">0{index + 1}</p>
@@ -88,7 +77,7 @@ export default function ProductPage() {
       </section>
       <section id="security" className="mt-16 max-w-2xl scroll-mt-28">
         <h2 className="text-2xl tracking-[-0.04em]">Security</h2>
-        <ul className="mt-4 space-y-3 text-sm leading-snug text-faint lg:text-base">
+        <ul className="mt-4 text-base leading-7 text-foreground">
           <li>Preference stores and reward specs are versioned with the run that used them.</li>
           <li>A release can require a named reviewer in addition to the eval gate.</li>
           <li>Lab machines do not upload raw traces unless that export is turned on.</li>

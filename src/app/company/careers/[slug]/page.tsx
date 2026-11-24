@@ -33,9 +33,8 @@ export default async function RolePage({
   if (!role) notFound();
 
   return (
-    <Interior eyebrow={role.tag} title={role.title} lede={role.lede}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="font-mono text-[0.75rem] text-muted uppercase">{role.type}</p>
+    <Interior eyebrow={role.tag}>
+      <div className="flex flex-wrap items-center gap-4">
         <Button href="/contact">
           Apply <ArrowRight />
         </Button>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Interior } from "@/components/interior";
+import { ResearchSwitch } from "@/components/research-switch";
 
 export const metadata: Metadata = {
   title: "Research",
@@ -135,48 +135,10 @@ const papers = [
 
 export default function ResearchPage() {
   return (
-    <Interior eyebrow="Research" space="mt-5">
-      <section>
-        <p className="max-w-3xl text-base leading-relaxed text-faint">
-          From{" "}
-          <a
-            href="https://scholar.google.com/citations?user=-D0EgMIAAAAJ&hl=en"
-            className="underline"
-          >
-            our chief scientist’s record
-          </a>
-          . The bandit and control results where the sample is the constraint, and the
-          hierarchical reasoning models trained on about a thousand examples.
-        </p>
-        <div className="mt-12 grid gap-16">
-          {papers.map((group) => (
-            <div key={group.label}>
-              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-                {group.label}
-              </p>
-              <p className="mt-3 max-w-3xl text-base leading-relaxed text-faint">
-                {group.intro}
-              </p>
-              <ul className="mt-6 border-b border-line">
-                {group.items.map((paper) => (
-                  <li key={paper.title} className="border-t border-line py-5">
-                    <a
-                      href={paper.href}
-                      className="text-base tracking-[-0.02em] hover:underline"
-                    >
-                      {paper.title}
-                    </a>
-                    <p className="mt-2 font-mono text-[0.75rem] text-muted">{paper.meta}</p>
-                    <p className="mt-2 max-w-3xl text-sm leading-relaxed text-faint">
-                      {paper.note}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-    </Interior>
+    <article className="bg-background">
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
+        <ResearchSwitch papers={papers} />
+      </div>
+    </article>
   );
 }

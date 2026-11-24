@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
-import { Interior } from "@/components/interior";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -10,12 +9,15 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <Interior
-      eyebrow="Contact"
-      lede="Our platform turns a small set of your preferences into a reasoning system, model agnostic, with ownership and privacy."
-      space="mt-5"
-    >
-      <ContactForm />
-    </Interior>
+    <article className="flex min-h-[calc(100dvh-72px)] items-center">
+      <div className="mx-auto w-full max-w-[1440px] px-4 lg:px-9">
+        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+          Contact
+        </p>
+        <div className="mt-5">
+          <ContactForm />
+        </div>
+      </div>
+    </article>
   );
 }

@@ -73,8 +73,15 @@ export function Mark({
 }
 
 export function Wordmark({ className = "" }: { className?: string }) {
+  const [outlined, setOutlined] = useState<boolean[] | null>(null);
+
   return (
-    <span className={`inline-flex items-center gap-2.5 text-foreground ${className}`}>
+    <span
+      className={`inline-flex items-center gap-2.5 text-foreground ${className}`}
+      onMouseEnter={() => setOutlined(pickOutlined())}
+      onMouseLeave={() => setOutlined(null)}
+    >
+      <Mark className="size-7" outlined={outlined} />
       <span className="text-[0.95rem] font-medium tracking-[-0.045em] whitespace-nowrap">
         MIResearchLab
       </span>

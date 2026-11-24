@@ -376,17 +376,6 @@ export function ArchitectureSwitch() {
       {view === "models" ? <ModelsPanel /> : null}
       {view === "demo" ? (
         <div className="flex min-w-0 flex-col lg:h-[calc(100dvh-72px)] lg:overflow-hidden">
-          <div className="grid min-w-0 items-end gap-4 *:min-w-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
-            <div>
-              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-                Demo
-              </p>
-              <h2 className="mt-1 text-2xl tracking-[-0.04em]">Ask the orchestrator.</h2>
-            </div>
-            <p className="hidden font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:block">
-              How the system operates
-            </p>
-          </div>
           <DemoChat embedded />
         </div>
       ) : null}

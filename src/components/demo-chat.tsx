@@ -403,14 +403,61 @@ function routeQuery(text: string): Route {
   };
 }
 
-export function DemoChat({ embedded = false }: { embedded?: boolean }) {
+function OperateToggle({
+  value,
+  onSelect,
+}: {
+  value: "detail" | "diagram" | null;
+  onSelect: (id: "detail" | "diagram") => void;
+}) {
+  return (
+    <div className="inline-flex shrink-0 border border-line" role="group" aria-label="How the system operates">
+      {(
+        [
+          { id: "detail", label: "Detail" },
+          { id: "diagram", label: "Diagram" },
+        ] as const
+      ).map((item, index) => {
+        const selected = value === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onSelect(item.id)}
+            className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
+              index > 0 ? "border-l border-line" : ""
+            } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
+          >
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function DemoChat({
+  embedded = false,
+  titleLevel = "h2",
+}: {
+  embedded?: boolean;
+  titleLevel?: "h1" | "h2";
+}) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
   const [step, setStep] = useState(0);
   const [openDoc, setOpenDoc] = useState<string | null>(null);
   const [questionsOpen, setQuestionsOpen] = useState(false);
-  const [operateView, setOperateView] = useState<"detail" | "diagram">("diagram");
+  const [choice, setChoice] = useState<"detail" | "diagram" | null>(null);
+  const operateView = choice ?? "diagram";
+  const Title = titleLevel === "h1" ? "h1" : "h2";
+
+  function choose(id: "detail" | "diagram") {
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+    setChoice((current) => (desktop || current !== id ? id : null));
+  }
   const run = useRef(0);
   const timers = useRef<number[]>([]);
   const thread = useRef<HTMLDivElement>(null);
@@ -480,8 +527,28 @@ export function DemoChat({ embedded = false }: { embedded?: boolean }) {
   const opened = openDoc ? docs[openDoc] : null;
 
   return (
+    <>
+    <div className="grid min-w-0 items-end gap-4 *:min-w-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+      <div className="flex min-w-0 items-end gap-3 lg:block">
+        <div className="min-w-0">
+          <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+            Demo
+          </p>
+          <Title className="mt-1 text-2xl tracking-[-0.04em]">
+            <span className="lg:hidden">Orchestrator</span>
+            <span className="hidden lg:inline">Ask the orchestrator.</span>
+          </Title>
+        </div>
+        <div className="ml-auto shrink-0 lg:hidden">
+          <OperateToggle value={choice} onSelect={choose} />
+        </div>
+      </div>
+      <p className="hidden font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:block">
+        How the system operates
+      </p>
+    </div>
     <div className="mt-3 grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:grid-rows-1 lg:overflow-hidden">
-      <div className="flex flex-col border border-line bg-surface lg:min-h-0">
+      <div className={`flex flex-col border border-line bg-surface lg:min-h-0 ${choice !== null ? "max-lg:hidden" : ""}`}>
         <div className="flex shrink-0 flex-wrap gap-2 border-b border-line p-3">
           {samples.map((sample) => (
             <button
@@ -494,7 +561,7 @@ export function DemoChat({ embedded = false }: { embedded?: boolean }) {
             </button>
           ))}
         </div>
-        <div ref={thread} className="grid content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div ref={thread} className="grid min-h-[22rem] content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {messages.length === 0 ? (
             <p className="text-sm leading-relaxed text-faint">
               Choose a question. The orchestrator will show the systems, the
@@ -586,34 +653,12 @@ export function DemoChat({ embedded = false }: { embedded?: boolean }) {
         </form>
       </div>
 
-      <aside className="grid content-start gap-3 lg:min-h-0 lg:overflow-y-auto" aria-live="polite">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex border border-line" role="group" aria-label="How the system operates">
-            {(
-              [
-                { id: "detail", label: "Detail" },
-                { id: "diagram", label: "Diagram" },
-              ] as const
-            ).map((item, index) => {
-              const selected = operateView === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setOperateView(item.id)}
-                  className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
-                    index > 0 ? "border-l border-line" : ""
-                  } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:hidden">
-            How the system operates
-          </p>
+      <aside
+        className={`${choice === null ? "hidden lg:grid" : "grid"} content-start gap-3 lg:min-h-0 lg:overflow-y-auto`}
+        aria-live="polite"
+      >
+        <div className="hidden lg:block">
+          <OperateToggle value={operateView} onSelect={choose} />
         </div>
         {operateView === "diagram" ? (
           <OperateDiagram route={route} step={step} />
@@ -740,5 +785,6 @@ export function DemoChat({ embedded = false }: { embedded?: boolean }) {
         )}
       </aside>
     </div>
+    </>
   );
 }

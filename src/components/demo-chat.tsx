@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 type Placement = "On-prem" | "Frontier" | "Held";
 
@@ -307,63 +307,63 @@ function OperateDiagram({ route, step }: { route: Route | null; step: number }) 
 
   return (
     <div className="px-4 py-6">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
-        <p className="flex items-center justify-end gap-1.5 pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase">
+      <div className="mx-auto grid w-max grid-cols-[auto_auto_auto] justify-center lg:w-full lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+        <p className="flex items-center justify-end gap-1.5 self-center pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase">
           <span className="size-1.5 bg-accent" />
           Gateway
         </p>
-        <span className="block size-10 bg-foreground" />
+        <span className="size-10 justify-self-center self-center bg-foreground" />
         <div />
-      </div>
-      {nodes.map((node, index) => {
-        const note = node.items.find((item) => item.id === openId);
-        return (
-          <div key={node.id} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-            <p className="mt-6 pr-3 text-right font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">
-              {node.title}
-            </p>
-            <div className="flex h-full flex-col items-center">
-              <span className="h-6 w-px shrink-0 bg-foreground" />
-              <div
-                className={`grid max-w-56 shrink-0 gap-1 border bg-surface px-3 py-2 text-center ${
-                  node.accent ? "border-accent" : "border-foreground"
-                }`}
-              >
-                {node.items.map((item) =>
-                  item.note ? (
-                    <button
-                      key={item.id}
-                      type="button"
-                      aria-expanded={openId === item.id}
-                      onClick={() => setOpenId(openId === item.id ? null : item.id)}
-                      className={`font-mono text-[0.65rem] tracking-[-0.01em] uppercase ${
-                        openId === item.id ? "text-accent" : ""
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ) : (
-                    <p
-                      key={item.id}
-                      className="font-mono text-[0.65rem] tracking-[-0.01em] text-faint uppercase"
-                    >
-                      {item.label}
-                    </p>
-                  ),
-                )}
+        {nodes.map((node, index) => {
+          const note = node.items.find((item) => item.id === openId);
+          return (
+            <Fragment key={node.id}>
+              <p className="mt-6 pr-3 text-right font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap text-accent uppercase">
+                {node.title}
+              </p>
+              <div className="flex flex-col items-center">
+                <span className="h-6 w-px shrink-0 bg-foreground" />
+                <div
+                  className={`grid w-48 shrink-0 gap-1 border bg-surface px-3 py-2 text-center lg:w-auto lg:max-w-56 ${
+                    node.accent ? "border-accent" : "border-foreground"
+                  }`}
+                >
+                  {node.items.map((item) =>
+                    item.note ? (
+                      <button
+                        key={item.id}
+                        type="button"
+                        aria-expanded={openId === item.id}
+                        onClick={() => setOpenId(openId === item.id ? null : item.id)}
+                        className={`font-mono text-[0.65rem] tracking-[-0.01em] uppercase ${
+                          openId === item.id ? "text-accent" : ""
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ) : (
+                      <p
+                        key={item.id}
+                        className="font-mono text-[0.65rem] tracking-[-0.01em] text-faint uppercase"
+                      >
+                        {item.label}
+                      </p>
+                    ),
+                  )}
+                </div>
+                {index < nodes.length - 1 ? <span className="w-px flex-1 bg-foreground" /> : null}
               </div>
-              {index < nodes.length - 1 ? <span className="w-px flex-1 bg-foreground" /> : null}
-            </div>
-            <div className="mt-6 pl-4">
-              {note ? (
-                <p className="max-w-56 border border-line px-3 py-2 text-left text-sm leading-relaxed whitespace-pre-line text-faint">
-                  {note.note}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        );
-      })}
+              <div className={note ? "mt-6 w-56 pl-4 lg:w-auto" : ""}>
+                {note ? (
+                  <p className="w-full border border-line px-3 py-2 text-left text-sm leading-relaxed whitespace-pre-line text-faint lg:max-w-56">
+                    {note.note}
+                  </p>
+                ) : null}
+              </div>
+            </Fragment>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -425,7 +425,7 @@ function OperateToggle({
             type="button"
             aria-pressed={selected}
             onClick={() => onSelect(item.id)}
-            className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
+            className={`h-[31px] shrink-0 whitespace-nowrap px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
               index > 0 ? "border-l border-line" : ""
             } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
           >
@@ -540,19 +540,16 @@ export function DemoChat({
       </p>
     </div>
     <div className="relative mt-3">
-      <div className="pointer-events-none invisible" aria-hidden>
-        <div className="hidden border border-line lg:block">
+      <div className="pointer-events-none invisible hidden lg:block" aria-hidden>
+        <div className="border border-line">
           <div className="border-b border-line p-3">
             <OperateToggle value="diagram" onSelect={() => {}} />
           </div>
           <OperateDiagram route={null} step={0} />
         </div>
-        <div className="lg:hidden">
-          <OperateDiagram route={null} step={0} />
-        </div>
       </div>
-      <div className="absolute inset-0 grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
-      <div className={`flex h-full min-h-0 flex-col overflow-hidden border border-line bg-surface ${choice !== null ? "max-lg:hidden" : ""}`}>
+      <div className="grid items-stretch gap-4 lg:absolute lg:inset-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+      <div className={`flex min-h-0 flex-col overflow-hidden border border-line bg-surface lg:h-full ${choice !== null ? "max-lg:hidden" : ""}`}>
         <div className="flex shrink-0 flex-wrap gap-2 border-b border-line p-3">
           {samples.map((sample) => (
             <button
@@ -565,7 +562,7 @@ export function DemoChat({
             </button>
           ))}
         </div>
-        <div ref={thread} className="grid h-0 min-h-0 flex-1 content-start gap-3 overflow-y-auto p-4">
+        <div ref={thread} className="grid content-start gap-3 p-4 lg:h-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {messages.length === 0 ? (
             <p className="text-sm leading-relaxed text-faint">
               Choose a question. The orchestrator will show the systems, the
@@ -592,13 +589,13 @@ export function DemoChat({
       </div>
 
       <aside
-        className={`flex h-full min-h-0 flex-col overflow-hidden border border-line bg-surface ${choice === null ? "hidden lg:flex" : ""}`}
+        className={`flex min-h-0 flex-col overflow-hidden border border-line bg-surface lg:h-full ${choice === null ? "hidden lg:flex" : ""}`}
         aria-live="polite"
       >
           <div className="hidden shrink-0 border-b border-line p-3 lg:block">
             <OperateToggle value={operateView} onSelect={choose} />
           </div>
-          <div className="h-0 min-h-0 flex-1 overflow-y-auto">
+          <div className="min-w-0 max-w-full max-lg:overflow-x-auto lg:h-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {operateView === "diagram" ? (
           <OperateDiagram route={route} step={step} />
         ) : opened ? (

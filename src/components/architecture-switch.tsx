@@ -3,14 +3,12 @@
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { AgentsPanel } from "@/components/agents-panel";
 import { DemoChat } from "@/components/demo-chat";
-import { GatewayDiagram } from "@/components/gateway-diagram";
 import { ModelsPanel } from "@/components/models-panel";
 import { PremisePanel } from "@/components/premise-panel";
 import { SystemPath } from "@/components/system-path";
 
 const views = [
   { id: "summary", label: "Summary" },
-  { id: "gateway", label: "Gateway" },
   { id: "agents", label: "Agents" },
   { id: "models", label: "Models" },
   { id: "premise", label: "System" },
@@ -1193,7 +1191,6 @@ export function ArchitectureSwitch() {
           </section>
         </div>
       ) : null}
-      {view === "gateway" ? <GatewayDiagram /> : null}
       {view === "trajectory" ? <SystemPath /> : null}
       {view === "agents" ? <AgentsPanel /> : null}
       {view === "premise" ? <PremisePanel /> : null}

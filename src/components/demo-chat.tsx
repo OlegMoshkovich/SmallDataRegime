@@ -126,10 +126,10 @@ const samples: { label: string; query: string; route: Route }[] = [
       placement: "On-prem",
       gate: {
         label: "Decision",
-        text: "Unsupported items left blank. A person owns the case.",
+        text: "Unsupported items left blank. A human owns the case.",
       },
       reply:
-        "Opened the checklist items SharePoint can identify, and the case file in the internal system. Three items have no usable metadata, so they are marked unsupported rather than filled in. A person owns the case. It stays on the enterprise's machines.",
+        "Opened the checklist items SharePoint can identify, and the case file in the internal system. Three items have no usable metadata, so they are marked unsupported rather than filled in. A human owns the case. It stays on the enterprise's machines.",
     },
   },
   {
@@ -163,10 +163,10 @@ const samples: { label: string; query: string; route: Route }[] = [
       placement: "On-prem",
       gate: {
         label: "Draft",
-        text: "Narrative drafted. A person owns the disposition. Nothing filed.",
+        text: "Narrative drafted. A human owns the disposition. Nothing filed.",
       },
       reply:
-        "Opened the alert and the account activity. Both name a customer, so this stays on the enterprise's machines. A short pass scored the alert, then Qwen 30B drafted the narrative. A judge checked that the cited items exist. The disposition is blank. A person owns it. Nothing is filed. The call is stored at the gateway.",
+        "Opened the alert and the account activity. Both name a customer, so this stays on the enterprise's machines. A short pass scored the alert, then Qwen 30B drafted the narrative. A judge checked that the cited items exist. The disposition is blank. A human owns it. Nothing is filed. The call is stored at the gateway.",
     },
   },
   {
@@ -200,13 +200,13 @@ function sampleRoute(label: string) {
 function agentNote(route: Route) {
   const does: Record<string, string> = {
     Orchestrator:
-      "The person talks only to the orchestrator. It opens the document, picks the agent, and runs the model the request is allowed to use.",
+      "The human talks only to the orchestrator. It opens the document, picks the agent, and runs the model the request is allowed to use.",
     Compliance:
-      "Answers a covenant question from the documents it was handed. It does not go looking for a file on its own. A person owns the case.",
+      "Answers a covenant question from the documents it was handed. It does not go looking for a file on its own. A human owns the case.",
     "Customer support":
       "Answers what the client can be told. This is read only. No message is sent.",
     "AML investigation":
-      "Drafts what it found in the alert. A person owns the disposition. Nothing is filed.",
+      "Drafts what it found in the alert. A human owns the disposition. Nothing is filed.",
     "SME manager":
       "Prepares the file for the owner to preview, including the new rows. Nothing is submitted until they approve.",
   };
@@ -383,10 +383,10 @@ function routeQuery(text: string): Route {
       placement: "On-prem",
       gate: {
         label: "Decision",
-        text: "Read only. A person owns the next step.",
+        text: "Read only. A human owns the next step.",
       },
       reply:
-        "Opened the client file. It stays on the enterprise's machines. This is read only. A person owns the next step.",
+        "Opened the client file. It stays on the enterprise's machines. This is read only. A human owns the next step.",
     };
   }
   return {

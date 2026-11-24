@@ -135,7 +135,7 @@ function HostingMobile({
     >
       <g fill="none" stroke="#101010" strokeWidth="1.25">
         {[mid - 36, mid, mid + 36].map((x) => (
-          <g key={`person-${x}`} transform={`translate(${x} 16)`}>
+          <g key={`human-${x}`} transform={`translate(${x} 16)`}>
             <circle cx="0" cy="0" r="5" />
             <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
           </g>
@@ -148,7 +148,7 @@ function HostingMobile({
         ))}
       </g>
       <text x={mid} y="46" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
-        A person · Chat UI
+        A human · Chat UI
       </text>
       <text x={mid} y="94" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
         Enterprise apps · API
@@ -160,14 +160,14 @@ function HostingMobile({
           onShow(
             event,
             "One URL",
-            "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+            "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
           )
         }
         onMouseMove={(event) =>
           onShow(
             event,
             "One URL",
-            "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+            "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
           )
         }
         onMouseLeave={onHide}
@@ -175,7 +175,7 @@ function HostingMobile({
           onPress(
             event,
             "One URL",
-            "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+            "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
           )
         }
       >
@@ -274,7 +274,7 @@ function HostingMobile({
         x={R}
         y={r0}
         label="Chat UI"
-        info="Where a person signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
+        info="Where a human signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
         {...node}
       />
       <PlaneNode
@@ -457,7 +457,7 @@ function SummaryHosting() {
   const deepseek = { x: col[1], y: 640 };
   const embeddings = { x: col[2], y: 640 };
   const reranker = { x: col[3], y: 640 };
-  const personX = (col[0] + col[1]) / 2;
+  const humanX = (col[0] + col[1]) / 2;
   const appsX = (col[2] + col[3]) / 2;
   const egressX = frameX + frameW + 48;
   const egressCenter = egressX + 80;
@@ -558,7 +558,7 @@ function SummaryHosting() {
           />
 
           <g fill="none" stroke="#101010" strokeWidth="1.25">
-            {[personX, appsX].map((x) => (
+            {[humanX, appsX].map((x) => (
               <g key={x}>
                 <path d={`M${x},128 v18`} />
                 <path d={`M${x - 3.5},133 l3.5,-6 l3.5,6`} />
@@ -581,14 +581,14 @@ function SummaryHosting() {
               showTip(
                 event,
                 "One URL",
-                "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+                "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
               )
             }
             onMouseMove={(event) =>
               showTip(
                 event,
                 "One URL",
-                "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+                "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
               )
             }
             onMouseLeave={hideTip}
@@ -596,7 +596,7 @@ function SummaryHosting() {
               pressTip(
                 event,
                 "One URL",
-                "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+                "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
               )
             }
           >
@@ -647,8 +647,8 @@ function SummaryHosting() {
           </g>
 
           <g fill="none" stroke="#101010" strokeWidth="1.25">
-            {[personX - 44, personX, personX + 44].map((x) => (
-              <g key={`person-${x}`} transform={`translate(${x} 28)`}>
+            {[humanX - 44, humanX, humanX + 44].map((x) => (
+              <g key={`human-${x}`} transform={`translate(${x} 28)`}>
                 <circle cx="0" cy="0" r="5" />
                 <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
               </g>
@@ -661,12 +661,12 @@ function SummaryHosting() {
             ))}
           </g>
           <text
-            x={personX}
+            x={humanX}
             y="62"
             textAnchor="middle"
             className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
           >
-            A person · Chat UI
+            A human · Chat UI
           </text>
           <text
             x={appsX}
@@ -688,7 +688,7 @@ function SummaryHosting() {
           <PlaneNode
             {...chat}
             label="Chat UI"
-            info="Where a person signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
+            info="Where a human signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
@@ -942,10 +942,10 @@ export function ArchitectureSwitch() {
         <div className="grid min-w-0 gap-16 *:min-w-0">
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-              For an enterprise
+              For enterprises
             </p>
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              The orchestrator is the main agent the person interacts with. It opens the right
+              The orchestrator is the main agent the human interacts with. It opens the right
               document, calls the right agent, and runs the model the privacy of the request allows.
             </p>
             <p className="mt-5 max-w-4xl text-base leading-relaxed text-faint">
@@ -1007,8 +1007,8 @@ export function ArchitectureSwitch() {
               </p>
               <ol className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  ["01 Authenticate", "The person’s sign-in token, or the application’s credentials."],
-                  ["02 Identity", "The person, their team, their groups, and the use case."],
+                  ["01 Authenticate", "The human’s sign-in token, or the application’s credentials."],
+                  ["02 Identity", "The human, their team, their groups, and the use case."],
                   ["03 Policy", "The compiled rules for that team and use case."],
                   ["04 Sensitivity", "Identifiers, account numbers, card numbers, names, and document labels set how sensitive the request is."],
                   ["05 Route", "A model group, an agent, or a search. The match cannot override where the data is allowed to run."],
@@ -1052,10 +1052,10 @@ export function ArchitectureSwitch() {
                   Products
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
-                  Document search has two paths. Live search asks the document store with the person’s
+                  Document search has two paths. Live search asks the document store with the human’s
                   own token, so a file they cannot open never reaches the model. An index keeps changed
                   files, splits them, and stores who may read each piece. At question time the
-                  gateway filters by the person’s groups, ranks the pieces, and sends a short set
+                  gateway filters by the human’s groups, ranks the pieces, and sends a short set
                   to a local model, each with its file link.
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
@@ -1063,13 +1063,13 @@ export function ArchitectureSwitch() {
                   names against the sanctions list without a model, pulls recent transactions from
                   a read-only view, searches case notes, and reasons on a local model. The output
                   is an evidence pack: findings, citations, a recommended action, and open
-                  questions. A person approves, edits, or rejects. Escalation, filing, and
-                  contacting a customer wait for that person.
+                  questions. A human approves, edits, or rejects. Escalation, filing, and
+                  contacting a customer wait for that human.
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   An agent calls models only through the gateway, and its tools act with the
-                  original person’s permissions. A run is a durable job. It survives a restart,
-                  can wait for a person, and can be replayed step by step. Text-to-SQL comes after
+                  original human’s permissions. A run is a durable job. It survives a restart,
+                  can wait for a human, and can be replayed step by step. Text-to-SQL comes after
                   the pilot and writes against named definitions, so the same question returns the
                   same number.
                 </p>
@@ -1100,7 +1100,7 @@ export function ArchitectureSwitch() {
                   Postgres, and Redis. The GPU machine serves the models, and its firewall accepts
                   traffic only from the application machine. The only route out of the enterprise
                   leaves from the gateway, through the enterprise’s egress proxy, and only for a
-                  use case whose policy allows an external model. A person reaches one internal
+                  use case whose policy allows an external model. A human reaches one internal
                   URL. The API sits on the same URL. People sign in with the enterprise’s single
                   sign-on. Applications use client credentials. The same signed images move to the
                   enterprise’s Kubernetes later, with no code change.
@@ -1113,7 +1113,7 @@ export function ArchitectureSwitch() {
               Examples
             </p>
             <p className="mt-3 max-w-3xl text-base leading-relaxed text-faint">
-              A person asks, in the chat. This is the experience we envision, not a client of
+              A human asks, in the chat. This is the experience we envision, not a client of
               record.
             </p>
             <ol className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -1136,7 +1136,7 @@ export function ArchitectureSwitch() {
                 <p className="mt-2 text-base">Find the policy that covers this covenant.</p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   The orchestrator finds the document and opens it where it already lives. The
-                  passage comes back in the chat. The person does not open the system, and the file
+                  passage comes back in the chat. The human does not open the system, and the file
                   is not copied out.
                 </p>
               </li>
@@ -1147,7 +1147,7 @@ export function ArchitectureSwitch() {
                 <p className="mt-2 text-base">What should we do with this fraud alert?</p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   The orchestrator opens the alert and the account activity, then hands the question
-                  to the anti-fraud agent. The agent drafts what it found. A person decides. Nothing
+                  to the anti-fraud agent. The agent drafts what it found. A human decides. Nothing
                   is filed. The alert names a client, so the model stays on the enterprise’s machines.
                 </p>
               </li>

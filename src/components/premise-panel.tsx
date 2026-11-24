@@ -59,7 +59,7 @@ function HostCell({
 }
 
 const lifecycle = [
-  { name: "Question", note: "A person asks in the chat.", row: "bottom", tone: "ink" },
+  { name: "Question", note: "A human asks in the chat.", row: "bottom", tone: "ink" },
   { name: "Auth + policy", note: "Sign-in token, team, use case.", row: "top", tone: "accent" },
   { name: "Sensitivity", note: "Internal, then document search.", row: "bottom", tone: "accent" },
   { name: "Budget", note: "Tokens reserved.", row: "top", tone: "accent" },
@@ -205,7 +205,7 @@ export function PremisePanel() {
             The code is one TypeScript monorepo. pnpm workspaces and Turborepo build every image,
             so one commit records which code ran under which rules. The apps are the gateway and
             its nine-stage API, the agent worker, ingestion, the chat UI, and three connectors:
-            SharePoint on behalf of the person, a read-only database, and sanctions screening.
+            SharePoint on behalf of the human, a read-only database, and sanctions screening.
             Beside them sit the policy files, the evals, the Compose and Helm deploy files, and the
             docs. The packages cover shared types, policy load and reload, routing and locality,
             sensitivity, budgets, audit logs, retrieval, and the agent SDK. The compliance agent
@@ -285,7 +285,7 @@ export function PremisePanel() {
           <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               ["01", "Authenticate", "Validates the sign-in token or client credentials.", "auth · 401", ["Auth + policy"]],
-              ["02", "Resolve identity", "Person, team, groups, and use case. Cached for five minutes.", "identity · 403", ["Auth + policy"]],
+              ["02", "Resolve identity", "Human, team, groups, and use case. Cached for five minutes.", "identity · 403", ["Auth + policy"]],
               ["03", "Load policy", "Compiled policy for this team and use case.", "policy · 403 policy_denied", ["Auth + policy"]],
               ["04", "Classify data", "Finds identifiers, account numbers, card numbers, and names, and sets sensitivity.", "sensitivity", ["Sensitivity"]],
               ["05", "Route", "Picks a model group, an agent, or a search.", "router · 422 no_route", []],

@@ -53,7 +53,7 @@ export default function ArchitecturePage() {
 
           <figure
             className="mt-10 border border-line"
-            aria-label="A product calls one gateway. The use case keeps its risk, budget, and rules. The gateway picks a model and can fall back. The call is stored, judged, and sampled. A person owns a decision that changes a customer."
+            aria-label="A product calls one gateway. The use case keeps its risk, budget, and rules. The gateway picks a model and can fall back. The call is stored, judged, and sampled. A human owns a decision that changes a customer."
           >
               <div className="border-b border-line px-4 py-5 lg:px-6">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
@@ -123,7 +123,7 @@ export default function ArchitecturePage() {
                         {[
                           ["Risk", "What the use case is allowed to do."],
                           ["Budget", "How much the call may spend."],
-                          ["Rules", "What must stay with a person."],
+                          ["Rules", "What must stay with a human."],
                         ].map(([name, body], index, list) => (
                           <li key={name} className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
                             <div className="flex-1 border border-line bg-surface px-3 py-3">
@@ -201,7 +201,7 @@ export default function ArchitecturePage() {
                         </li>
                       ))}
                       <li className="border border-line bg-surface px-3 py-2 text-sm leading-snug">
-                        A decision that changes a customer’s position stays with a person.
+                        A decision that changes a customer’s position stays with a human.
                       </li>
                     </ol>
                   </div>

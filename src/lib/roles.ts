@@ -36,7 +36,7 @@ export const roles = [
     qualifications: [
       "You have trained or post-trained a model, or built the system that did.",
       "You care more about lift per example than about the size of the corpus.",
-      "You can explain a failed run to the person who wrote the reward.",
+      "You can explain a failed run to the human who wrote the reward.",
     ],
   },
   {

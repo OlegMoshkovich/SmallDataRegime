@@ -9,7 +9,7 @@ const governance = [
   },
   {
     name: "Rules",
-    body: "What must stay with a person.",
+    body: "What must stay with a human.",
   },
 ];
 
@@ -63,7 +63,7 @@ export function GatewayDiagram() {
   return (
     <figure
       className="border border-line bg-surface"
-      aria-label="A question enters one gateway. The gateway holds risk, budget, and rules, routes a fraud question to the anti-fraud agent, or sends a general question straight to a model. If the chosen model fails, the call moves to the fallback. The call is stored, judged, and sampled, and a person owns a decision that changes a customer."
+      aria-label="A question enters one gateway. The gateway holds risk, budget, and rules, routes a fraud question to the anti-fraud agent, or sends a general question straight to a model. If the chosen model fails, the call moves to the fallback. The call is stored, judged, and sampled, and a human owns a decision that changes a customer."
     >
       <div className="grid gap-6 border-b border-line p-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:p-6">
         <div className="flex min-w-0 flex-wrap items-center gap-4">
@@ -200,7 +200,7 @@ export function GatewayDiagram() {
             </li>
           ))}
           <li className="border border-line bg-surface px-3 py-2 text-sm leading-snug">
-            A decision that changes a customer’s position stays with a person.
+            A decision that changes a customer’s position stays with a human.
           </li>
         </ol>
       </div>

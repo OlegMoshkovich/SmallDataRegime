@@ -31,7 +31,7 @@ const steps: Step[] = [
     name: "Request",
     note: "The question comes in.",
     description:
-      "The person types into one chat. They do not pick a system, an agent, or a model.",
+      "The human types into one chat. They do not pick a system, an agent, or a model.",
     x: 230,
     y: 52,
     side: "left",
@@ -107,7 +107,7 @@ const steps: Step[] = [
     name: "RAG",
     note: "The passage is retrieved.",
     description:
-      "The passage is retrieved from the document. The person receives the answer, not a second copy.",
+      "The passage is retrieved from the document. The human receives the answer, not a second copy.",
     x: 190,
     y: 582,
     side: "left",

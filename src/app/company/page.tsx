@@ -14,7 +14,7 @@ export default function CompanyPage() {
     <Interior
       eyebrow="Company"
       title="Post-training for teams who are done collecting for its own sake."
-      lede="Small Data Regime by MIResearchLab exists because the valuable update is usually the small one: a reward written carefully, a few hundred preferences that disagree with the base model, and an eval that can stop the run."
+      lede="SmallDataRegime by MIResearchLab exists because the valuable update is usually the small one: a reward written carefully, a few hundred preferences that disagree with the base model, and an eval that can stop the run."
     >
       <div className="grid max-w-3xl gap-8 text-base leading-relaxed text-faint">
         <p>

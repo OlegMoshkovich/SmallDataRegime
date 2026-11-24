@@ -77,7 +77,7 @@ export function ArchitectureSwitch() {
               document, calls the right agent, and runs the model the privacy of the request allows.
             </p>
             <p className="mt-5 max-w-4xl text-base leading-relaxed text-faint">
-              Staff type into one chat. Applications call one API. Both reach the same gateway.
+              A person types into one chat. Applications call one API. Both reach the same gateway.
               The person does not open a system, pick an agent, or pick a model. The orchestrator
               replies in that same chat, naming the document it opened and the agent that answered.
               Behind the chat, the gateway decides every request.
@@ -272,7 +272,7 @@ export function ArchitectureSwitch() {
                   Postgres, and Redis. The GPU machine serves the models, and its firewall accepts
                   traffic only from the application machine. The only route out of the enterprise
                   leaves from the gateway, through the enterprise’s egress proxy, and only for a
-                  use case whose policy allows an external model. Staff reach one internal
+                  use case whose policy allows an external model. A person reaches one internal
                   URL. The API sits on the same URL. People sign in with the enterprise’s single
                   sign-on. Applications use client credentials. The same signed images move to the
                   enterprise’s Kubernetes later, with no code change.
@@ -375,7 +375,7 @@ export function ArchitectureSwitch() {
       {view === "premise" ? <PremisePanel /> : null}
       {view === "models" ? <ModelsPanel /> : null}
       {view === "demo" ? (
-        <div className="flex min-w-0 flex-col lg:h-[calc(100dvh-72px)] lg:overflow-hidden">
+        <div className="flex min-w-0 flex-col">
           <DemoChat embedded />
         </div>
       ) : null}

@@ -33,7 +33,7 @@ export default function HomePage() {
       </section>
 
       <div className="mx-auto w-full max-w-[1440px] px-4 pt-2 lg:px-6 lg:pt-6">
-        <div className="aspect-[4/3] overflow-hidden border border-line-strong bg-[radial-gradient(ellipse_at_center,#1a1a1a_0%,#0d0d0d_72%)] sm:aspect-video">
+        <div className="border border-line-strong bg-[radial-gradient(ellipse_at_center,#1a1a1a_0%,#0d0d0d_72%)]">
           <ConsoleMock />
         </div>
       </div>

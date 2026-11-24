@@ -53,7 +53,7 @@ export function Factory() {
       <h2 className="mt-4 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
         Our recursive{" "}
         <span className="max-lg:block">
-          <span className="whitespace-nowrap">self-improving</span> setup.
+          <span className="whitespace-nowrap">self-improving</span> systems.
         </span>
       </h2>
 

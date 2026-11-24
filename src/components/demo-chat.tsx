@@ -444,12 +444,10 @@ export function DemoChat({
   embedded?: boolean;
   titleLevel?: "h1" | "h2";
 }) {
-  const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
   const [step, setStep] = useState(0);
   const [openDoc, setOpenDoc] = useState<string | null>(null);
-  const [questionsOpen, setQuestionsOpen] = useState(false);
   const [choice, setChoice] = useState<"detail" | "diagram" | null>(null);
   const operateView = choice ?? "diagram";
   const Title = titleLevel === "h1" ? "h1" : "h2";
@@ -491,12 +489,10 @@ export function DemoChat({
   function ask(text: string, preset?: Route) {
     const trimmed = text.trim();
     if (!trimmed) return;
-    setQuestionsOpen(false);
     timers.current.forEach((timer) => window.clearTimeout(timer));
     timers.current = [];
     const id = ++run.current;
     const next = preset ?? routeQuery(trimmed);
-    setDraft("");
     setRoute(next);
     setStep(0);
     setOpenDoc(null);
@@ -547,8 +543,8 @@ export function DemoChat({
         How the system operates
       </p>
     </div>
-    <div className="mt-3 grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:grid-rows-1 lg:overflow-hidden">
-      <div className={`flex flex-col border border-line bg-surface lg:min-h-0 ${choice !== null ? "max-lg:hidden" : ""}`}>
+    <div className="mt-3 grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+      <div className={`flex flex-col border border-line bg-surface lg:h-full lg:min-h-0 lg:overflow-hidden ${choice !== null ? "max-lg:hidden" : ""}`}>
         <div className="flex shrink-0 flex-wrap gap-2 border-b border-line p-3">
           {samples.map((sample) => (
             <button
@@ -561,7 +557,7 @@ export function DemoChat({
             </button>
           ))}
         </div>
-        <div ref={thread} className="grid min-h-[22rem] content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div ref={thread} className="grid content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {messages.length === 0 ? (
             <p className="text-sm leading-relaxed text-faint">
               Choose a question. The orchestrator will show the systems, the
@@ -585,76 +581,10 @@ export function DemoChat({
             ))
           )}
         </div>
-        <form
-          className="flex shrink-0 gap-2 border-t border-line p-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            ask(draft);
-          }}
-        >
-          <label className="sr-only" htmlFor="demo-question">
-            Question
-          </label>
-          <div className="relative min-w-0 flex-1">
-            {questionsOpen ? (
-              <ul
-                id="demo-questions"
-                role="listbox"
-                aria-label="Questions"
-                className="absolute right-0 bottom-full left-0 z-10 mb-1 border border-line bg-surface"
-              >
-                {samples.map((sample) => (
-                  <li key={sample.label} role="presentation">
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={draft === sample.query}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => ask(sample.query, sample.route)}
-                      className="block w-full px-3 py-2 text-left text-sm hover:bg-background"
-                    >
-                      {sample.query}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            <input
-              id="demo-question"
-              role="combobox"
-              aria-expanded={questionsOpen}
-              aria-controls="demo-questions"
-              aria-autocomplete="list"
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              onMouseDown={() => setQuestionsOpen(true)}
-              onFocus={() => setQuestionsOpen(true)}
-              onBlur={(event) => {
-                const next = event.relatedTarget;
-                if (next instanceof Node && event.currentTarget.parentElement?.contains(next)) return;
-                window.setTimeout(() => {
-                  if (document.activeElement?.id === "demo-question") return;
-                  setQuestionsOpen(false);
-                }, 0);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") setQuestionsOpen(false);
-              }}
-              placeholder="Ask the orchestrator"
-              className="w-full border border-line bg-background px-3 py-2 text-sm outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-ink px-3.5 font-mono text-[0.8125rem] tracking-[-0.0175rem] text-paper capitalize"
-          >
-            Send
-          </button>
-        </form>
       </div>
 
       <aside
-        className={`${choice === null ? "hidden lg:grid" : "grid"} content-start gap-3 lg:min-h-0 lg:overflow-y-auto`}
+        className={`${choice === null ? "hidden lg:grid" : "grid"} content-start gap-3`}
         aria-live="polite"
       >
         <div className="hidden lg:block">

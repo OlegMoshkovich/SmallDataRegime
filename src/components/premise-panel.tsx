@@ -59,7 +59,7 @@ function HostCell({
 }
 
 const lifecycle = [
-  { name: "Question", note: "Staff ask in the chat.", row: "bottom", tone: "ink" },
+  { name: "Question", note: "A person asks in the chat.", row: "bottom", tone: "ink" },
   { name: "Auth + policy", note: "Sign-in token, team, use case.", row: "top", tone: "accent" },
   { name: "Sensitivity", note: "Internal, then document search.", row: "bottom", tone: "accent" },
   { name: "Budget", note: "Tokens reserved.", row: "top", tone: "accent" },

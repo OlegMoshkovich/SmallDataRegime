@@ -48,7 +48,7 @@ export function Factory() {
   return (
     <section id="factory" className="mx-auto w-full max-w-[1440px] px-4 py-16 lg:px-9 lg:py-24">
       <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-        Proprietory methods : Recursive self-improving factory
+        Proprietory methods : Recursive self-improvement
       </p>
 
       <div className="mt-5 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
@@ -107,14 +107,10 @@ export function Factory() {
             Our planner vs typical agentic systems
           </p>
 
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center">
             <div className="grid gap-2">
               <Node>ChatGPT</Node>
               <Node>Tools + skills</Node>
-            </div>
-            <div className="grid gap-3 text-foreground">
-              <Arrow direction="down" />
-              <Arrow direction="up" />
             </div>
           </div>
 

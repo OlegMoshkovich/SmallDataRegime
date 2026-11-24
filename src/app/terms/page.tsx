@@ -3,7 +3,7 @@ import { Interior } from "@/components/interior";
 
 export const metadata: Metadata = {
   title: "Terms",
-  description: "Terms for using the SmallDataRegime.ai preview site.",
+  description: "Terms for using the SmallDataRegime preview site.",
 };
 
 export default function TermsPage() {

@@ -5,7 +5,7 @@ import { features } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Product",
   description:
-    "How SmallDataRegime.ai turns a small preference set into a gated policy update.",
+    "How SmallDataRegime turns a small preference set into a gated policy update.",
 };
 
 const places = [
@@ -47,7 +47,7 @@ export default function ProductPage() {
     <Interior
       eyebrow="Product"
       title="A system built for scarce signal."
-      lede="SmallDataRegime.ai is the post-training system for teams that cannot label a million examples, and should not have to. The unit of work is a small, reviewed set tied to a written reward."
+      lede="SmallDataRegime is the post-training system for teams that cannot label a million examples, and should not have to. The unit of work is a small, reviewed set tied to a written reward."
     >
       <ol className="grid gap-6 md:grid-cols-2">
         {steps.map((step, index) => (
@@ -74,7 +74,7 @@ export default function ProductPage() {
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-snug text-faint lg:text-base">
           Small-data post-training is often the work that cannot leave the building.
-          SmallDataRegime.ai runs the collect, train, and gate steps without assuming a public API.
+          SmallDataRegime runs the collect, train, and gate steps without assuming a public API.
         </p>
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           {places.map((place, index) => (

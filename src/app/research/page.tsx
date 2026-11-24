@@ -140,7 +140,7 @@ const notes = [
   },
   {
     title: "Yield, not volume",
-    body: "A preference is useful when the policy’s held-out win rate moves after it is included. SmallDataRegime.ai ranks new pairs by that marginal lift so a labeler spends the next hour on the slice that is still wrong, not on another easy win.",
+    body: "A preference is useful when the policy’s held-out win rate moves after it is included. SmallDataRegime ranks new pairs by that marginal lift so a labeler spends the next hour on the slice that is still wrong, not on another easy win.",
   },
   {
     title: "The spec is the governor",

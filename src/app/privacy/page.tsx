@@ -3,7 +3,7 @@ import { Interior } from "@/components/interior";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "How SmallDataRegime.ai treats traces, preferences, and reward specs.",
+  description: "How SmallDataRegime treats traces, preferences, and reward specs.",
 };
 
 export default function PrivacyPage() {

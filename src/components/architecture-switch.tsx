@@ -92,11 +92,11 @@ export function ArchitectureSwitch() {
             <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
               {[
                 [
-                  "One door",
+                  "Single access point",
                   "Every model call, agent run, and document lookup goes through the gateway. Applications call the gateway. The gateway calls the model.",
                 ],
                 [
-                  "Data stays home",
+                  "Local deployment",
                   "A request leaves the enterprise only when policy allows it and the sensitivity check passes. Customer files stay on the enterprise’s machines.",
                 ],
                 [
@@ -342,7 +342,7 @@ export function ArchitectureSwitch() {
               The privacy rule
             </p>
             <h2 className="mt-3 max-w-3xl text-2xl tracking-[-0.04em]">
-              Data stays home.
+              On premise deployment.
             </h2>
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <article className="border border-line bg-surface p-5">

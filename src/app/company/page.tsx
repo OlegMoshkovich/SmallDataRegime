@@ -6,7 +6,7 @@ import { roles } from "@/lib/roles";
 
 export const metadata: Metadata = {
   title: "Company",
-  description: "SmallDataRegime.ai builds the post-training system for small, governed data.",
+  description: "SmallDataRegime builds the post-training system for small, governed data.",
 };
 
 export default function CompanyPage() {

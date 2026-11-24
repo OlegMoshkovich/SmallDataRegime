@@ -3,7 +3,7 @@ import { Interior } from "@/components/interior";
 
 export const metadata: Metadata = {
   title: "Docs",
-  description: "Start a small-data post-training run with SmallDataRegime.ai.",
+  description: "Start a small-data post-training run with SmallDataRegime.",
 };
 
 const docs = [

@@ -41,6 +41,7 @@ function PlaneNode({
   detail,
   info,
   accent = false,
+  compact = false,
   onShow,
   onPress,
   onHide,
@@ -51,10 +52,12 @@ function PlaneNode({
   detail?: string;
   info: string;
   accent?: boolean;
+  compact?: boolean;
   onShow: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onPress: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onHide: () => void;
 }) {
+  const hit = compact ? 132 : 156;
   return (
     <g
       className="cursor-help"
@@ -63,27 +66,375 @@ function PlaneNode({
       onMouseLeave={onHide}
       onClick={(event) => onPress(event, label, info)}
     >
-      <rect x={x - 78} y={y - 28} width="156" height={detail ? 80 : 62} fill="transparent" />
+      <rect
+        x={x - hit / 2}
+        y={compact ? y - 26 : y - 28}
+        width={hit}
+        height={detail ? (compact ? 70 : 80) : compact ? 58 : 62}
+        fill="transparent"
+      />
       <IsoCube x={x} y={y} accent={accent} />
       <text
         x={x}
         y={y + 22}
         textAnchor="middle"
-        className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+        className={`fill-foreground font-mono tracking-[-0.01em] uppercase ${compact ? "text-[12px]" : "text-[13px]"}`}
       >
         {label}
       </text>
       {detail ? (
         <text
           x={x}
-          y={y + 38}
+          y={compact ? y + 36 : y + 38}
           textAnchor="middle"
-          className="fill-faint font-mono text-[12px] tracking-[-0.01em] uppercase"
+          className={`fill-faint font-mono tracking-[-0.01em] uppercase ${compact ? "text-[11px]" : "text-[12px]"}`}
         >
           {detail}
         </text>
       ) : null}
     </g>
+  );
+}
+
+function HostingMobile({
+  onShow,
+  onPress,
+  onHide,
+  onClear,
+}: {
+  onShow: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
+  onPress: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
+  onHide: () => void;
+  onClear: () => void;
+}) {
+  const L = 86;
+  const R = 250;
+  const mid = 168;
+  const frameX = 10;
+  const frameW = 304;
+  const dash = "5 4";
+  const r0 = 248;
+  const r1 = 348;
+  const r2 = 448;
+  const r3 = 548;
+  const r4 = 648;
+  const node = {
+    compact: true,
+    onShow,
+    onPress,
+    onHide,
+  };
+
+  return (
+    <svg
+      onClick={onClear}
+      viewBox="0 0 340 1160"
+      className="block h-auto w-full"
+      role="img"
+      aria-label="On premise hosting. The proxy serves the chat and the gateway. The gateway calls Redis, Postgres, the agent workers, and the model proxy. The model proxy is the only path to the GPU ports and to the egress proxy."
+    >
+      <g fill="none" stroke="#101010" strokeWidth="1.25">
+        {[mid - 36, mid, mid + 36].map((x) => (
+          <g key={`person-${x}`} transform={`translate(${x} 16)`}>
+            <circle cx="0" cy="0" r="5" />
+            <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
+          </g>
+        ))}
+        {[mid - 36, mid, mid + 36].map((x) => (
+          <g key={`screen-${x}`} transform={`translate(${x} 64)`}>
+            <rect x="-9" y="-7" width="18" height="12" />
+            <path d="M0 5v4M-5 9h10" />
+          </g>
+        ))}
+      </g>
+      <text x={mid} y="46" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+        A person · Chat UI
+      </text>
+      <text x={mid} y="94" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+        Enterprise apps · API
+      </text>
+
+      <g
+        className="cursor-help"
+        onMouseEnter={(event) =>
+          onShow(
+            event,
+            "One URL",
+            "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+          )
+        }
+        onMouseMove={(event) =>
+          onShow(
+            event,
+            "One URL",
+            "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+          )
+        }
+        onMouseLeave={onHide}
+        onClick={(event) =>
+          onPress(
+            event,
+            "One URL",
+            "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+          )
+        }
+      >
+        <rect x={frameX} y="108" width={frameW} height="46" fill="#ffffff" stroke="#101010" />
+        <text x={mid} y="127" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+          HTTPS · ai.enterprise.internal
+        </text>
+        <text x={mid} y="143" textAnchor="middle" className="fill-faint font-mono text-[11px] uppercase">
+          Corporate SSO
+        </text>
+      </g>
+
+      <g fill="none" stroke="#101010" strokeWidth="1.25">
+        {[L, R].map((x) => (
+          <g key={x}>
+            <path d={`M${x},160 v16`} />
+            <path d={`M${x - 3.5},165 l3.5,-6 l3.5,6`} />
+            <path d={`M${x - 3.5},171 l3.5,6 l3.5,-6`} />
+          </g>
+        ))}
+      </g>
+
+      <rect x={frameX} y="184" width={frameW} height="500" fill="#f4f3f2" stroke="#d6d3d2" />
+      <rect x={frameX} y="760" width={frameW} height="214" fill="#f4f3f2" stroke="#d6d3d2" />
+
+      <g fill="none" stroke="#c8c4c2" strokeWidth="1.25" strokeDasharray={dash}>
+        <path d={`M${L + 14},${r0 - 14} H${R - 14}`} />
+        <path d={`M${mid},${r0 - 14} V${r1 - 22} H${L}`} />
+        <path d={`M${L + 14},${r1 - 14} H${R - 14}`} />
+        <path d={`M${mid},${r1 + 8} V${r3 - 14}`} />
+        <path d={`M${L + 14},${r2 - 14} H${R - 14}`} />
+        <path d={`M${L + 14},${r3 - 14} H${R - 14}`} />
+        <path d={`M${mid},${r3 - 14} V${r4 - 14} H${L + 14}`} />
+      </g>
+      <path
+        d={`M${L + 14},${r1 - 8} H176 V${r4 - 22} H${R}`}
+        fill="none"
+        stroke="#de5c36"
+        strokeWidth="1.6"
+      />
+      <path
+        d={`M${R + 14},${r4 - 2} H328 V996 H${frameX + frameW}`}
+        fill="none"
+        stroke="#de5c36"
+        strokeWidth="1.5"
+        strokeDasharray={dash}
+      />
+      <g fill="none" stroke="#de5c36" strokeWidth="1.35">
+        <path d={`M${R},${r4 + 34} V708`} />
+        <path d={`M${R - 3.5},${r4 + 40} l3.5,-6 l3.5,6`} />
+        <path d={`M${R - 3.5},702 l3.5,6 l3.5,-6`} />
+        <path d={`M${mid},748 V776`} />
+        <path d={`M${mid - 3.5},754 l3.5,-6 l3.5,6`} />
+        <path d={`M${mid - 3.5},770 l3.5,6 l3.5,-6`} />
+      </g>
+
+      <g
+        className="cursor-help"
+        onMouseEnter={(event) =>
+          onShow(
+            event,
+            "Ports 8001–8004",
+            "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
+          )
+        }
+        onMouseMove={(event) =>
+          onShow(
+            event,
+            "Ports 8001–8004",
+            "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
+          )
+        }
+        onMouseLeave={onHide}
+        onClick={(event) =>
+          onPress(
+            event,
+            "Ports 8001–8004",
+            "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
+          )
+        }
+      >
+        <rect x={frameX} y="708" width={frameW} height="36" fill="#ffffff" stroke="#de5c36" />
+        <text x={mid} y="730" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+          Ports 8001–8004 only
+        </text>
+      </g>
+
+      <PlaneNode
+        x={L}
+        y={r0}
+        label="Proxy"
+        info="The single entry point on the internal network. It terminates HTTPS and sends the chat to the chat UI and the API to the gateway."
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={r0}
+        label="Chat UI"
+        info="Where a person signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
+        {...node}
+      />
+      <PlaneNode
+        x={L}
+        y={r1}
+        label="Gateway ×2"
+        info="Two Fastify instances on port 8080. They check the request, enforce policy, and route it to a model, an agent, or a search."
+        accent
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={r1}
+        label="OTel"
+        info="Sends OpenTelemetry traces out to the monitoring the enterprise already runs."
+        {...node}
+      />
+      <PlaneNode
+        x={L}
+        y={r2}
+        label="Agent worker ×2"
+        info="Two background workers. They run multi-step tasks from the pg-boss queue in Postgres, and call tools through the MCP servers."
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={r2}
+        label="MCP servers"
+        info="Three connectors. They are the tools an agent uses to reach SharePoint, a read-only database, and the sanctions list."
+        {...node}
+      />
+      <PlaneNode
+        x={L}
+        y={r3}
+        label="Postgres 16"
+        info="Stores document vectors for search, runs the pg-boss job queue, and keeps the logs and the runs."
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={r3}
+        label="Redis 7"
+        info="Tracks token budgets as they are spent, and caches frequent responses. The gateway is what talks to it."
+        {...node}
+      />
+      <PlaneNode
+        x={L}
+        y={r4}
+        label="Ingestion"
+        info="Syncs new and changed SharePoint files, and skips a file that has not changed. The vectors land in Postgres."
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={r4}
+        label="Model proxy"
+        info="The only path to the models. No other container calls a model directly. It is also the only service with a route out."
+        accent
+        {...node}
+      />
+
+      <PlaneNode
+        x={L}
+        y={812}
+        label="vLLM Qwen"
+        detail="GPU 0 · 8001"
+        info="Qwen3-30B-A3B in FP8, about 31 GB. It handles chat, answers from retrieved documents, and chooses where a task goes. FP8 is 8-bit floating point, which shrinks the memory it needs."
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={812}
+        label="vLLM DeepSeek"
+        detail="GPU 1 · 8002"
+        info="DeepSeek-R1-Distill-Qwen-32B in FP8, about 33 GB. It does the compliance reasoning that needs step-by-step logic."
+        {...node}
+      />
+      <PlaneNode
+        x={L}
+        y={916}
+        label="Embeddings"
+        detail="BGE-M3 · 8003"
+        info="BGE-M3, about 2 GB. It turns a document into vectors that can be searched."
+        {...node}
+      />
+      <PlaneNode
+        x={R}
+        y={916}
+        label="Reranker"
+        detail="8004"
+        info="bge-reranker-v2-m3, about 2 GB. It scores the search results so the most relevant passages reach the model."
+        {...node}
+      />
+
+      <g
+        className="cursor-help"
+        onMouseEnter={(event) =>
+          onShow(
+            event,
+            "Egress proxy",
+            "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
+          )
+        }
+        onMouseMove={(event) =>
+          onShow(
+            event,
+            "Egress proxy",
+            "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
+          )
+        }
+        onMouseLeave={onHide}
+        onClick={(event) =>
+          onPress(
+            event,
+            "Egress proxy",
+            "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
+          )
+        }
+      >
+        <rect x={frameX} y="996" width={frameW} height="52" fill="#ffffff" stroke="#101010" />
+        <text x={mid} y="1026" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+          Egress proxy
+        </text>
+      </g>
+      <path d={`M${mid},1048 v16`} fill="none" stroke="#101010" strokeWidth="1.25" />
+      <path d={`M${mid - 3.5},1058 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.25" />
+      <g
+        className="cursor-help"
+        onMouseEnter={(event) =>
+          onShow(
+            event,
+            "External API",
+            "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
+          )
+        }
+        onMouseMove={(event) =>
+          onShow(
+            event,
+            "External API",
+            "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
+          )
+        }
+        onMouseLeave={onHide}
+        onClick={(event) =>
+          onPress(
+            event,
+            "External API",
+            "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
+          )
+        }
+      >
+        <rect x={frameX} y="1072" width={frameW} height="56" fill="#ffffff" stroke="#101010" strokeDasharray={dash} />
+        <text x={mid} y="1094" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+          External API
+        </text>
+        <text x={mid} y="1112" textAnchor="middle" className="fill-faint font-mono text-[11px]">
+          if allowed
+        </text>
+      </g>
+    </svg>
   );
 }
 
@@ -158,7 +509,17 @@ function SummaryHosting() {
       <h2 className="mt-3 text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem] lg:whitespace-nowrap">
         One VM for a Dockerized system, plus a GPU server.
       </h2>
-      <div className="mt-10 max-w-full min-w-0 overflow-x-auto">
+      <div className="mt-10 lg:hidden">
+        <HostingMobile
+          onShow={showTip}
+          onPress={pressTip}
+          onHide={hideTip}
+          onClear={() => {
+            if (coarsePointer()) setTip(null);
+          }}
+        />
+      </div>
+      <div className="mt-10 hidden max-w-full min-w-0 overflow-x-auto lg:block">
         <svg
           onClick={() => {
             if (coarsePointer()) setTip(null);

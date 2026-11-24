@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
 import { DemoChat } from "@/components/demo-chat";
@@ -20,6 +20,536 @@ const views = [
 ] as const;
 
 type View = (typeof views)[number]["id"];
+
+function IsoCube({ x, y, accent = false }: { x: number; y: number; accent?: boolean }) {
+  const top = `${x},${y - 20} ${x + 11},${y - 14} ${x},${y - 8} ${x - 11},${y - 14}`;
+  const left = `${x - 11},${y - 14} ${x},${y - 8} ${x},${y + 4} ${x - 11},${y - 2}`;
+  const right = `${x},${y - 8} ${x + 11},${y - 14} ${x + 11},${y - 2} ${x},${y + 4}`;
+  return (
+    <g stroke={accent ? "#de5c36" : "#101010"} strokeWidth="1.1" strokeLinejoin="miter">
+      <polygon points={left} fill={accent ? "#b84828" : "#e7e4e2"} />
+      <polygon points={right} fill={accent ? "#de5c36" : "#f7f6f5"} />
+      <polygon points={top} fill={accent ? "#e97858" : "#ffffff"} />
+    </g>
+  );
+}
+
+function PlaneNode({
+  x,
+  y,
+  label,
+  detail,
+  info,
+  accent = false,
+  onShow,
+  onPress,
+  onHide,
+}: {
+  x: number;
+  y: number;
+  label: string;
+  detail?: string;
+  info: string;
+  accent?: boolean;
+  onShow: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
+  onPress: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
+  onHide: () => void;
+}) {
+  return (
+    <g
+      className="cursor-help"
+      onMouseEnter={(event) => onShow(event, label, info)}
+      onMouseMove={(event) => onShow(event, label, info)}
+      onMouseLeave={onHide}
+      onClick={(event) => onPress(event, label, info)}
+    >
+      <rect x={x - 78} y={y - 28} width="156" height={detail ? 80 : 62} fill="transparent" />
+      <IsoCube x={x} y={y} accent={accent} />
+      <text
+        x={x}
+        y={y + 22}
+        textAnchor="middle"
+        className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+      >
+        {label}
+      </text>
+      {detail ? (
+        <text
+          x={x}
+          y={y + 38}
+          textAnchor="middle"
+          className="fill-faint font-mono text-[12px] tracking-[-0.01em] uppercase"
+        >
+          {detail}
+        </text>
+      ) : null}
+    </g>
+  );
+}
+
+function SummaryHosting() {
+  const frameX = 76;
+  const frameW = 760;
+  const frameCenter = frameX + frameW / 2;
+  const col = [170, 360, 554, 744];
+  const proxy = { x: col[0], y: 230 };
+  const chat = { x: col[1], y: 230 };
+  const gateway = { x: col[2], y: 230 };
+  const otel = { x: col[3], y: 230 };
+  const ingestion = { x: col[0], y: 324 };
+  const mcp = { x: col[1], y: 324 };
+  const worker = { x: col[2], y: 324 };
+  const redis = { x: col[3], y: 324 };
+  const postgres = { x: (col[0] + col[1]) / 2, y: 418 };
+  const model = { x: col[2], y: 418 };
+  const qwen = { x: col[0], y: 640 };
+  const deepseek = { x: col[1], y: 640 };
+  const embeddings = { x: col[2], y: 640 };
+  const reranker = { x: col[3], y: 640 };
+  const personX = (col[0] + col[1]) / 2;
+  const appsX = (col[2] + col[3]) / 2;
+  const egressX = frameX + frameW + 48;
+  const egressCenter = egressX + 80;
+  const dash = "5 4";
+  const sectionRef = useRef<HTMLElement>(null);
+  const [tip, setTip] = useState<{ title: string; body: string; x: number; y: number } | null>(null);
+
+  function coarsePointer() {
+    return window.matchMedia("(hover: none)").matches;
+  }
+
+  function placeTip(event: ReactMouseEvent<SVGGElement>, title: string, body: string) {
+    const bounds = sectionRef.current?.getBoundingClientRect();
+    if (!bounds) return null;
+    const width = 288;
+    const height = 148;
+    let x = event.clientX - bounds.left + 14;
+    let y = event.clientY - bounds.top + 18;
+    if (x + width > bounds.width - 8) x = event.clientX - bounds.left - width - 10;
+    if (y + height > bounds.height - 8) y = event.clientY - bounds.top - height - 10;
+    return { title, body, x: Math.max(8, x), y: Math.max(8, y) };
+  }
+
+  function showTip(event: ReactMouseEvent<SVGGElement>, title: string, body: string) {
+    if (coarsePointer()) return;
+    const next = placeTip(event, title, body);
+    if (next) setTip(next);
+  }
+
+  function pressTip(event: ReactMouseEvent<SVGGElement>, title: string, body: string) {
+    event.stopPropagation();
+    if (!coarsePointer()) return;
+    const next = placeTip(event, title, body);
+    if (!next) return;
+    setTip((current) => (current?.title === title ? null : next));
+  }
+
+  function hideTip() {
+    if (coarsePointer()) return;
+    setTip(null);
+  }
+
+  return (
+    <section ref={sectionRef} className="relative border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
+      <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+        <span aria-hidden className="size-1.5 bg-accent" />
+        On premise hosting
+      </p>
+      <h2 className="mt-3 text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem] lg:whitespace-nowrap">
+        One VM for a Dockerized system, plus a GPU server.
+      </h2>
+      <div className="mt-10 max-w-full min-w-0 overflow-x-auto">
+        <svg
+          onClick={() => {
+            if (coarsePointer()) setTip(null);
+          }}
+          viewBox="0 0 1120 760"
+          className="block h-auto w-full min-w-[64rem]"
+          role="img"
+          aria-label="On premise hosting. The proxy serves the chat and the gateway. The gateway calls Redis, Postgres, the agent workers, and the model proxy. The model proxy is the only path to the GPU ports and to the egress proxy."
+        >
+          <rect x={frameX} y="176" width={frameW} height="292" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x={frameX} y="584" width={frameW} height="140" fill="#f4f3f2" stroke="#d6d3d2" />
+
+          <g fill="none" stroke="#c8c4c2" strokeWidth="1.25" strokeDasharray={dash}>
+            <path d={`M${proxy.x + 12},${proxy.y - 14} L${chat.x - 12},${chat.y - 14}`} />
+            <path d={`M${chat.x + 12},${chat.y - 14} L${gateway.x - 12},${gateway.y - 14}`} />
+            <path
+              d={`M${proxy.x},${proxy.y - 22} C ${chat.x},${proxy.y - 64} ${chat.x},${gateway.y - 64} ${gateway.x},${gateway.y - 22}`}
+            />
+            <path d={`M${gateway.x + 12},${gateway.y - 14} L${otel.x - 12},${otel.y - 14}`} />
+            <path d={`M${gateway.x + 8},${gateway.y + 2} L${redis.x - 8},${redis.y - 18}`} />
+            <path d={`M${gateway.x},${gateway.y + 4} L${worker.x},${worker.y - 20}`} />
+            <path d={`M${gateway.x - 10},${gateway.y + 2} L${postgres.x + 8},${postgres.y - 20}`} />
+            <path d={`M${worker.x - 12},${worker.y - 10} L${mcp.x + 12},${mcp.y - 10}`} />
+            <path d={`M${worker.x - 8},${worker.y + 2} L${postgres.x + 10},${postgres.y - 18}`} />
+            <path d={`M${ingestion.x + 6},${ingestion.y + 4} L${postgres.x - 8},${postgres.y - 18}`} />
+          </g>
+          <path
+            d={`M${gateway.x + 14},${gateway.y - 8} C ${gateway.x + 150},${gateway.y + 24} ${model.x + 150},${model.y - 80} ${model.x + 12},${model.y - 18}`}
+            fill="none"
+            stroke="#de5c36"
+            strokeWidth="1.6"
+          />
+          <path
+            d={`M${model.x + 18},${model.y - 2} H ${egressCenter} V 548`}
+            fill="none"
+            stroke="#de5c36"
+            strokeWidth="1.5"
+            strokeDasharray={dash}
+          />
+
+          <g fill="none" stroke="#101010" strokeWidth="1.25">
+            {[personX, appsX].map((x) => (
+              <g key={x}>
+                <path d={`M${x},128 v18`} />
+                <path d={`M${x - 3.5},133 l3.5,-6 l3.5,6`} />
+                <path d={`M${x - 3.5},141 l3.5,6 l3.5,-6`} />
+              </g>
+            ))}
+          </g>
+          <g fill="none" stroke="#de5c36" strokeWidth="1.35">
+            <path d={`M${model.x},456 v36`} />
+            <path d={`M${model.x - 3.5},462 l3.5,-6 l3.5,6`} />
+            <path d={`M${model.x - 3.5},486 l3.5,6 l3.5,-6`} />
+            <path d={`M${model.x},552 v24`} />
+            <path d={`M${model.x - 3.5},558 l3.5,-6 l3.5,6`} />
+            <path d={`M${model.x - 3.5},570 l3.5,6 l3.5,-6`} />
+          </g>
+
+          <g
+            className="cursor-help"
+            onMouseEnter={(event) =>
+              showTip(
+                event,
+                "One URL",
+                "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+              )
+            }
+            onMouseMove={(event) =>
+              showTip(
+                event,
+                "One URL",
+                "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+              )
+            }
+            onMouseLeave={hideTip}
+            onClick={(event) =>
+              pressTip(
+                event,
+                "One URL",
+                "ai.enterprise.internal on TLS 443. A person and enterprise apps both arrive here, and sign in with corporate single sign-on.",
+              )
+            }
+          >
+            <rect x={frameX} y="78" width={frameW} height="36" fill="#ffffff" stroke="#101010" />
+            <text
+              x={frameCenter}
+              y="101"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[14px] tracking-[-0.01em] uppercase"
+            >
+              HTTPS · ai.enterprise.internal · Corporate SSO
+            </text>
+          </g>
+          <g
+            className="cursor-help"
+            onMouseEnter={(event) =>
+              showTip(
+                event,
+                "Ports 8001–8004",
+                "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
+              )
+            }
+            onMouseMove={(event) =>
+              showTip(
+                event,
+                "Ports 8001–8004",
+                "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
+              )
+            }
+            onMouseLeave={hideTip}
+            onClick={(event) =>
+              pressTip(
+                event,
+                "Ports 8001–8004",
+                "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
+              )
+            }
+          >
+            <rect x={model.x - 228} y="508" width="456" height="34" fill="#ffffff" stroke="#de5c36" />
+            <text
+              x={model.x}
+              y="530"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+            >
+              Model proxy → ports 8001–8004 only
+            </text>
+          </g>
+
+          <g fill="none" stroke="#101010" strokeWidth="1.25">
+            {[personX - 44, personX, personX + 44].map((x) => (
+              <g key={`person-${x}`} transform={`translate(${x} 28)`}>
+                <circle cx="0" cy="0" r="5" />
+                <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
+              </g>
+            ))}
+            {[appsX - 44, appsX, appsX + 44].map((x) => (
+              <g key={`screen-${x}`} transform={`translate(${x} 30)`}>
+                <rect x="-9" y="-7" width="18" height="12" />
+                <path d="M0 5v4M-5 9h10" />
+              </g>
+            ))}
+          </g>
+          <text
+            x={personX}
+            y="62"
+            textAnchor="middle"
+            className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+          >
+            A person · Chat UI
+          </text>
+          <text
+            x={appsX}
+            y="62"
+            textAnchor="middle"
+            className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+          >
+            Enterprise apps · API
+          </text>
+
+          <PlaneNode
+            {...proxy}
+            label="Proxy"
+            info="The single entry point on the internal network. It terminates HTTPS and sends the chat to the chat UI and the API to the gateway."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...chat}
+            label="Chat UI"
+            info="Where a person signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...gateway}
+            label="Gateway ×2"
+            info="Two Fastify instances on port 8080. They check the request, enforce policy, and route it to a model, an agent, or a search."
+            accent
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...otel}
+            label="OTel"
+            info="Sends OpenTelemetry traces out to the monitoring the enterprise already runs."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...ingestion}
+            label="Ingestion"
+            info="Syncs new and changed SharePoint files, and skips a file that has not changed. The vectors land in Postgres."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...mcp}
+            label="MCP servers"
+            info="Three connectors. They are the tools an agent uses to reach SharePoint, a read-only database, and the sanctions list."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...worker}
+            label="Agent worker ×2"
+            info="Two background workers. They run multi-step tasks from the pg-boss queue in Postgres, and call tools through the MCP servers."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...redis}
+            label="Redis 7"
+            info="Tracks token budgets as they are spent, and caches frequent responses. The gateway is what talks to it."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...postgres}
+            label="Postgres 16"
+            info="Stores document vectors for search, runs the pg-boss job queue, and keeps the logs and the runs."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...model}
+            label="Model proxy"
+            info="The only path to the models. No other container calls a model directly. It is also the only service with a route out."
+            accent
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+
+          <PlaneNode
+            {...qwen}
+            label="vLLM Qwen"
+            detail="GPU 0 · 8001"
+            info="Qwen3-30B-A3B in FP8, about 31 GB. It handles chat, answers from retrieved documents, and chooses where a task goes. FP8 is 8-bit floating point, which shrinks the memory it needs."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...deepseek}
+            label="vLLM DeepSeek"
+            detail="GPU 1 · 8002"
+            info="DeepSeek-R1-Distill-Qwen-32B in FP8, about 33 GB. It does the compliance reasoning that needs step-by-step logic."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...embeddings}
+            label="Embeddings"
+            detail="BGE-M3 · 8003"
+            info="BGE-M3, about 2 GB. It turns a document into vectors that can be searched."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+          <PlaneNode
+            {...reranker}
+            label="Reranker"
+            detail="8004"
+            info="bge-reranker-v2-m3, about 2 GB. It scores the search results so the most relevant passages reach the model."
+            onShow={showTip}
+            onHide={hideTip}
+            onPress={pressTip}
+          />
+
+          <g
+            className="cursor-help"
+            onMouseEnter={(event) =>
+              showTip(
+                event,
+                "Egress proxy",
+                "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
+              )
+            }
+            onMouseMove={(event) =>
+              showTip(
+                event,
+                "Egress proxy",
+                "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
+              )
+            }
+            onMouseLeave={hideTip}
+            onClick={(event) =>
+              pressTip(
+                event,
+                "Egress proxy",
+                "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
+              )
+            }
+          >
+            <rect x={egressX} y="548" width="160" height="72" fill="#ffffff" stroke="#101010" />
+            <text
+              x={egressCenter}
+              y="580"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+            >
+              Egress
+            </text>
+            <text
+              x={egressCenter}
+              y="598"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+            >
+              proxy
+            </text>
+          </g>
+          <path d={`M${egressCenter},620 v22`} fill="none" stroke="#101010" strokeWidth="1.25" />
+          <path d={`M${egressCenter - 3.5},636 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.25" />
+          <g
+            className="cursor-help"
+            onMouseEnter={(event) =>
+              showTip(
+                event,
+                "External API",
+                "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
+              )
+            }
+            onMouseMove={(event) =>
+              showTip(
+                event,
+                "External API",
+                "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
+              )
+            }
+            onMouseLeave={hideTip}
+            onClick={(event) =>
+              pressTip(
+                event,
+                "External API",
+                "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
+              )
+            }
+          >
+            <rect
+              x={egressX}
+              y="648"
+              width="160"
+              height="64"
+              fill="#ffffff"
+              stroke="#101010"
+              strokeDasharray={dash}
+            />
+            <text
+              x={egressCenter}
+              y="674"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+            >
+              External API
+            </text>
+            <text
+              x={egressCenter}
+              y="692"
+              textAnchor="middle"
+              className="fill-faint font-mono text-[12px] tracking-[-0.01em]"
+            >
+              if allowed
+            </text>
+          </g>
+        </svg>
+      </div>
+      {tip ? (
+        <div
+          role="tooltip"
+          className="pointer-events-none absolute z-20 w-72 border border-line bg-surface px-3 py-2.5"
+          style={{ left: tip.x, top: tip.y }}
+        >
+          <p className="font-mono text-[0.7rem] tracking-[-0.01em] uppercase">{tip.title}</p>
+          <p className="mt-1.5 text-sm leading-snug text-faint">{tip.body}</p>
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 export function ArchitectureSwitch() {
   const [view, setView] = useState<View>("summary");
@@ -121,45 +651,6 @@ export function ArchitectureSwitch() {
                   <p className="mt-3 text-sm leading-relaxed text-faint">{body}</p>
                 </article>
               ))}
-            </div>
-
-            <div className="mt-12">
-              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                Scope
-              </p>
-              <h3 className="mt-3 text-2xl tracking-[-0.04em]">The first pilot, then what follows.</h3>
-              <p className="mt-3 max-w-4xl text-base leading-relaxed text-faint">
-                The first two weeks start once the enterprise has the machines, a sign-in
-                application, and read access to one document site and one database. At the end of
-                that pilot there is one URL, one API, two working products, a log of every request,
-                and a baseline score for each model.
-              </p>
-              <div className="mt-6 max-w-full min-w-0 overflow-x-auto border border-line">
-                <table className="w-full min-w-[40rem] text-left text-sm">
-                  <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
-                    <tr>
-                      <th className="px-4 py-3 font-normal">Area</th>
-                      <th className="px-4 py-3 font-normal">In the first two weeks</th>
-                      <th className="px-4 py-3 font-normal">Later</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      ["Access", "Chat at one internal URL, and an API existing tools already speak", "A chat tool and an IDE plugin"],
-                      ["Gateway", "Sign-in, policy, a router, budgets, and logging", "More than one copy on Kubernetes, and a recovery path"],
-                      ["Products", "A compliance agent and document search", "Text-to-SQL on a semantic layer, and a coding assistant"],
-                      ["Connectors", "One document store, and one read-only database", "More document stores, chat, and core enterprise events"],
-                      ["Models", "Two local models, and one external frontier model behind a flag", "Fine-tuned models, and more GPU pools"],
-                    ].map(([area, now, later]) => (
-                      <tr key={area} className="border-t border-line align-top">
-                        <th className="px-4 py-3 text-left font-normal">{area}</th>
-                        <td className="px-4 py-3 text-faint">{now}</td>
-                        <td className="px-4 py-3 text-faint">{later}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
 
             <div className="mt-12">
@@ -289,7 +780,7 @@ export function ArchitectureSwitch() {
               A person asks, in the chat. This is the experience we envision, not a client of
               record.
             </p>
-            <ol className="mt-8 grid max-w-3xl gap-4">
+            <ol className="mt-8 grid gap-4 sm:grid-cols-2">
               <li className="border border-line bg-surface p-4">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                   A facility
@@ -367,6 +858,7 @@ export function ArchitectureSwitch() {
               </article>
             </div>
           </section>
+          <SummaryHosting />
         </div>
       ) : null}
       {view === "gateway" ? <GatewayDiagram /> : null}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
 import { DemoChat } from "@/components/demo-chat";
 import { GatewayDiagram } from "@/components/gateway-diagram";
@@ -916,21 +915,8 @@ export function ArchitectureSwitch() {
   return (
     <div className="min-w-0">
       <div className="mb-4 flex flex-wrap items-center gap-4">
-        <button
-          type="button"
-          onClick={() => setView("demo")}
-          className="group relative inline-flex h-[31px] items-center justify-center overflow-hidden border border-transparent bg-ink px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] text-paper capitalize [--stripe:rgba(255,255,255,0.18)]"
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            Try the chat <ArrowRight />
-          </span>
-          <span
-            aria-hidden
-            className="stripe-hover pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
-          />
-        </button>
         <div
-          className="flex w-full flex-wrap gap-2 lg:ml-auto lg:w-auto lg:gap-0 lg:border lg:border-line"
+          className="ml-auto flex w-fit max-w-full flex-wrap justify-end gap-2 lg:gap-0 lg:border lg:border-line"
           role="group"
           aria-label="View"
         >

@@ -59,7 +59,7 @@ export function ResearchRecord() {
           </p>
           <p className="text-base leading-snug">
             Our chief scientist has a track record of identifying foundational problems
-            pertaining to machine intelligence and providing fundamental solutions that
+            in the field and providing fundamental solutions that
             are widely recognized and applied across industries.
           </p>
           <div className="bg-accent p-5 text-paper">

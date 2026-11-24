@@ -13,7 +13,7 @@ const papers = [
   {
     label: "Small-data regime",
     intro:
-      "Learning when each new example is expensive. The bound is on how many pulls, queries, or preferences it takes.",
+      "Learning when each new example is expensive.",
     items: [
       {
         title: "Improved Algorithms for Linear Stochastic Bandits",
@@ -115,7 +115,7 @@ const papers = [
   {
     label: "Hierarchical reasoning",
     intro:
-      "Recurrent models that plan slowly and execute quickly, trained without a large corpus.",
+      "Recurrent models trained without a large corpus.",
     items: [
       {
         title: "Hierarchical Reasoning Model",
@@ -135,7 +135,7 @@ const papers = [
 
 export default function ResearchPage() {
   return (
-    <Interior eyebrow="Research">
+    <Interior eyebrow="Research" space="mt-5">
       <section>
         <p className="max-w-3xl text-base leading-relaxed text-faint">
           From{" "}

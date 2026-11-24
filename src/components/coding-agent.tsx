@@ -46,6 +46,10 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
     const el = frame.current;
     if (!el) return;
     const fit = () => {
+      if (window.matchMedia("(max-width: 1023px)").matches) {
+        el.style.height = "";
+        return;
+      }
       const top = el.getBoundingClientRect().top + window.scrollY;
       const available = Math.floor(window.innerHeight - top - 24);
       el.style.height = available >= 320 ? `${available}px` : "";

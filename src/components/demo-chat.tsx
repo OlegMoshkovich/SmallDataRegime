@@ -306,7 +306,7 @@ function OperateDiagram({ route, step }: { route: Route | null; step: number }) 
   ];
 
   return (
-    <div className="border border-line bg-surface px-4 py-6">
+    <div className="px-4 py-6">
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
         <p className="flex items-center justify-end gap-1.5 pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase">
           <span className="size-1.5 bg-accent" />
@@ -479,11 +479,7 @@ export function DemoChat({
   useEffect(() => {
     const el = thread.current;
     if (!el) return;
-    if (el.scrollHeight > el.clientHeight + 1) {
-      el.scrollTo({ top: el.scrollHeight });
-      return;
-    }
-    el.lastElementChild?.scrollIntoView({ block: "nearest" });
+    el.scrollTo({ top: el.scrollHeight });
   }, [messages, step]);
 
   function ask(text: string, preset?: Route) {
@@ -543,8 +539,20 @@ export function DemoChat({
         How the system operates
       </p>
     </div>
-    <div className="mt-3 grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
-      <div className={`flex flex-col border border-line bg-surface lg:h-full lg:min-h-0 lg:overflow-hidden ${choice !== null ? "max-lg:hidden" : ""}`}>
+    <div className="relative mt-3">
+      <div className="pointer-events-none invisible" aria-hidden>
+        <div className="hidden border border-line lg:block">
+          <div className="border-b border-line p-3">
+            <OperateToggle value="diagram" onSelect={() => {}} />
+          </div>
+          <OperateDiagram route={null} step={0} />
+        </div>
+        <div className="lg:hidden">
+          <OperateDiagram route={null} step={0} />
+        </div>
+      </div>
+      <div className="absolute inset-0 grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+      <div className={`flex h-full min-h-0 flex-col overflow-hidden border border-line bg-surface ${choice !== null ? "max-lg:hidden" : ""}`}>
         <div className="flex shrink-0 flex-wrap gap-2 border-b border-line p-3">
           {samples.map((sample) => (
             <button
@@ -557,7 +565,7 @@ export function DemoChat({
             </button>
           ))}
         </div>
-        <div ref={thread} className="grid content-start gap-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div ref={thread} className="grid h-0 min-h-0 flex-1 content-start gap-3 overflow-y-auto p-4">
           {messages.length === 0 ? (
             <p className="text-sm leading-relaxed text-faint">
               Choose a question. The orchestrator will show the systems, the
@@ -584,16 +592,17 @@ export function DemoChat({
       </div>
 
       <aside
-        className={`${choice === null ? "hidden lg:grid" : "grid"} content-start gap-3`}
+        className={`flex h-full min-h-0 flex-col overflow-hidden border border-line bg-surface ${choice === null ? "hidden lg:flex" : ""}`}
         aria-live="polite"
       >
-        <div className="hidden lg:block">
-          <OperateToggle value={operateView} onSelect={choose} />
-        </div>
+          <div className="hidden shrink-0 border-b border-line p-3 lg:block">
+            <OperateToggle value={operateView} onSelect={choose} />
+          </div>
+          <div className="h-0 min-h-0 flex-1 overflow-y-auto">
         {operateView === "diagram" ? (
           <OperateDiagram route={route} step={step} />
         ) : opened ? (
-          <article className="flex min-h-0 flex-col border border-line bg-surface">
+          <article className="m-4 border border-line bg-surface">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
                 {opened.system}
@@ -606,13 +615,13 @@ export function DemoChat({
                 Back
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+            <div className="px-4 py-4">
               <h2 className="text-lg tracking-[-0.03em]">{opened.title}</h2>
               <p className="mt-4 text-sm leading-relaxed whitespace-pre-line">{opened.body}</p>
             </div>
           </article>
         ) : (
-          <>
+          <div className="grid content-start gap-3 p-4">
             <article
               className="border border-line bg-surface p-4"
             >
@@ -711,9 +720,11 @@ export function DemoChat({
                 {step >= 5 && route ? route.gate.text : "Waiting"}
               </p>
             </article>
-          </>
+          </div>
         )}
+          </div>
       </aside>
+      </div>
     </div>
     </>
   );

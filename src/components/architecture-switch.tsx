@@ -506,8 +506,8 @@ function SummaryHosting() {
         <span aria-hidden className="size-1.5 bg-accent" />
         On premise hosting
       </p>
-      <h2 className="mt-3 text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem] lg:whitespace-nowrap">
-        One VM for a Dockerized system, plus a GPU server.
+      <h2 className="mt-3 text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
+        Our initial deployment runs on one VM for a Dockerized system, plus a GPU server.
       </h2>
       <div className="mt-10 lg:hidden">
         <HostingMobile

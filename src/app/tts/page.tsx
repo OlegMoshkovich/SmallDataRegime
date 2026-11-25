@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TtsPage() {
   return (
-    <article className="bg-background">
+    <article className="min-h-[calc(100dvh-72px)] bg-background">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
         <TtsSwitch />
       </div>

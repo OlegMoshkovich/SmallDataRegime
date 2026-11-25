@@ -39,48 +39,48 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "engineers",
           label: "Data engineers",
-          note: "They build the streaming pipeline in notebooks. Lakeflow is the job that keeps card and transfer events moving.",
+          note: "Card and transfer events have to keep moving. That pipeline belongs to the engineers, so they are the ones who build it.",
         },
         {
           id: "ai-apps",
           label: "AI apps and agents",
-          note: "The score is called from the app or the agent at the moment of the payment.",
+          note: "The score is needed at the moment of the payment. The app or the agent is already there, so the call starts from them.",
         },
       ],
       control: [
         {
           id: "jobs",
           label: "Notebooks and jobs",
-          note: "The Lakeflow stream is a job. Engineers own the code. The job starts, runs, and stops.",
+          note: "The stream is production code that starts, runs, and stops. A job is how that code stays on a schedule.",
         },
         {
           id: "gateway",
           label: "Agents and AI Gateway",
-          note: "The live score goes out through AI Gateway, which logs the call and enforces the limit.",
+          note: "The live score is a model call. AI Gateway is in front of it so the caller, the cost, and the limit are recorded.",
         },
       ],
       compute: [
         {
           id: "spark",
           label: "Spark clusters",
-          note: "Spark reads the event stream and writes the scored rows into Delta.",
+          note: "The events arrive as a stream and have to be written into Delta. Spark is the engine that keeps that write going.",
         },
         {
           id: "serving",
           label: "Model serving",
-          note: "The endpoint scores one payment at a time and scales with the traffic.",
+          note: "One payment needs one score, at the speed of the transaction. Model serving answers that single request and scales with the traffic.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "Events and scores land in Delta. The warehouse can read the same tables later.",
+          note: "The events and the scores have to remain for a later review. Delta keeps both, so a later report reads the same tables.",
         },
         {
           id: "models",
           label: "Models",
-          note: "The score model and its signature live in the MLflow registry. Serving loads that version.",
+          note: "Serving has to load the approved score model, with its signature. The registry is where that version is kept.",
         },
       ],
       story: [
@@ -151,48 +151,48 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "engineers",
           label: "Data engineers",
-          note: "They train and refresh the scorecard. The job is theirs.",
+          note: "The scorecard is trained and refreshed from features the engineers own. They start this path.",
         },
         {
           id: "analysts",
           label: "Analysts and BI tools",
-          note: "They read the stress results. They do not retrain the model.",
+          note: "The stress test is a report on tables that are already built. Analysts are the people who read it.",
         },
       ],
       control: [
         {
           id: "jobs",
           label: "Notebooks and jobs",
-          note: "Training is a job. The same job writes the features it used.",
+          note: "Training has to be repeatable, and it has to write the features it used. A job does both.",
         },
         {
           id: "genie",
           label: "Genie and AI/BI",
-          note: "The stress pack is a dashboard and a metric over the gold tables.",
+          note: "The stress pack is a dashboard over a certified metric. Genie and AI/BI are how analysts open that pack.",
         },
       ],
       compute: [
         {
           id: "spark",
           label: "Spark clusters",
-          note: "Spark builds the features and fits the scorecard.",
+          note: "Building the features and fitting the scorecard is a heavy batch job. Spark is the engine for that work.",
         },
         {
           id: "warehouse",
           label: "SQL warehouse",
-          note: "The warehouse reads the gold tables for the report. It does not rerun the training.",
+          note: "The report is SQL over gold tables that training already wrote. The warehouse is the engine for that read.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "Exposures, features, and results are Delta tables. Time travel keeps the version the report used.",
+          note: "Exposures, features, and results have to stay as a version the report can reopen. Delta holds that version.",
         },
         {
           id: "models",
           label: "Models",
-          note: "The scorecard is registered in MLflow with the tables it read.",
+          note: "The report has to name the scorecard it used. The registry keeps that version next to the tables it read.",
         },
       ],
       story: [
@@ -263,48 +263,48 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "engineers",
           label: "Data engineers",
-          note: "They join products and channels into one profile.",
+          note: "The profile joins products and channels. That pipeline belongs to the engineers, so they are the ones who build it.",
         },
         {
           id: "apps",
           label: "Business apps",
-          note: "The offer screen reads the live profile. It does not scan the lake.",
+          note: "The offer is shown on a screen a person is using. The business app is the place that reads the live profile.",
         },
       ],
       control: [
         {
           id: "jobs",
           label: "Notebooks and jobs",
-          note: "Lakeflow builds the profile from bronze into gold.",
+          note: "The profile is rebuilt on a schedule, from bronze to gold. A job is how that rebuild stays repeatable.",
         },
         {
           id: "apps",
           label: "Databricks Apps",
-          note: "The offer screen is an app on the platform. It inherits the catalog permissions.",
+          note: "The offer screen is an internal app. It runs on the platform so it keeps the signed-in user's catalog grants.",
         },
       ],
       compute: [
         {
           id: "spark",
           label: "Spark clusters",
-          note: "Spark does the joins and writes the gold profile.",
+          note: "The profile is a large join. Spark is the engine that builds it and writes the gold table.",
         },
         {
           id: "lakebase",
           label: "Lakebase Postgres",
-          note: "The app reads and writes the live profile in Postgres.",
+          note: "The offer screen reads one live row and writes the response. Postgres holds that live profile.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "The analytical profile is a Delta table. History stays here.",
+          note: "The analytical profile and its history stay in one table. Jobs and the warehouse both read it.",
         },
         {
           id: "synced",
           label: "Synced to Delta",
-          note: "Lakebase changes stream back into Delta, so the app and the jobs share one profile.",
+          note: "The app writes Postgres. Those changes stream back into Delta, so the jobs read the same profile the app just updated.",
         },
       ],
       story: [
@@ -375,43 +375,43 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "engineers",
           label: "Data engineers",
-          note: "They own the pipeline that rebuilds the report tables.",
+          note: "The report tables are rebuilt every period by a pipeline. The engineers own that pipeline, so they start it.",
         },
         {
           id: "analysts",
           label: "Analysts and BI tools",
-          note: "They open the pack. The numbers come from the warehouse.",
+          note: "The published pack is what analysts open. The numbers are already in tables, so they read them.",
         },
       ],
       control: [
         {
           id: "jobs",
           label: "Notebooks and jobs",
-          note: "Lakeflow is the repeatable pipeline. A failed run leaves the previous version in place.",
+          note: "The period has to be rebuilt the same way each time. A job does that, and a failed run leaves the previous version in place.",
         },
         {
           id: "genie",
           label: "Genie and AI/BI",
-          note: "The pack is a dashboard. A follow-up question goes through Genie on the same metric.",
+          note: "The pack is a dashboard on one certified metric. Genie is how a follow-up question uses that same metric.",
         },
       ],
       compute: [
         {
           id: "spark",
           label: "Spark clusters",
-          note: "Spark rebuilds the report tables.",
+          note: "Rebuilding the period's tables is a batch job over many sources. Spark is the engine for that rebuild.",
         },
         {
           id: "warehouse",
           label: "SQL warehouse",
-          note: "Databricks SQL reads them. The report does not scan the raw files itself.",
+          note: "The published report is a SQL read of the tables Spark wrote. The warehouse is the engine for that read.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "The report reads gold Delta tables. Lineage points back at the sources those tables were built from.",
+          note: "The report needs gold tables whose lineage points back at the sources. Delta is where that version is kept.",
         },
       ],
       story: [
@@ -476,28 +476,28 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "analysts",
           label: "Analysts and BI tools",
-          note: "This is the analyst path. No job is started.",
+          note: "This is a question on a number that already exists. An analyst asks it, so the path starts with them.",
         },
       ],
       control: [
         {
           id: "genie",
           label: "Genie and AI/BI",
-          note: "Genie turns the question into SQL against a metric view. The metric view is the certified definition.",
+          note: "The question should become SQL against the certified NPS metric. Genie is the place that holds that definition.",
         },
       ],
       compute: [
         {
           id: "warehouse",
           label: "SQL warehouse",
-          note: "The warehouse runs that SQL. It scales up for the query and back down after.",
+          note: "One SQL question needs an engine that can scale up for the query and back down after. That engine is the warehouse.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "The metric view points at a gold Delta table. The warehouse reads it in place.",
+          note: "The metric already points at a gold table. Delta is that table, and the warehouse reads it where it sits.",
         },
       ],
       story: [
@@ -544,28 +544,28 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "ai-apps",
           label: "AI apps and agents",
-          note: "The person asks an agent. That is the access point for this workflow.",
+          note: "A person asks which passages apply. An agent is the access point, because the answer comes from a search and a model.",
         },
       ],
       control: [
         {
           id: "gateway",
           label: "Agents and AI Gateway",
-          note: "Agent Bricks retrieves the passages and calls the model. AI Gateway logs the call and applies the limit.",
+          note: "The agent has to retrieve passages and call a model. AI Gateway sits on that call so the caller, the cost, and the limit are recorded.",
         },
       ],
       compute: [
         {
           id: "serving",
           label: "Model serving",
-          note: "Serving loads the model and returns the answer. The index is searched beside that call.",
+          note: "The answer is one model request, with the index searched beside it. Model serving is the endpoint that returns it.",
         },
       ],
       storage: [
         {
           id: "models",
           label: "Models",
-          note: "The vector index sits with the model registry. Serving reads the model from here. The passages stay the documents that were embedded.",
+          note: "The vector index and the model version live together. Serving loads that version, and the passages stay the documents that were embedded.",
         },
       ],
       story: [
@@ -612,28 +612,28 @@ const samples: { label: string; query: string; route: Route }[] = [
         {
           id: "analysts",
           label: "Analysts and BI tools",
-          note: "Internal risk and merchant numbers are a warehouse query.",
+          note: "Merchant risk is a question on tables the analysts already use. They are the ones who ask it.",
         },
       ],
       control: [
         {
           id: "genie",
           label: "Genie and AI/BI",
-          note: "Dashboards and Genie send the SQL. The partner share is a grant in Unity Catalog, not a second pipeline.",
+          note: "The internal view is a dashboard, and the partner share is a catalog grant on the same table. Genie is where that question is asked.",
         },
       ],
       compute: [
         {
           id: "warehouse",
           label: "SQL warehouse",
-          note: "Databricks SQL answers the internal questions from the payments tables.",
+          note: "The internal numbers are SQL on the payments tables. The warehouse is the engine that answers them.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "History lives in Delta. Delta Sharing grants a reader on this table. The partner queries it in place. No copy is made.",
+          note: "One table holds the history. A share on that Delta table lets the partner read it where it sits, so the warehouse and the partner see the same copy.",
         },
       ],
       story: [
@@ -675,7 +675,6 @@ const samples: { label: string; query: string; route: Route }[] = [
 ];
 
 function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
-  const [openId, setOpenId] = useState<string | null>(null);
   const waiting = (id: string): Piece => ({ id, label: "Waiting", note: "" });
   const layers: {
     id: string;
@@ -716,7 +715,6 @@ function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
         <span className="size-10 justify-self-center self-center bg-foreground" />
         <div />
         {layers.map((layer, index) => {
-          const note = layer.items.find((item) => item.id === openId);
           return (
             <Fragment key={layer.id}>
               <p className="mt-6 pr-3 text-right font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap text-accent uppercase">
@@ -725,42 +723,27 @@ function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
               <div className="flex flex-col items-center">
                 <span className="h-6 w-px shrink-0 bg-foreground" />
                 <div
-                  className={`grid w-48 shrink-0 gap-1 border bg-surface px-3 py-2 text-center lg:w-auto lg:max-w-56 ${
+                  className={`grid w-72 shrink-0 gap-3 border bg-surface px-3 py-3 text-center ${
                     layer.accent ? "border-accent" : "border-foreground"
                   }`}
                 >
-                  {layer.items.map((item) =>
-                    item.note ? (
-                      <button
-                        key={item.id}
-                        type="button"
-                        aria-expanded={openId === item.id}
-                        onClick={() => setOpenId(openId === item.id ? null : item.id)}
-                        className={`font-mono text-[0.65rem] tracking-[-0.01em] uppercase ${
-                          openId === item.id ? "text-accent" : ""
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ) : (
-                      <p
-                        key={item.id}
-                        className="font-mono text-[0.65rem] tracking-[-0.01em] text-faint uppercase"
-                      >
+                  {layer.items.map((item) => (
+                    <div key={item.id}>
+                      <p className={`font-mono text-[0.65rem] tracking-[-0.01em] uppercase ${item.note ? "" : "text-faint"}`}>
                         {item.label}
                       </p>
-                    ),
-                  )}
+                      {item.note ? (
+                        <p className="mt-1 text-left text-sm leading-relaxed text-faint">
+                          <span className="mb-0.5 block font-mono text-[0.6rem] tracking-[-0.01em] text-accent uppercase">Why</span>
+                          {item.note}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
                 {index < layers.length - 1 ? <span className="w-px flex-1 bg-foreground" /> : null}
               </div>
-              <div className={note ? "mt-6 w-56 pl-4 lg:w-auto" : ""}>
-                {note ? (
-                  <p className="w-full border border-line px-3 py-2 text-left text-sm leading-relaxed whitespace-pre-line text-faint lg:max-w-56">
-                    {note.note}
-                  </p>
-                ) : null}
-              </div>
+              <div />
             </Fragment>
           );
         })}

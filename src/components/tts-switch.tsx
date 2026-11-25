@@ -31,10 +31,10 @@ function DbCube({ x, y, accent = false }: { x: number; y: number; accent?: boole
 }
 
 function DbNode({
-  x, y, accent = false, label, label2, sublabel, detail, info, onShow, onHide, onPress,
+  x, y, accent = false, label, label2, sublabel, detail, more, info, onShow, onHide, onPress,
 }: {
   x: number; y: number; accent?: boolean; label: string; label2?: string; sublabel?: string;
-  detail?: string; info?: string;
+  detail?: string; more?: string; info?: string;
   onShow?: (e: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onHide?: () => void;
   onPress?: (e: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
@@ -51,12 +51,13 @@ function DbNode({
   } : {};
   return (
     <g {...handlers}>
-      <rect x={x - 66} y={y - 26} width={132} height={label2 ? (detail ? 86 : 68) : (detail ? 72 : 56)} fill="transparent" />
+      <rect x={x - 70} y={y - 26} width={140} height={label2 ? (more ? 100 : detail ? 86 : 68) : (more ? 90 : detail ? 72 : 56)} fill="transparent" />
       <DbCube x={x} y={y} accent={accent} />
       <text x={x} y={l1y} textAnchor="middle" className={cls}>{label}</text>
       {label2 ? <text x={x} y={l1y + 13} textAnchor="middle" className={cls}>{label2}</text> : null}
       {sublabel ? <text x={x} y={l1y + (label2 ? 26 : 13)} textAnchor="middle" className="fill-muted font-mono text-[10px]">{sublabel}</text> : null}
       {detail ? <text x={x} y={l1y + (label2 ? 39 : 26)} textAnchor="middle" className="fill-faint font-mono text-[10px]">{detail}</text> : null}
+      {more ? <text x={x} y={l1y + (label2 ? 51 : 38)} textAnchor="middle" className="fill-faint font-mono text-[10px]">{more}</text> : null}
     </g>
   );
 }
@@ -66,8 +67,8 @@ function DatabricksConnectDiagram() {
   const ucX = 148;
   const c = [300, 448, 596, 744];
   const cY = 202;
-  const pY = 358;
-  const sY = 508;
+  const pY = 374;
+  const sY = 540;
 
   const sectionRef = useRef<HTMLElement>(null);
   const [tip, setTip] = useState<{ title: string; body: string; x: number; y: number } | null>(null);
@@ -80,7 +81,7 @@ function DatabricksConnectDiagram() {
     const bounds = sectionRef.current?.getBoundingClientRect();
     if (!bounds) return null;
     const width = 288;
-    const height = 148;
+    const height = 320;
     let x = event.clientX - bounds.left + 14;
     let y = event.clientY - bounds.top + 18;
     if (x + width > bounds.width - 8) x = event.clientX - bounds.left - width - 10;
@@ -117,15 +118,15 @@ function DatabricksConnectDiagram() {
       </p>
       <div className="mt-6 max-w-full min-w-0 overflow-x-auto">
         <svg
-          viewBox="0 0 1120 580"
+          viewBox="0 0 1120 640"
           className="block h-auto w-full min-w-[48rem]"
           role="img"
           aria-label="Databricks platform connection diagram showing four access flows through control, compute, and storage layers, governed by Unity Catalog."
         >
           {/* Layer backgrounds */}
-          <rect x="90" y="152" width="722" height="120" fill="#f4f3f2" stroke="#d6d3d2" />
-          <rect x="90" y="308" width="722" height="116" fill="#f4f3f2" stroke="#d6d3d2" />
-          <rect x="90" y="460" width="722" height="108" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x="90" y="152" width="722" height="136" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x="90" y="324" width="722" height="132" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x="90" y="492" width="722" height="124" fill="#f4f3f2" stroke="#d6d3d2" />
 
           {/* Left side labels */}
           <text x="5" y="66" className="fill-foreground font-mono text-[11px] uppercase">ACCESS</text>
@@ -135,53 +136,50 @@ function DatabricksConnectDiagram() {
           <text x="5" y="187" className="fill-foreground font-mono text-[11px] uppercase">CONTROL</text>
           <text x="5" y="202" className="fill-muted font-mono text-[10px]">Run by</text>
           <text x="5" y="215" className="fill-muted font-mono text-[10px]">Databricks</text>
-          <line x1="5" y1="262" x2="82" y2="262" stroke="#d6d3d2" strokeWidth="0.8" />
+          <line x1="5" y1="276" x2="82" y2="276" stroke="#d6d3d2" strokeWidth="0.8" />
 
-          <text x="5" y="343" className="fill-foreground font-mono text-[11px] uppercase">COMPUTE</text>
-          <text x="5" y="358" className="fill-muted font-mono text-[10px]">Your cloud or</text>
-          <text x="5" y="371" className="fill-muted font-mono text-[10px]">serverless</text>
-          <line x1="5" y1="412" x2="82" y2="412" stroke="#d6d3d2" strokeWidth="0.8" />
+          <text x="5" y="359" className="fill-foreground font-mono text-[11px] uppercase">COMPUTE</text>
+          <text x="5" y="374" className="fill-muted font-mono text-[10px]">Your cloud or</text>
+          <text x="5" y="387" className="fill-muted font-mono text-[10px]">serverless</text>
+          <line x1="5" y1="444" x2="82" y2="444" stroke="#d6d3d2" strokeWidth="0.8" />
 
-          <text x="5" y="494" className="fill-foreground font-mono text-[11px] uppercase">STORAGE</text>
-          <text x="5" y="509" className="fill-muted font-mono text-[10px]">Your cloud</text>
-          <text x="5" y="522" className="fill-muted font-mono text-[10px]">storage</text>
-          <line x1="5" y1="558" x2="82" y2="558" stroke="#d6d3d2" strokeWidth="0.8" />
+          <text x="5" y="526" className="fill-foreground font-mono text-[11px] uppercase">STORAGE</text>
+          <text x="5" y="541" className="fill-muted font-mono text-[10px]">Your cloud</text>
+          <text x="5" y="554" className="fill-muted font-mono text-[10px]">storage</text>
+          <line x1="5" y1="604" x2="82" y2="604" stroke="#d6d3d2" strokeWidth="0.8" />
 
           {/* Unity Catalog orange connections */}
           <path d={`M${ucX + 12},${cY - 10} H${c[3] + 10}`} fill="none" stroke="#FF5C00" strokeWidth="1.2" strokeDasharray={dash} />
-          <path d={`M${ucX},${cY + 4} V574`} fill="none" stroke="#FF5C00" strokeWidth="1.2" strokeDasharray={dash} />
-          <path d={`M${ucX},281 l6,9 l-6,9 l-6,-9 Z`} fill="#FF5C00" />
-          <path d={`M${ucX},442 l6,9 l-6,9 l-6,-9 Z`} fill="#FF5C00" />
+          <path d={`M${ucX},${cY + 4} V614`} fill="none" stroke="#FF5C00" strokeWidth="1.2" strokeDasharray={dash} />
+          <path d={`M${ucX},296 l6,9 l-6,9 l-6,-9 Z`} fill="#FF5C00" />
+          <path d={`M${ucX},466 l6,9 l-6,9 l-6,-9 Z`} fill="#FF5C00" />
 
-          {/* Access → control band-top: arrows stop at band top y=152 */}
+          {/* Access → control. The numbered step sits below the labels, with no stub through the words. */}
           {c.map((cx, i) => (
             <g key={cx}>
-              {/* labels are at y=79 and y=92 — split line to skip them */}
-              <line x1={cx} y1="66" x2={cx} y2="74" stroke="#101010" strokeWidth="1.2" fill="none" />
-              <line x1={cx} y1="98" x2={cx} y2="108" stroke="#101010" strokeWidth="1.2" fill="none" />
-              <circle cx={cx} cy="118" r="9" fill="#101010" />
-              <text x={cx} y="122" textAnchor="middle" fill="white" className="font-mono text-[11px]">{i + 1}</text>
-              <line x1={cx} y1="128" x2={cx} y2="146" stroke="#101010" strokeWidth="1.2" fill="none" />
+              <circle cx={cx} cy="128" r="9" fill="#101010" />
+              <text x={cx} y="132" textAnchor="middle" fill="white" fontSize="11" className="font-mono">{i + 1}</text>
+              <line x1={cx} y1="137" x2={cx} y2="146" stroke="#101010" strokeWidth="1.2" fill="none" />
               <path d={`M${cx - 3.5},146 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.2" />
             </g>
           ))}
 
-          {/* Control → compute: gap y=272 to y=308 */}
+          {/* Control → compute: gap below the control band (ends 288) to the compute band (starts 324) */}
           {c.map((cx) => (
             <g key={cx}>
-              <line x1={cx} y1="278" x2={cx} y2="302" stroke="#101010" strokeWidth="1.2" fill="none" />
-              <path d={`M${cx - 3.5},302 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.2" />
+              <line x1={cx} y1="294" x2={cx} y2="318" stroke="#101010" strokeWidth="1.2" fill="none" />
+              <path d={`M${cx - 3.5},318 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.2" />
             </g>
           ))}
 
-          {/* Compute → storage: gap y=424 to y=460 */}
+          {/* Compute → storage: gap below the compute band (ends 456) to the storage band (starts 492) */}
           {[c[0], c[2], c[3]].map((cx) => (
             <g key={cx}>
-              <line x1={cx} y1="430" x2={cx} y2="454" stroke="#101010" strokeWidth="1.2" fill="none" />
-              <path d={`M${cx - 3.5},454 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.2" />
+              <line x1={cx} y1="462" x2={cx} y2="486" stroke="#101010" strokeWidth="1.2" fill="none" />
+              <path d={`M${cx - 3.5},486 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.2" />
             </g>
           ))}
-          <path d={`M${c[1]},424 L${c[0]},460`} fill="none" stroke="#101010" strokeWidth="1.2" strokeDasharray={dash} />
+          <path d={`M${c[1]},456 L${c[0]},492`} fill="none" stroke="#101010" strokeWidth="1.2" strokeDasharray={dash} />
 
           {/* User icons */}
           {[c[0], c[1]].map((cx) => (
@@ -205,72 +203,84 @@ function DatabricksConnectDiagram() {
             [c[3], "BUSINESS", "APPS"],
           ] as [number, string, string][]).map(([cx, l1, l2]) => (
             <g key={cx}>
-              <text x={cx} y="79" textAnchor="middle" className="fill-foreground font-mono text-[11px] uppercase">{l1}</text>
-              <text x={cx} y="92" textAnchor="middle" className="fill-foreground font-mono text-[11px] uppercase">{l2}</text>
+              <text x={cx} y="84" textAnchor="middle" fill="#101010" fontSize="11" className="font-mono uppercase">{l1}</text>
+              <text x={cx} y="98" textAnchor="middle" fill="#101010" fontSize="11" className="font-mono uppercase">{l2}</text>
             </g>
           ))}
 
           {/* Control layer nodes */}
           <DbNode x={ucX} y={cY} accent label="UNITY" label2="CATALOG"
             detail="permission fabric"
-            info="Unity Catalog is the single governance layer. Every table, model, file and function is registered here. Access policies, lineage, and audit logs all flow through it regardless of which service runs the query."
+            more="checks every query"
+            info={"Unity Catalog is the single governance layer. Every table, model, file, and function is registered here. Access policies, lineage, and audit logs all flow through it, whichever service runs the query.\n\nA notebook, a Genie question, an agent call, and an app query each ask Catalog before they touch data. Catalog records who read a table, which job wrote it, and which model was trained on it. A missing grant stops the query."}
             {...node} />
           <DbNode x={c[0]} y={cY} label="NOTEBOOKS" label2="JOBS"
             detail="code and pipelines"
-            info="Interactive notebooks for exploration and development. Jobs schedules them as production pipelines on Spark clusters. Data engineers write bronze-to-silver transformations here."
+            more="writes the tables"
+            info={"Interactive notebooks are where engineers explore data and write transformations. Jobs run that same code on a schedule, with retries and a run history, on Spark clusters. The result is written to Delta tables.\n\nBronze-to-silver pipelines live here: clean a raw feed, join it to a reference table, and commit the output. Unity Catalog decides which tables the job may read and which schema it may write."}
             {...node} />
           <DbNode x={c[1]} y={cY} label="GENIE" label2="AI/BI"
             detail="natural language BI"
-            info="Genie lets analysts ask plain-language questions and get answers from Delta Tables without writing SQL. The AI/BI dashboard layer turns metric views into self-service reports."
+            more="questions become SQL"
+            info={"Genie lets analysts ask a question in plain language and get an answer from Delta tables. It turns the question into SQL, sends it to the SQL warehouse, and returns a table or a chart. AI/BI dashboards use the same metric views, so a question and a report share one definition.\n\nThe warehouse returns only the tables that the analyst is allowed to read. A follow-up question stays on that same governed set of tables."}
             {...node} />
           <DbNode x={c[2]} y={cY} label="AGENTS" label2="AI GATEWAY"
             detail="agent and model routing"
-            info="Agents AI is a framework for building, evaluating, and deploying agentic workflows on enterprise data. AI Gateway sits in front of model serving to enforce rate limits, cost controls, and audit logging on every model call."
+            more="logs every model call"
+            info={"Agents AI is where teams build, evaluate, and deploy agents on enterprise data. An agent retrieves rows or documents, calls a model, and returns an answer or a next step. AI Gateway sits in front of model serving and records the caller, the model, the token cost, and the response on every call.\n\nRate limits and spend controls are applied at the gateway. Unity Catalog still decides which tables, files, and model versions that agent may open."}
             {...node} />
           <DbNode x={c[3]} y={cY} label="DATABRICKS" label2="APPS"
             detail="hosted web apps"
-            info="Databricks Apps lets teams deploy internal web applications (Python, React) directly on the Databricks platform. They inherit Unity Catalog permissions and can query warehouses or call models without extra infrastructure."
+            more="inherit catalog rights"
+            info={"Databricks Apps hosts internal web applications, in Python or React, on the platform itself. The app runs next to the data and keeps the signed-in user's Unity Catalog grants, so a screen can only show what that user is allowed to query.\n\nLive operational screens usually read and write Lakebase Postgres. Reports go to the SQL warehouse, and predictions go to model serving, under the same Catalog grants."}
             {...node} />
 
           {/* Compute layer nodes */}
           <DbNode x={c[0]} y={pY} label="SPARK" label2="CLUSTERS"
             detail="distributed processing"
-            info="Apache Spark clusters run notebooks and jobs at scale. Auto-scaling pools keep idle time low. All reads and writes go through Delta Lake, so ACID guarantees hold even when hundreds of tasks run in parallel."
+            more="runs jobs at scale"
+            info={"Apache Spark clusters run notebooks and jobs across many machines. A transformation is split into tasks, then committed as one Delta transaction, so a reader sees a finished update. Clusters scale out for a large run and scale back when the run ends.\n\nSpark is the engine under the engineering path. It writes the Delta tables that the SQL warehouse later reads."}
             {...node} />
           <DbNode x={c[1]} y={pY} label="SQL" label2="WAREHOUSE"
             detail="serverless SQL engine"
-            info="Databricks SQL Warehouse is an optimised, serverless query engine for BI workloads. It auto-scales to zero when idle. Genie, dashboards, and direct JDBC/ODBC connections all hit the warehouse, which reads Delta Tables in object storage."
+            more="reads the same tables"
+            info={"The SQL warehouse is a serverless engine for BI queries. Genie, dashboards, and JDBC or ODBC tools all send SQL here. The warehouse reads the Delta tables Spark wrote, applies the Catalog grant, and returns rows.\n\nAn idle warehouse scales down, so a quiet dashboard does not keep machines running. A burst of questions scales it back up."}
             {...node} />
           <DbNode x={c[2]} y={pY} label="MODEL" label2="SERVING"
             detail="real-time inference"
-            info="Model Serving hosts MLflow-registered models behind a REST endpoint. It auto-scales to handle burst traffic and can serve foundation models from the Foundation Model APIs alongside custom fine-tuned models."
+            more="answers one request"
+            info={"Model Serving hosts a model behind a REST endpoint. An agent or an app sends one request and gets one prediction or completion back. Serving loads a named version from the MLflow registry, including its signature and files, and scales with the request rate.\n\nCustom models and foundation-model endpoints are both served this way. AI Gateway can stand in front and keep a record of each call."}
             {...node} />
           <DbNode x={c[3]} y={pY} label="LAKEBASE" label2="POSTGRES"
             detail="managed Postgres"
-            info="Lakebase is a managed Postgres that keeps operational data in sync with Delta Lake. Apps write live transactional data to Postgres; Lakebase streams those changes into bronze tables so batch and real-time pipelines share one truth."
+            more="live reads and writes"
+            info={"Lakebase is managed Postgres for live application data. Business apps insert, update, and read rows with short transactions. Each change is captured and streamed into a Delta table, so Spark, the warehouse, and agents see the same records shortly after the app writes them.\n\nCatalog governs the Postgres tables and the Delta tables they land in. The app keeps its fast reads and writes on Postgres."}
             {...node} />
 
           {/* Storage layer nodes */}
           <DbNode x={c[0]} y={sY} label="DELTA TABLES" sublabel="shared by 1 and 2"
             detail="ACID object storage"
-            info="Delta Lake adds transactions, schema enforcement, and time-travel on top of Parquet files in cloud object storage. Spark writes them; the SQL Warehouse reads them. Both user groups query the same physical data."
+            more="one copy, many readers"
+            info={"Delta tables are Parquet files in the enterprise cloud account, with transactions, schema checks, and time travel. A commit finishes as a whole, so a reader sees the previous version or the new one. Time travel can reopen an earlier version for an audit or a restatement.\n\nSpark writes these tables. The SQL warehouse reads the same files. The engineering path and the BI path meet on this one copy."}
             {...node} />
           <DbNode x={c[2]} y={sY} label="MODELS" sublabel="MLflow, docs"
             detail="model and file registry"
-            info="The MLflow Model Registry stores versioned model artifacts (weights, signatures, conda envs). Feature tables and vector indexes also live here. Model Serving loads directly from this registry."
+            more="weights and vector index"
+            info={"The MLflow registry stores each model version: weights, signature, and the files needed to load it. A training run in a notebook logs the version, and someone promotes it when it is ready to serve. Feature tables and vector indexes sit here too, including the document indexes agents search.\n\nModel Serving and agents load a named version. Catalog decides who may register a model and who may call it."}
             {...node} />
           <DbNode x={c[3]} y={sY} label="SYNCED" sublabel="to Delta"
             detail="Postgres CDC to Delta"
-            info="Changes from Lakebase Postgres are streamed into Delta Tables via CDC. Business apps get low-latency Postgres reads while analytics pipelines and AI features consume the same data as Delta without ETL delay."
+            more="app changes land here"
+            info={"Changes in Lakebase Postgres are captured and written into Delta tables. Each insert, update, and delete becomes a change record and lands in the synced table. The app keeps reading and writing Postgres. Notebooks, the warehouse, and agents read the Delta copy.\n\nA short lag is normal while the change travels. The two stores stay aligned as records arrive, so analytics uses the same data the app just wrote."}
             {...node} />
 
           {/* Right legend */}
           <text x="845" y="166" className="fill-muted font-mono text-[11px] uppercase">HOW TO READ IT</text>
           {([
             { y: 192, lines: ["Engineers' notebooks and", "jobs run on Spark, which", "writes Delta tables."] },
-            { y: 232, lines: ["Genie and dashboards send", "SQL to the warehouse,", "which reads the same tables."] },
-            { y: 320, lines: ["Agents call models through", "AI Gateway; serving loads", "MLflow models and searches", "documents."] },
-            { y: 400, lines: ["Apps keep live data in", "Lakebase, synced to Delta."] },
+            { y: 260, lines: ["Genie and dashboards send", "SQL to the warehouse,", "which reads the same tables."] },
+            { y: 330, lines: ["Agents call models through", "AI Gateway; serving loads", "MLflow models and searches", "documents."] },
+            { y: 405, lines: ["Apps keep live data in", "Lakebase, synced to Delta."] },
           ] as { y: number; lines: string[] }[]).map((item, i) => (
             <g key={item.y}>
               <circle cx="855" cy={item.y} r="9" fill="#101010" />
@@ -292,7 +302,9 @@ function DatabricksConnectDiagram() {
           style={{ left: tip.x, top: tip.y }}
         >
           <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">{tip.title}</p>
-          <p className="mt-1 text-sm leading-snug text-faint">{tip.body}</p>
+          {tip.body.split("\n\n").map((para) => (
+            <p key={para} className="mt-2 text-sm leading-snug text-faint first:mt-1">{para}</p>
+          ))}
         </div>
       ) : null}
     </section>
@@ -867,12 +879,12 @@ export function TtsSwitch() {
                 </thead>
                 <tbody>
                   {[
-                    ["Delta Lake, Iceberg", "Open table formats on cloud storage", "Open formats limit lock-in"],
                     ["Unity Catalog", "Permissions, lineage, row and column masks", "Proves to auditors who saw what"],
+                    ["Delta Lake, Iceberg", "Open table formats on cloud storage", "Open formats limit lock-in"],
                     ["Lakeflow", "Ingest and transform data, also no-code", "Feeds from core systems, cards, payments"],
-                    ["Lakebase", "Managed Postgres for apps and agents", "App state next to analytical data"],
                     ["Databricks SQL", "Warehouse queries and dashboards", "Regulatory and management reporting"],
                     ["Genie", "Turns plain questions into SQL", '"What is our NPS?" without SQL'],
+                    ["Lakebase", "Managed Postgres for apps and agents", "App state next to analytical data"],
                     ["MLflow, Model Serving", "Train, track and serve models", "Fraud, credit scoring, churn"],
                     ["AI Gateway", "Permissions, limits, guardrails, usage logs", "Governed access to LLMs"],
                     ["Vector Search", "Search over embedded documents", "Policy and procedure assistants"],
@@ -1152,9 +1164,9 @@ export function TtsSwitch() {
 
       {view === "bank" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Seven enterprise workloads">
+          <Section eyebrow="Seven workflows">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Common use cases at enterprises and the Databricks products each one uses.
+              Common use cases and the Databricks products each one uses.
             </p>
             <div className="mt-8 overflow-x-auto">
               <table className="w-full min-w-[48rem] text-left text-sm">

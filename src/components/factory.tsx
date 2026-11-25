@@ -52,13 +52,13 @@ export function Factory() {
       </p>
 
       <div className="mt-5 border border-line bg-sunken px-5 py-6 lg:px-8">
-        <div className="grid items-center gap-8 lg:grid-cols-[11rem_minmax(0,1fr)_auto_minmax(0,1.3fr)]">
-          <p className="text-lg leading-snug tracking-[-0.03em]">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+          <p className="shrink-0 text-lg leading-snug tracking-[-0.03em] lg:w-44">
             Our planner vs typical agentic systems
           </p>
 
-          <div className="flex items-center justify-center">
-            <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 justify-center">
+            <div className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-3">
               <Node>State_Uncertainty_Goal</Node>
               <Arrow direction="right" className="text-accent" />
               <Node>Policy</Node>
@@ -66,13 +66,7 @@ export function Factory() {
               <Node>Action</Node>
               <Arrow direction="right" />
               <Node>Tools</Node>
-            </div>
-          </div>
-
-          <span className="h-px bg-line-strong lg:h-16 lg:w-px lg:mx-8" />
-
-          <div className="w-fit max-w-full">
-            <div className="flex flex-wrap items-center gap-2">
+              <span className="mx-4 h-px w-8 bg-line-strong lg:mx-6 lg:h-16 lg:w-px" />
               <Node>ChatGPT</Node>
               <Arrow direction="right" className="text-accent" />
               <Node>Skills</Node>

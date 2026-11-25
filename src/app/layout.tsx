@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <Header />
         <div aria-hidden className="h-[72px] shrink-0" />
-        <main>{children}</main>
+        <main className="min-h-[calc(100dvh-72px)]">{children}</main>
         <Footer />
         <ScrollToTop />
       </body>

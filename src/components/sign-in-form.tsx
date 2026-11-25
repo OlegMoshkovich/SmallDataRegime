@@ -42,7 +42,7 @@ export function SignInForm() {
           type="password"
           autoComplete="current-password"
           autoFocus
-          placeholder="_"
+          placeholder=""
           value={password}
           onChange={(e) => { setPassword(e.target.value); setError(false); }}
           className="h-11 border border-line bg-surface px-3 font-mono text-sm text-foreground outline-none focus:border-foreground placeholder:text-faint"

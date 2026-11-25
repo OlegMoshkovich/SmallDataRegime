@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -21,8 +19,7 @@ export function SignInForm() {
     });
 
     if (res.ok) {
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } else {
       setError(true);
       setPassword("");

@@ -77,6 +77,8 @@ export function Factory() {
         </div>
       </div>
 
+      <div className="mt-6 border-t border-line" />
+
       <div className="mt-6 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
         <div className="lg:col-start-3 lg:row-start-1">
           <Block title="Optimizer">

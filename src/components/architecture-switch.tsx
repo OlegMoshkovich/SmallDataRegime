@@ -1007,18 +1007,7 @@ export function ArchitectureSwitch() {
               <span className="size-1.5 bg-accent" aria-hidden />
               Architecture
             </p>
-            <p className="mt-4 max-w-xl text-base leading-snug text-faint">
-              The orchestrator is the main agent the human works with. It opens the right
-              document, calls the right agent, and runs whichever model the privacy of the request
-              allows.
-            </p>
-            <p className="mt-5 max-w-4xl text-base leading-relaxed text-faint">
-              The human types into one chat; applications call one API; both reach the same gateway.
-              The human never has to open a system, pick an agent, or choose a model. The
-              orchestrator answers right there in the chat, naming the document it opened and the
-              agent that replied. Behind the scenes, the gateway is what decides every request.
-            </p>
-            <p className="mt-3 max-w-4xl text-base leading-relaxed text-faint">
+            <p className="mt-4 max-w-4xl text-base leading-relaxed text-faint">
               We write it in TypeScript and ship it as containers. The agent harnesses, document
               retrieval, and the local models all run beside the gateway, right next to the GPUs.
               Who may see what, which model serves each use case, the budgets, the logging — all of

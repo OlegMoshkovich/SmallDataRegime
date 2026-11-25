@@ -1128,45 +1128,49 @@ export function TtsSwitch() {
   return (
     <div className="min-w-0">
       <div className="mb-4 flex flex-wrap items-center gap-4">
-        <button
-          type="button"
-          aria-pressed={view === "demo"}
-          onClick={() => setView("demo")}
-          className={`group relative inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize ${
-            view === "demo"
-              ? "border-transparent bg-ink text-paper [--stripe:rgba(255,255,255,0.18)]"
-              : "border-line-strong bg-background text-foreground [--stripe:rgba(0,0,0,0.14)]"
-          }`}
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            Demo <ArrowRight />
-          </span>
-          <span
-            aria-hidden
-            className="stripe-hover pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
-          />
-        </button>
-        <div
-          className="ml-auto flex w-fit max-w-full flex-wrap justify-end gap-2 lg:gap-0 lg:border lg:border-line"
-          role="group"
-          aria-label="View"
-        >
-          {views.filter((item) => item.id !== "demo").map((item, index) => {
-            const selected = view === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => setView(item.id)}
-                className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
-                  index > 0 ? "lg:border-l lg:border-line" : ""
-                } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
-              >
-                {item.label}
-              </button>
-            );
-          })}
+        <div className="flex w-full max-w-full flex-wrap items-center gap-2 lg:contents">
+          <button
+            type="button"
+            aria-pressed={view === "demo"}
+            onClick={() => setView("demo")}
+            className={`group relative inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize ${
+              view === "demo"
+                ? "border-transparent bg-ink text-paper [--stripe:rgba(255,255,255,0.18)]"
+                : "border-line-strong bg-background text-foreground [--stripe:rgba(0,0,0,0.14)]"
+            }`}
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Demo <ArrowRight />
+            </span>
+            <span
+              aria-hidden
+              className="stripe-hover pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
+            />
+          </button>
+          <div
+            className="contents lg:ml-auto lg:flex lg:w-fit lg:max-w-full lg:flex-wrap lg:justify-end lg:gap-0 lg:border lg:border-line"
+            role="group"
+            aria-label="View"
+          >
+            {views
+              .filter((item) => item.id !== "demo")
+              .map((item, index) => {
+                const selected = view === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setView(item.id)}
+                    className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
+                      index > 0 ? "lg:border-l lg:border-line" : ""
+                    } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+          </div>
         </div>
       </div>
 

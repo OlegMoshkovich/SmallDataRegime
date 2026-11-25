@@ -703,13 +703,15 @@ function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
 
   return (
     <div className="px-4 py-6">
-      <div className="mx-auto grid w-max grid-cols-[auto_auto_auto] justify-center lg:w-full lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="mx-auto grid w-max min-w-full grid-cols-[1fr_auto_1fr]">
         <p className="flex items-center justify-end gap-1.5 self-center pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase">
           <span className="size-1.5 bg-accent" />
           Unity Catalog
         </p>
         <span className="size-10 justify-self-center self-center bg-foreground" />
-        <div />
+        <p className="invisible pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase" aria-hidden>
+          Unity Catalog
+        </p>
         {layers.map((layer, index) => {
           return (
             <Fragment key={layer.id}>
@@ -739,7 +741,9 @@ function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
                 </div>
                 {index < layers.length - 1 ? <span className="w-px flex-1 bg-foreground" /> : null}
               </div>
-              <div />
+              <p className="invisible mt-6 pr-3 text-right font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase" aria-hidden>
+                {layer.title}
+              </p>
             </Fragment>
           );
         })}
@@ -1250,7 +1254,7 @@ export function TtsDemo() {
             <FlowDiagram route={null} step={0} />
           </div>
         </div>
-        <div className="grid min-h-0 w-full flex-1 items-stretch gap-4 lg:absolute lg:inset-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+        <div className="grid min-h-0 w-full flex-1 items-stretch gap-4 lg:absolute lg:inset-0 lg:h-full lg:grid-rows-1 lg:overflow-hidden lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
           <div className={`flex h-full min-h-0 flex-col overflow-hidden border border-line bg-surface ${choice !== null ? "max-lg:hidden" : ""}`}>
             <div className="flex shrink-0 flex-wrap gap-2 border-b border-line p-3">
               {samples.map((sample) => (
@@ -1297,7 +1301,7 @@ export function TtsDemo() {
               <OperateToggle value={operateView} onSelect={choose} />
               <DiagramTab open={mapOpen} onClick={() => setMapOpen(true)} />
             </div>
-            <div className="h-0 min-h-0 min-w-0 max-w-full flex-1 overflow-y-auto max-lg:overflow-x-auto">
+            <div className="h-0 min-h-0 min-w-0 max-w-full flex-1 overflow-auto overscroll-contain">
               <div className={operateView === "diagram" ? "" : "hidden"}>
                 <FlowDiagram key={play} route={route} step={step} />
               </div>

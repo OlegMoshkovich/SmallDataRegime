@@ -351,7 +351,7 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
         >
           {(
             [
-              ["key", "Key"],
+              ["key", "OPEN_ROUTER"],
               ["model", "Model"],
               ["github", "GitHub"],
             ] as const

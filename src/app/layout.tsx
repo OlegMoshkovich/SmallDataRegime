@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MIResearchLab",
-    template: "%s | MIResearchLab",
+    default: "MI_research_lab",
+    template: "%s | MI_research_lab",
   },
   description:
     "Post-train language and policy models from a small, curated set of preferences, traces, and reward specs. Sample efficient. Model agnostic. Fully owned.",

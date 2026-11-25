@@ -118,7 +118,7 @@ const steps: Step[] = [
     name: "Agent",
     note: "Handed the request. It keeps its own systems.",
     description:
-      "The orchestrator hands the request to the agent. The agent keeps its own systems.",
+      "The orchestrator hands the request to the agent. The agent keeps its own systems and opens them through MCP.",
     x: 500,
     y: 668,
     side: "above",
@@ -138,17 +138,6 @@ const steps: Step[] = [
   },
   {
     n: "11",
-    name: "MCP",
-    note: "Opens the systems it may use.",
-    description: "The agent opens the systems it may use.",
-    x: 460,
-    y: 828,
-    side: "right",
-    tone: "hollow",
-    shift: { x: 22, y: 18, align: "left" },
-  },
-  {
-    n: "12",
     name: "Orchestrator",
     note: "Serves the answer back.",
     description: "The completed request comes back. The orchestrator serves the answer in the same chat.",
@@ -497,9 +486,7 @@ export function SystemPath() {
       <figcaption className="flex flex-col gap-2 border-t border-line px-4 py-4 lg:flex-row lg:items-baseline lg:justify-between lg:px-6">
         <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
           <span className="size-1.5 bg-accent" aria-hidden />
-          Request
-          <span className="text-muted">·</span>
-          <span className="text-muted">Flow</span>
+          Flow
         </p>
         <p className="text-sm leading-snug text-faint">
           Every reasoning step is kept with the trace.

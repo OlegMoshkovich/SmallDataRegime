@@ -939,9 +939,9 @@ export function ArchitectureSwitch() {
       {view === "summary" ? (
         <div className="grid min-w-0 gap-16 *:min-w-0">
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-              For enterprises
-            </p>
+            <h1 className="max-w-3xl text-[2.125rem] leading-[1.08] tracking-[-0.045em] lg:text-[2.75rem]">
+              Orchestration through a centralized gateway is at the core of our system.
+            </h1>
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               The orchestrator is the main agent the human interacts with. It opens the right
               document, calls the right agent, and runs the model the privacy of the request allows.

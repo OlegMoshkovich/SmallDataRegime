@@ -407,15 +407,14 @@ function OperateToggle({
   value,
   onSelect,
 }: {
-  value: "detail" | "diagram" | null;
-  onSelect: (id: "detail" | "diagram") => void;
+  value: "diagram" | null;
+  onSelect: (id: "diagram") => void;
 }) {
   return (
     <div className="inline-flex shrink-0 border border-line" role="group" aria-label="How the system operates">
       {(
         [
-          { id: "detail", label: "Detail" },
-          { id: "diagram", label: "Diagram" },
+          { id: "diagram", label: "Trajectory" },
         ] as const
       ).map((item, index) => {
         const selected = value === item.id;
@@ -446,10 +445,10 @@ export function DemoChat({
   const [route, setRoute] = useState<Route | null>(null);
   const [step, setStep] = useState(0);
   const [openDoc, setOpenDoc] = useState<string | null>(null);
-  const [choice, setChoice] = useState<"detail" | "diagram" | null>(null);
+  const [choice, setChoice] = useState<"diagram" | null>(null);
   const operateView = choice ?? "diagram";
 
-  function choose(id: "detail" | "diagram") {
+  function choose(id: "diagram") {
     const desktop = window.matchMedia("(min-width: 1024px)").matches;
     setChoice((current) => (desktop || current !== id ? id : null));
   }

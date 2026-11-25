@@ -53,7 +53,6 @@ export function Mark({
       onMouseLeave={controlled ? undefined : () => setLocal(shuffle ? rest : null)}
     >
       {cells.map((cell, index) => {
-        const hollow = Boolean(open?.[index]);
         return (
           <rect
             key={`${cell.x}-${cell.y}`}
@@ -61,10 +60,9 @@ export function Mark({
             y={cell.y}
             width="5"
             height="5"
-            fill={hollow ? "#ffffff" : "currentColor"}
-            stroke={hollow ? "currentColor" : "none"}
-            strokeWidth={hollow ? 0.9 : 0}
-            style={{ transition: "fill 140ms linear" }}
+            fill="#ffffff"
+            stroke="none"
+            strokeWidth={0}
           />
         );
       })}

@@ -56,14 +56,6 @@ export function AgentsPanel() {
       <div className="mt-8 grid min-w-0 items-start gap-10 *:min-w-0 lg:grid-cols-2 lg:gap-16">
         <div className="grid gap-8">
           <div>
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">What an agent is</p>
-            <p className="mt-2 max-w-xl text-base leading-relaxed text-faint">
-              A harness put together in the small-data regime, with explicit management of state,
-              uncertainty, goal, and policy. It is a TypeScript package declaring its steps, tools,
-              allowed models and output schema. An agent-worker container runs it.
-            </p>
-          </div>
-          <div>
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Durable runs</p>
             <p className="mt-2 max-w-xl text-base leading-relaxed text-faint">
               Jobs in Postgres (pg-boss): a run survives a restart, can wait days for a human, and

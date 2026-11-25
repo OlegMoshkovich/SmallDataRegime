@@ -51,7 +51,40 @@ export function Factory() {
         Proprietory methods : Recursive self-improvement
       </p>
 
-      <div className="mt-5 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
+      <div className="mt-5 border border-line bg-sunken px-5 py-6 lg:px-8">
+        <div className="grid items-center gap-8 lg:grid-cols-[11rem_minmax(0,1fr)_auto_minmax(0,1.3fr)]">
+          <p className="text-lg leading-snug tracking-[-0.03em]">
+            Our planner vs typical agentic systems
+          </p>
+
+          <div className="flex items-center justify-center">
+            <div className="flex gap-2">
+              <Node>ChatGPT</Node>
+              <Node>Tools + skills</Node>
+            </div>
+          </div>
+
+          <span className="h-px bg-line-strong lg:h-16 lg:w-px" />
+
+          <div className="w-fit max-w-full">
+            <div className="flex flex-wrap items-center gap-2">
+              <Node>
+                State
+                <br />
+                Uncertainty
+                <br />
+                Goal
+              </Node>
+              <Arrow direction="right" />
+              <Node>Policy</Node>
+              <Arrow direction="right" />
+              <Node>Action</Node>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto] lg:gap-x-3 lg:gap-y-3">
         <div className="lg:col-start-3 lg:row-start-1">
           <Block title="Optimizer">
             Optimizes the components of the system to improve success criteria over
@@ -98,39 +131,6 @@ export function Factory() {
             The output is shaped according to the criteria. It could be a simple
             answer, a complex report, or a data room.
           </Block>
-        </div>
-      </div>
-
-      <div className="mt-6 border border-line bg-sunken px-5 py-6 lg:px-8">
-        <div className="grid items-center gap-8 lg:grid-cols-[11rem_minmax(0,1fr)_auto_minmax(0,1.3fr)]">
-          <p className="text-lg leading-snug tracking-[-0.03em]">
-            Our planner vs typical agentic systems
-          </p>
-
-          <div className="flex items-center justify-center">
-            <div className="grid gap-2">
-              <Node>ChatGPT</Node>
-              <Node>Tools + skills</Node>
-            </div>
-          </div>
-
-          <span className="h-px bg-line-strong lg:h-16 lg:w-px" />
-
-          <div className="w-fit max-w-full">
-            <div className="flex flex-wrap items-center gap-2">
-              <Node>
-                State
-                <br />
-                Uncertainty
-                <br />
-                Goal
-              </Node>
-              <Arrow direction="right" />
-              <Node>Policy</Node>
-              <Arrow direction="right" />
-              <Node>Action</Node>
-            </div>
-          </div>
         </div>
       </div>
     </section>

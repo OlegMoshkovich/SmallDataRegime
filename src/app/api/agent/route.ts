@@ -104,7 +104,7 @@ export async function POST(request: Request) {
   }
 
   if (!openRouterReady()) {
-    return Response.json({ error: "Add an OpenRouter API key to turn the agent on." }, { status: 403 });
+    return Response.json({ error: "Add an OpenRouter API key and connect GitHub to turn the agent on." }, { status: 403 });
   }
 
   const encoder = new TextEncoder();

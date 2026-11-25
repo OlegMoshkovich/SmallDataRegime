@@ -376,7 +376,7 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
           <p className="text-sm text-muted">
             {ready
               ? "Ask it to draft a file in the workspace."
-              : "Add an OpenRouter API key to turn the agent on."}
+              : "Add an OpenRouter API key and connect GitHub to turn the agent on."}
           </p>
         ) : (
           lines.map((line) => (

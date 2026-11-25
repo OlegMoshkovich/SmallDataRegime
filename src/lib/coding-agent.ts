@@ -161,7 +161,7 @@ function startWorker() {
 
 export async function* runCodingAgent(text: string, signal: AbortSignal, model = currentOpenRouterModel()): AsyncGenerator<AgentEvent> {
   if (!openRouterReady()) {
-    yield { kind: "error", text: "Add an OpenRouter API key to turn the agent on." };
+    yield { kind: "error", text: "Add an OpenRouter API key and connect GitHub to turn the agent on." };
     yield { kind: "done" };
     return;
   }

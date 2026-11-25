@@ -1010,7 +1010,7 @@ export function ArchitectureSwitch() {
             <p className="mt-4 max-w-4xl text-base leading-relaxed text-faint">
               We write it in TypeScript and ship it as containers. The agent harnesses, document
               retrieval, and the local models all run beside the gateway, right next to the GPUs.
-              Who may see what, which model serves each use case, the budgets, the logging — all of
+              Who may see what, which model serves each use case, the budgets, the logging: all of
               it is configuration, reviewed like code.
             </p>
 

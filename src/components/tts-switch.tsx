@@ -438,7 +438,7 @@ const databaseFamilies: {
     query: "SQL from several engines",
     example: "SELECT * FROM prod.payments.transactions VERSION AS OF 42",
     use: "Cheap shared history for BI, ML, and replay",
-    body: "The bytes live as files, usually Parquet, in object storage (S3, ADLS, GCS). A table format — Delta, Iceberg, or Hudi — adds a log that says which files currently form the table, so readers get transactions, schema changes, and time travel. A catalog maps the name prod.payments.transactions to those files and holds permissions. Spark, Trino, a warehouse, or Python can read the same table. Raw files can sit beside tables: the reader supplies the schema later (schema-on-read). This is the shared history under analytics and models, and a poor place to authorize a payment.",
+    body: "The bytes live as files, usually Parquet, in object storage (S3, ADLS, GCS). A table format (Delta, Iceberg, or Hudi) adds a log that says which files currently form the table, so readers get transactions, schema changes, and time travel. A catalog maps the name prod.payments.transactions to those files and holds permissions. Spark, Trino, a warehouse, or Python can read the same table. Raw files can sit beside tables: the reader supplies the schema later (schema-on-read). This is the shared history under analytics and models, and a poor place to authorize a payment.",
   },
   {
     title: "Document",
@@ -706,7 +706,7 @@ function DatabasesView() {
 
       <Section eyebrow="Freshness">
         <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-          Once a write commits, who gets to see it — and how soon. The product decides which of
+          Once a write commits, who gets to see it and how soon. The product decides which of
           these contracts a screen is allowed to lean on.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -1178,7 +1178,7 @@ export function TtsSwitch() {
         <div className="grid min-w-0 gap-6 *:min-w-0">
           <Section eyebrow="Data Ecosystem : 6 layers">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              One cloud platform for everything your data does — storage, pipelines, analytics, machine learning, and AI agents — all kept under a single catalog that handles permissions, lineage, and discovery.
+              One cloud platform for everything your data does: storage, pipelines, analytics, machine learning, and AI agents, all kept under a single catalog that handles permissions, lineage, and discovery.
             </p>
             <div className="mt-8 overflow-x-auto">
               <table className="w-full min-w-[36rem] text-left text-sm">
@@ -1382,7 +1382,7 @@ export function TtsSwitch() {
           <Section eyebrow="Five kinds of compute">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               Storage and compute are kept separate, so every kind of compute reads the same tables
-              — and you size and pay for each workload on its own terms.
+              and you size and pay for each workload on its own terms.
             </p>
             <div className="mt-8 overflow-x-auto">
               <table className="w-full min-w-[40rem] text-left text-sm">
@@ -1417,7 +1417,7 @@ export function TtsSwitch() {
           <Section eyebrow="Existing databases">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               Copy the data in, or leave it where it sits and query from there. Either way, on-prem
-              databases need a network path from the cloud — a VPN or a private line.
+              databases need a network path from the cloud: a VPN or a private line.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {[
@@ -1452,7 +1452,7 @@ export function TtsSwitch() {
 
           <Section eyebrow="Three ways to start">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Most companies work through all three in order — coexist first, land the priority
+              Most companies work through all three in order: coexist first, land the priority
               data, then migrate system by system.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -1530,7 +1530,7 @@ export function TtsSwitch() {
         <div className="grid min-w-0 gap-6 *:min-w-0">
           <Section eyebrow="Delta Lake">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Plain files that behave like database tables — Parquet underneath, with a transaction
+              Plain files that behave like database tables: Parquet underneath, with a transaction
               log on top. Iceberg readers get in through UniForm.
             </p>
             <CardGrid
@@ -1565,7 +1565,7 @@ export function TtsSwitch() {
 
           <Section eyebrow="Medallion architecture">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              A common naming pattern — prod.sales_bronze, prod.sales_silver, prod.sales_gold.
+              A common naming pattern: prod.sales_bronze, prod.sales_silver, prod.sales_gold.
               Access is granted layer by layer, and most people only ever see gold.
             </p>
             <div className="mt-8 overflow-x-auto">
@@ -1601,7 +1601,7 @@ export function TtsSwitch() {
 
           <Section eyebrow="Unity Catalog">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              A single place to handle permissions, lineage, audit, discovery, and sharing — across
+              A single place to handle permissions, lineage, audit, discovery, and sharing across
               every workspace you run.
             </p>
             <CardGrid

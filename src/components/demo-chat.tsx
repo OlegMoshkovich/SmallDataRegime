@@ -29,7 +29,7 @@ const docs: Record<string, Doc> = {
   checklist: {
     title: "Compliance checklist",
     system: "SharePoint",
-    body: "KYC refresh — owner missing, evidence missing.\nSanctions screen — owner Compliance, evidence attached.\nSource of funds — owner missing, evidence missing.\n\nMetadata is filled on one item of three.",
+    body: "KYC refresh: owner missing, evidence missing.\nSanctions screen: owner Compliance, evidence attached.\nSource of funds: owner missing, evidence missing.\n\nMetadata is filled on one item of three.",
   },
   "case-file": {
     title: "Case 1842",

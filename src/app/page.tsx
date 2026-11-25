@@ -36,7 +36,7 @@ export default function HomePage() {
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-snug text-faint lg:text-base">
             Shape a reward, train on a small set, and ship only the policies that
-            pass your evals — on a cluster, a lab machine, or an air-gapped host.
+            pass your evals on a cluster, a lab machine, or an air-gapped host.
           </p>
         </div>
         <ol className="mt-12 grid gap-6 lg:grid-cols-3">

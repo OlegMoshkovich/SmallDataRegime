@@ -24,9 +24,9 @@ function IsoCube({ x, y, accent = false }: { x: number; y: number; accent?: bool
   const left = `${x - 11},${y - 14} ${x},${y - 8} ${x},${y + 4} ${x - 11},${y - 2}`;
   const right = `${x},${y - 8} ${x + 11},${y - 14} ${x + 11},${y - 2} ${x},${y + 4}`;
   return (
-    <g stroke={accent ? "#de5c36" : "#101010"} strokeWidth="1.1" strokeLinejoin="miter">
+    <g stroke={accent ? "#FF5C00" : "#101010"} strokeWidth="1.1" strokeLinejoin="miter">
       <polygon points={left} fill={accent ? "#b84828" : "#e7e4e2"} />
-      <polygon points={right} fill={accent ? "#de5c36" : "#f7f6f5"} />
+      <polygon points={right} fill={accent ? "#FF5C00" : "#f7f6f5"} />
       <polygon points={top} fill={accent ? "#e97858" : "#ffffff"} />
     </g>
   );
@@ -211,17 +211,17 @@ function HostingMobile({
       <path
         d={`M${L + 14},${r1 - 8} H176 V${r4 - 22} H${R}`}
         fill="none"
-        stroke="#de5c36"
+        stroke="#FF5C00"
         strokeWidth="1.6"
       />
       <path
         d={`M${R + 14},${r4 - 2} H328 V996 H${frameX + frameW}`}
         fill="none"
-        stroke="#de5c36"
+        stroke="#FF5C00"
         strokeWidth="1.5"
         strokeDasharray={dash}
       />
-      <g fill="none" stroke="#de5c36" strokeWidth="1.35">
+      <g fill="none" stroke="#FF5C00" strokeWidth="1.35">
         <path d={`M${R},${r4 + 34} V708`} />
         <path d={`M${R - 3.5},${r4 + 40} l3.5,-6 l3.5,6`} />
         <path d={`M${R - 3.5},702 l3.5,6 l3.5,-6`} />
@@ -255,7 +255,7 @@ function HostingMobile({
           )
         }
       >
-        <rect x={frameX} y="708" width={frameW} height="36" fill="#ffffff" stroke="#de5c36" />
+        <rect x={frameX} y="708" width={frameW} height="36" fill="#ffffff" stroke="#FF5C00" />
         <text x={mid} y="730" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
           Ports 8001–8004 only
         </text>
@@ -544,13 +544,13 @@ function SummaryHosting() {
           <path
             d={`M${gateway.x + 14},${gateway.y - 8} C ${gateway.x + 150},${gateway.y + 24} ${model.x + 150},${model.y - 80} ${model.x + 12},${model.y - 18}`}
             fill="none"
-            stroke="#de5c36"
+            stroke="#FF5C00"
             strokeWidth="1.6"
           />
           <path
             d={`M${model.x + 18},${model.y - 2} H ${egressCenter} V 548`}
             fill="none"
-            stroke="#de5c36"
+            stroke="#FF5C00"
             strokeWidth="1.5"
             strokeDasharray={dash}
           />
@@ -564,7 +564,7 @@ function SummaryHosting() {
               </g>
             ))}
           </g>
-          <g fill="none" stroke="#de5c36" strokeWidth="1.35">
+          <g fill="none" stroke="#FF5C00" strokeWidth="1.35">
             <path d={`M${model.x},456 v36`} />
             <path d={`M${model.x - 3.5},462 l3.5,-6 l3.5,6`} />
             <path d={`M${model.x - 3.5},486 l3.5,6 l3.5,-6`} />
@@ -633,7 +633,7 @@ function SummaryHosting() {
               )
             }
           >
-            <rect x={model.x - 228} y="508" width="456" height="34" fill="#ffffff" stroke="#de5c36" />
+            <rect x={model.x - 228} y="508" width="456" height="34" fill="#ffffff" stroke="#FF5C00" />
             <text
               x={model.x}
               y="530"

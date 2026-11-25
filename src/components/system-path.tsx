@@ -415,7 +415,7 @@ export function SystemPath() {
                 y1={trimmed.y1}
                 x2={trimmed.x2}
                 y2={trimmed.y2}
-                stroke={lit ? "#de5c36" : "currentColor"}
+                stroke={lit ? "#FF5C00" : "currentColor"}
                 strokeWidth={lit ? 1.75 : 1.25}
                 vectorEffect="non-scaling-stroke"
               />

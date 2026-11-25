@@ -151,7 +151,7 @@ export function ConsoleMock() {
           <path d="M0 50 H640" stroke="rgba(255,255,255,0.08)" />
           <path d={model.curve} fill="none" stroke="#fafafa" strokeWidth="2" />
           <path d={`${model.curve} V 170 H 8 Z`} fill="rgba(222,92,54,0.28)" />
-          <circle cx={model.mark.x} cy={model.mark.y} r="3.5" fill="#de5c36" />
+          <circle cx={model.mark.x} cy={model.mark.y} r="3.5" fill="#FF5C00" />
           <text
             x={labelOnLeft ? model.mark.x - 12 : model.mark.x + 12}
             y={model.mark.y - 8}

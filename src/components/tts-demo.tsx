@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Piece = {
   id: string;
@@ -257,54 +258,49 @@ const samples: { label: string; query: string; route: Route }[] = [
   },
   {
     label: "Customer 360",
-    query: "Build one profile and offer the next product.",
+    query: "Build Amina Okafor's profile and offer her the next product.",
     route: {
       access: [
         {
           id: "engineers",
           label: "Data engineers",
-          note: "The profile joins products and channels. That pipeline belongs to the engineers, so they are the ones who build it.",
+          note: "Amina is customer 12. Her products and channels have to be joined into one profile, and that pipeline belongs to the engineers.",
         },
         {
           id: "apps",
           label: "Business apps",
-          note: "The offer is shown on a screen a person is using. The business app is the place that reads the live profile.",
+          note: "The offer is shown on her screen. The business app reads her one live row.",
         },
       ],
       control: [
         {
           id: "jobs",
           label: "Notebooks and jobs",
-          note: "The profile is rebuilt on a schedule, from bronze to gold. A job is how that rebuild stays repeatable.",
+          note: "Lakeflow rebuilds her profile on a schedule and writes it to Delta Lake. A job is how that rebuild stays repeatable.",
         },
         {
           id: "apps",
           label: "Databricks Apps",
-          note: "The offer screen is an internal app. It runs on the platform so it keeps the signed-in user's catalog grants.",
+          note: "Her offer screen is an app on the platform, so it keeps the signed-in user's Unity Catalog grants.",
         },
       ],
       compute: [
         {
           id: "spark",
           label: "Spark clusters",
-          note: "The profile is a large join. Spark is the engine that builds it and writes the gold table.",
-        },
-        {
-          id: "lakebase",
-          label: "Lakebase Postgres",
-          note: "The offer screen reads one live row and writes the response. Postgres holds that live profile.",
+          note: "Her profile is a join across products and channels. Spark is the engine Lakeflow uses to build that row.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "The analytical profile and its history stay in one table. Jobs and the warehouse both read it.",
+          note: "Delta Lake holds her identity, her joined profile, and its history. Databricks SQL and Genie read that same row.",
         },
         {
-          id: "synced",
-          label: "Synced to Delta",
-          note: "The app writes Postgres. Those changes stream back into Delta, so the jobs read the same profile the app just updated.",
+          id: "lakebase",
+          label: "Lakebase Postgres",
+          note: "Lakebase holds the live row her app reads, and the offer the app writes back. That write syncs into Delta Lake.",
         },
       ],
       story: [
@@ -312,59 +308,59 @@ const samples: { label: string; query: string; route: Route }[] = [
           id: "notebooks",
           at: 1,
           system: "Notebooks",
-          text: "The engineers' notebooks are opened and start the job that joins products and channels into one profile.",
+          text: "The engineers' notebooks open and start the Lakeflow job that joins Amina's products and channels into one profile.",
         },
         {
           id: "app",
           at: 1,
           system: "Offer app",
-          text: "The offer screen opens to read one customer's live profile. It does not scan the historical tables.",
+          text: "Her offer screen opens and asks for customer 12. It reads the live row in Lakebase.",
         },
         {
           id: "job",
           at: 2,
           system: "Profile job",
-          text: "The job opens the source tables, writes one profile, and stops. The sources are left in place.",
+          text: "The job opens her source tables in Delta Lake, writes one profile row, and stops. The sources stay where they are.",
         },
         {
           id: "screen",
           at: 2,
           system: "App screen",
-          text: "The screen opens on the platform. It can see only the profile the catalog allows.",
+          text: "The screen opens on Databricks Apps. Unity Catalog allows only Amina's profile.",
         },
         {
           id: "spark",
           at: 3,
           system: "Spark",
-          text: "Spark opens the source tables, writes the profile, and can shut down. The profile remains.",
+          text: "Spark opens her tables, writes the joined profile to Delta Lake, and can shut down. The row remains.",
         },
         {
           id: "postgres",
-          at: 3,
-          system: "Lakebase Postgres",
-          text: "Postgres opens the live profile. The app reads it and can update it. That update is the offer, not the history.",
+          at: 4,
+          system: "Lakebase",
+          text: "Lakebase opens her live row. The app reads it and writes the offer. That row is what her screen shows.",
         },
         {
           id: "delta",
           at: 4,
-          system: "Delta tables",
-          text: "The profile table is opened and the historical profile is written there.",
+          system: "Delta Lake",
+          text: "Her profile table opens and the joined row is written there. Databricks SQL and Genie can read that same row.",
         },
         {
           id: "sync",
           at: 4,
           system: "Sync",
-          text: "The sync opens and copies the Postgres change into that Delta table. After that, the app and the jobs are looking at one profile.",
+          text: "The sync copies the offer from Lakebase into her Delta Lake profile. The app and the next job then read one row.",
         },
         {
           id: "catalog",
           at: 4,
           system: "Unity Catalog",
-          text: "The catalog allows the job, the app, and both copies. It does not store the profile itself.",
+          text: "Unity Catalog allows the job, the app, and both copies, and records who opened Amina's record.",
         },
       ],
       reply:
-        "Customer 360 uses the engineer path and the app path. Lakeflow runs on Spark and writes the profile to Delta tables. The business app reads the live profile from Lakebase. Lakebase syncs those changes back to Delta. Unity Catalog governs the table and the app.",
+        "Amina Okafor is customer 12. Lakeflow runs on Spark and writes her joined profile to Delta Lake, where Databricks SQL and Genie can read it. Her app reads the live row from Lakebase and writes the offer there. That write syncs back into Delta Lake. Unity Catalog registers both copies and records who opened her record.",
     },
   },
   {
@@ -777,7 +773,327 @@ function Description({ route, step }: { route: Route | null; step: number }) {
   );
 }
 
-type OperateId = "diagram" | "description";
+type OperateId = "diagram" | "description" | "map";
+
+const setupColumns: {
+  access: { id: string; label: string };
+  control: { id: string; label: string; detail: string; more: string };
+  compute: { id: string; label: string; detail: string; more: string } | null;
+  storage: { id: string; label: string; detail: string; more: string } | null;
+}[] = [
+  {
+    access: { id: "engineers", label: "Data engineers" },
+    control: { id: "jobs", label: "Lakeflow jobs", detail: "Designer and notebooks", more: "Writes the tables" },
+    compute: { id: "spark", label: "Spark clusters", detail: "Distributed processing", more: "Runs jobs at scale" },
+    storage: { id: "delta", label: "Delta Lake, Iceberg", detail: "Open table formats", more: "One copy, many readers" },
+  },
+  {
+    access: { id: "analysts", label: "Analysts and BI tools" },
+    control: { id: "genie", label: "Genie and AI/BI", detail: "Dashboards, metric views", more: "Questions become SQL" },
+    compute: { id: "warehouse", label: "Databricks SQL", detail: "Warehouse queries", more: "Reads the same tables" },
+    storage: null,
+  },
+  {
+    access: { id: "ai-apps", label: "AI apps and agents" },
+    control: { id: "gateway", label: "Agent Bricks", detail: "AI Gateway routing", more: "Logs every model call" },
+    compute: { id: "serving", label: "Model serving", detail: "Foundation model APIs", more: "Answers one request" },
+    storage: { id: "models", label: "MLflow, Vector Search", detail: "Registry and embeddings", more: "Search the documents" },
+  },
+  {
+    access: { id: "apps", label: "Business apps" },
+    control: { id: "apps", label: "Databricks Apps", detail: "Hosted web apps", more: "Inherit catalog rights" },
+    compute: null,
+    storage: { id: "lakebase", label: "Lakebase Postgres", detail: "Managed Postgres", more: "Synced to Delta" },
+  },
+];
+
+function pieceOn(route: Route | null, layer: "access" | "control" | "compute" | "storage", id: string) {
+  return route?.[layer].find((item) => item.id === id) ?? null;
+}
+
+function SetupMap({
+  route,
+  step,
+  expanded = false,
+}: {
+  route: Route | null;
+  step: number;
+  expanded?: boolean;
+}) {
+  function on(layer: "access" | "control" | "compute" | "storage", id: string) {
+    if (!route) return false;
+    const min = layer === "access" ? 1 : layer === "control" ? 2 : layer === "compute" ? 3 : 4;
+    return step >= min && Boolean(pieceOn(route, layer, id));
+  }
+
+  const catalogOn = Boolean(route && step >= 1);
+
+  function card(
+    layer: "access" | "control" | "compute" | "storage",
+    node: { id: string; label: string; detail?: string; more?: string },
+  ) {
+    const active = on(layer, node.id);
+    const why = active ? pieceOn(route, layer, node.id)?.note : "";
+    return (
+      <div
+        className={`border bg-surface text-center ${expanded ? "px-3 py-3" : "px-1 py-1.5"} ${
+          active ? "border-foreground" : route ? "border-line opacity-35" : "border-line"
+        }`}
+      >
+        <p className={`font-mono uppercase leading-tight ${expanded ? "text-[0.7rem]" : "text-[0.55rem]"}`}>
+          {node.label}
+        </p>
+        {expanded && node.detail ? (
+          <p className="mt-2 text-sm leading-snug text-faint">
+            {node.detail}. {node.more}.
+          </p>
+        ) : null}
+        {expanded && why ? <p className="mt-2 text-left text-sm leading-relaxed text-faint">{why}</p> : null}
+      </div>
+    );
+  }
+
+  const band = expanded ? "px-3 py-4" : "px-1.5 py-2";
+
+  return (
+    <div className="grid min-w-[36rem] gap-3">
+      <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] border border-[#d6d3d2] bg-[#f4f3f2]">
+        <div className="px-2 py-3">
+          <p className="font-mono text-[0.6rem] tracking-[-0.01em] uppercase">Access</p>
+        </div>
+        <div className={`grid grid-cols-4 ${expanded ? "gap-3" : "gap-1.5"} ${band}`}>
+          {setupColumns.map((column) => (
+            <div key={column.access.id}>{card("access", column.access)}</div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] border border-[#d6d3d2] bg-[#f4f3f2]">
+        <div className="px-2 py-3">
+          <p className="font-mono text-[0.6rem] tracking-[-0.01em] uppercase">Control</p>
+          <p className={`mt-3 font-mono uppercase leading-tight ${catalogOn ? "text-accent" : "text-faint"} ${expanded ? "text-[0.7rem]" : "text-[0.55rem]"}`}>
+            Unity Catalog
+          </p>
+          {expanded ? <p className="mt-1 text-sm leading-snug text-faint">Permission fabric. Checks every query.</p> : null}
+        </div>
+        <div className={`grid grid-cols-4 ${expanded ? "gap-3" : "gap-1.5"} ${band}`}>
+          {setupColumns.map((column) => (
+            <div key={column.control.id + column.access.id}>{card("control", column.control)}</div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] border border-[#d6d3d2] bg-[#f4f3f2]">
+        <div className="px-2 py-3">
+          <p className="font-mono text-[0.6rem] tracking-[-0.01em] uppercase">Compute</p>
+        </div>
+        <div className={`grid grid-cols-4 ${expanded ? "gap-3" : "gap-1.5"} ${band}`}>
+          {setupColumns.map((column) =>
+            column.compute ? (
+              <div key={column.compute.id}>{card("compute", column.compute)}</div>
+            ) : (
+              <div key={column.access.id} />
+            ),
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] border border-[#d6d3d2] bg-[#f4f3f2]">
+        <div className="px-2 py-3">
+          <p className="font-mono text-[0.6rem] tracking-[-0.01em] uppercase">Storage</p>
+        </div>
+        <div className={`grid grid-cols-4 ${expanded ? "gap-3" : "gap-1.5"} ${band}`}>
+          {setupColumns.map((column) =>
+            column.storage ? (
+              <div key={column.storage.id}>{card("storage", column.storage)}</div>
+            ) : (
+              <div key={column.access.id} />
+            ),
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function windowOrigin() {
+  const width = Math.min(44 * 16, window.innerWidth - 32);
+  return {
+    x: Math.max(16, window.innerWidth - width - 12),
+    y: 88,
+  };
+}
+
+function MapView({
+  route,
+  step,
+  onClose,
+}: {
+  route: Route | null;
+  step: number;
+  onClose: () => void;
+}) {
+  const [pos, setPos] = useState({ x: 16, y: 16 });
+  const [size, setSize] = useState({ width: 704, height: 560 });
+  const [playStep, setPlayStep] = useState<number | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ dx: number; dy: number } | null>(null);
+  const resize = useRef<{ x: number; y: number; w: number; h: number } | null>(null);
+  const playTimers = useRef<number[]>([]);
+  const close = useRef(onClose);
+  close.current = onClose;
+  const shown = playStep ?? step;
+
+  function stopPlay() {
+    playTimers.current.forEach((timer) => window.clearTimeout(timer));
+    playTimers.current = [];
+  }
+
+  function schedule(from: number) {
+    const marks = [1, 2, 3, 4].filter((mark) => mark > from);
+    if (marks.length === 0) {
+      setPlaying(false);
+      return;
+    }
+    setPlaying(true);
+    marks.forEach((mark, index) => {
+      playTimers.current.push(
+        window.setTimeout(() => {
+          setPlayStep(mark);
+          if (mark === 4) setPlaying(false);
+        }, 1000 * (index + 1)),
+      );
+    });
+  }
+
+  function play() {
+    if (!route) return;
+    if (playing) {
+      stopPlay();
+      setPlaying(false);
+      return;
+    }
+    stopPlay();
+    const from = playStep === null || playStep >= 4 ? 0 : playStep;
+    if (from === 0) setPlayStep(0);
+    schedule(from);
+  }
+
+  useLayoutEffect(() => {
+    const width = Math.min(44 * 16, window.innerWidth - 32);
+    const height = Math.min(640, window.innerHeight - 112);
+    setPos(windowOrigin());
+    setSize({ width, height });
+  }, []);
+
+  useEffect(() => {
+    stopPlay();
+    setPlayStep(null);
+    setPlaying(false);
+  }, [route]);
+
+  useEffect(() => stopPlay, []);
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") close.current();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if ((event.target as HTMLElement).closest("button")) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drag.current = { dx: event.clientX - pos.x, dy: event.clientY - pos.y };
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!drag.current) return;
+    const width = panel.current?.offsetWidth ?? 320;
+    const nextX = event.clientX - drag.current.dx;
+    const nextY = event.clientY - drag.current.dy;
+    setPos({
+      x: Math.min(window.innerWidth - 120, Math.max(16 - width + 120, nextX)),
+      y: Math.min(window.innerHeight - 48, Math.max(0, nextY)),
+    });
+  }
+
+  function onPointerUp() {
+    drag.current = null;
+  }
+
+  function onResizeDown(event: React.PointerEvent<HTMLDivElement>) {
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resize.current = { x: event.clientX, y: event.clientY, w: size.width, h: size.height };
+  }
+
+  function onResizeMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!resize.current) return;
+    const maxW = window.innerWidth - pos.x - 12;
+    const maxH = window.innerHeight - pos.y - 12;
+    setSize({
+      width: Math.min(maxW, Math.max(420, resize.current.w + event.clientX - resize.current.x)),
+      height: Math.min(maxH, Math.max(280, resize.current.h + event.clientY - resize.current.y)),
+    });
+  }
+
+  function onResizeUp() {
+    resize.current = null;
+  }
+
+  return createPortal(
+            <div
+                ref={panel}
+                role="dialog"
+                aria-modal="false"
+                aria-label="Setup diagram for this workflow"
+                className="fixed z-[40] flex flex-col border border-foreground bg-background shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
+                style={{ left: pos.x, top: pos.y, width: size.width, height: size.height }}
+              >
+                <div
+                  className="flex shrink-0 cursor-grab touch-none items-center justify-between gap-4 border-b border-line px-5 py-3 active:cursor-grabbing"
+                  onPointerDown={onPointerDown}
+                  onPointerMove={onPointerMove}
+                  onPointerUp={onPointerUp}
+                >
+                  <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">This workflow on the setup</p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={play}
+                      disabled={!route}
+                      className="h-[31px] cursor-pointer bg-foreground px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] text-background uppercase disabled:cursor-default disabled:opacity-40"
+                    >
+                      {playing ? "Pause" : "Play"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => close.current()}
+                      className="h-[31px] cursor-pointer border border-line bg-background px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+                <div className="min-h-0 flex-1 overflow-auto p-4">
+                  <SetupMap route={route} step={shown} expanded />
+                </div>
+                <div
+                  aria-label="Resize diagram"
+                  className="absolute right-0 bottom-0 z-10 h-5 w-5 cursor-nwse-resize"
+                  onPointerDown={onResizeDown}
+                  onPointerMove={onResizeMove}
+                  onPointerUp={onResizeUp}
+                >
+                  <span className="absolute right-1 bottom-1 block h-2 w-2 border-r border-b border-foreground" />
+                </div>
+            </div>,
+    document.body,
+  );
+}
 
 function OperateToggle({
   value,
@@ -813,13 +1129,29 @@ function OperateToggle({
   );
 }
 
+function DiagramTab({ open, onClick }: { open: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={open}
+      onClick={onClick}
+      className={`h-[31px] shrink-0 border border-line px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
+        open ? "bg-foreground text-background" : "bg-surface text-muted"
+      }`}
+    >
+      Diagram
+    </button>
+  );
+}
+
 export function TtsDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
   const [step, setStep] = useState(0);
   const [play, setPlay] = useState(0);
   const [choice, setChoice] = useState<OperateId | null>(null);
-  const operateView = choice ?? "diagram";
+  const [mapOpen, setMapOpen] = useState(false);
+  const operateView = choice === "description" ? "description" : "diagram";
   const run = useRef(0);
   const timers = useRef<number[]>([]);
   const thread = useRef<HTMLDivElement>(null);
@@ -899,8 +1231,9 @@ export function TtsDemo() {
               Demo
             </p>
           </div>
-          <div className="ml-auto shrink-0 lg:hidden">
-            <OperateToggle value={choice} onSelect={choose} />
+          <div className="ml-auto flex shrink-0 items-center gap-2 lg:hidden">
+            <OperateToggle value={choice === "map" ? null : choice} onSelect={choose} />
+            <DiagramTab open={mapOpen} onClick={() => setMapOpen(true)} />
           </div>
         </div>
         <p className="hidden font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:block">
@@ -910,8 +1243,9 @@ export function TtsDemo() {
       <div ref={frame} className="relative mt-3 flex flex-col">
         <div className="pointer-events-none invisible hidden lg:block" aria-hidden>
           <div className="border border-line">
-            <div className="border-b border-line p-3">
+            <div className="flex items-center justify-between gap-3 border-b border-line p-3">
               <OperateToggle value="diagram" onSelect={() => {}} />
+              <DiagramTab open={false} onClick={() => {}} />
             </div>
             <FlowDiagram route={null} step={0} />
           </div>
@@ -959,8 +1293,9 @@ export function TtsDemo() {
             className={`flex h-full min-h-0 flex-col overflow-hidden border border-line bg-surface ${choice === null ? "hidden lg:flex" : ""}`}
             aria-live="polite"
           >
-            <div className="hidden shrink-0 border-b border-line p-3 lg:block">
+            <div className="hidden shrink-0 items-center justify-between gap-3 border-b border-line p-3 lg:flex">
               <OperateToggle value={operateView} onSelect={choose} />
+              <DiagramTab open={mapOpen} onClick={() => setMapOpen(true)} />
             </div>
             <div className="h-0 min-h-0 min-w-0 max-w-full flex-1 overflow-y-auto max-lg:overflow-x-auto">
               <div className={operateView === "diagram" ? "" : "hidden"}>
@@ -970,6 +1305,7 @@ export function TtsDemo() {
                 <Description route={route} step={step} />
               </div>
             </div>
+            {mapOpen ? <MapView route={route} step={step} onClose={() => setMapOpen(false)} /> : null}
           </aside>
         </div>
       </div>

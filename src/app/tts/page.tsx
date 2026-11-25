@@ -4,7 +4,7 @@ import { TtsSwitch } from "@/components/tts-switch";
 export const metadata: Metadata = {
   title: "TTS",
   description:
-    "Databricks platform overview, a map of database types, enterprise workloads, legacy migration, and implementation roadmap.",
+    "Databricks platform overview, a map of database types, enterprise workloads, and legacy migration.",
 };
 
 export default function TtsPage() {

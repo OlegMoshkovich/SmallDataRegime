@@ -1,13 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Wordmark } from "@/components/logo";
 import { nav } from "@/lib/site";
 
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  function current(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -32,19 +38,25 @@ export function Header() {
           aria-label="Main"
         >
           <ul className="group/menu flex items-center gap-8">
-            {nav.map((item) => (
-              <li
-                key={item.href}
-                className="opacity-100 transition-opacity duration-200 group-hover/menu:opacity-50 hover:opacity-100"
-              >
-                <Link
-                  href={item.href}
-                  className="relative text-[0.75rem] leading-none after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+            {nav.map((item) => {
+              const selected = current(item.href);
+              return (
+                <li
+                  key={item.href}
+                  className="opacity-100 transition-opacity duration-200 group-hover/menu:opacity-50 hover:opacity-100"
                 >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+                  <Link
+                    href={item.href}
+                    aria-current={selected ? "page" : undefined}
+                    className={`relative text-[0.75rem] leading-none after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 hover:after:w-full ${
+                      selected ? "after:w-full" : "after:w-0"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
         <div className="flex items-center gap-3">
@@ -74,17 +86,21 @@ export function Header() {
         <div className="fixed inset-0 z-40 bg-background lg:hidden">
           <div className="flex h-full flex-col px-4 pt-24 pb-6">
             <ul className="flex flex-1 flex-col gap-1 overflow-auto">
-              {nav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="block py-3 text-lg text-faint"
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {nav.map((item) => {
+                const selected = current(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={selected ? "page" : undefined}
+                      className={`block py-3 text-lg ${selected ? "text-foreground underline underline-offset-4" : "text-faint"}`}
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
             <div className="flex flex-col gap-2">
               <Button href="/signin" variant="ghost" className="w-full">

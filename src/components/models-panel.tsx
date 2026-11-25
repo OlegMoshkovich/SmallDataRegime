@@ -40,10 +40,10 @@ export function ModelsPanel() {
         Models
       </p>
       <p className="mt-8 max-w-3xl text-base leading-relaxed text-faint">
-        We post-train and fine-tune open-weights models by applying our small-data regime. A short
-        stack of demonstrations and preferences becomes a policy.
-        We plan the run, apply the update, and validate it against the evals you wrote. The weights
-        stay on a lab machine and serve on these local GPUs.
+        We post-train and fine-tune open-weights models with our small-data regime: a short
+        stack of demonstrations and preferences becomes a policy. We plan the run, apply the update,
+        and check it against the evals you wrote. The weights never leave — they stay on a lab
+        machine and serve from these local GPUs.
       </p>
 
       <div className="mt-10 max-w-full min-w-0 overflow-x-auto border border-line">

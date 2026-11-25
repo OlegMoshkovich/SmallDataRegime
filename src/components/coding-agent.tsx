@@ -16,7 +16,7 @@ function usdPerMillion(value: number) {
   return `$${value.toFixed(value >= 1 ? 2 : 3)}`;
 }
 
-export function CodingAgent({ enabled, initialReady = false, headerLeft }: { enabled: boolean; initialReady?: boolean; headerLeft?: React.ReactNode }) {
+export function CodingAgent({ enabled, initialReady = false }: { enabled: boolean; initialReady?: boolean }) {
   const [prompt, setPrompt] = useState("");
   const [key, setKey] = useState("");
   const [ready, setReady] = useState(initialReady);
@@ -342,7 +342,6 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
   return (
     <div className="min-w-0">
       <div className="mb-4 flex flex-wrap items-center gap-4">
-        {headerLeft}
         <div
           className="flex w-full flex-wrap gap-2 lg:ml-auto lg:w-auto lg:gap-0 lg:border lg:border-line"
           role="group"
@@ -367,6 +366,12 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
               {label}
             </button>
           ))}
+          <a
+            href="https://github.com/anomalyco/opencode/tree/dev/specs/v2"
+            className="inline-flex h-[31px] items-center border-line px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase max-lg:border lg:border-l"
+          >
+            Docs
+          </a>
         </div>
       </div>
       <div ref={frame} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">

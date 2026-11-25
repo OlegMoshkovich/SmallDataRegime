@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
 import { DemoChat } from "@/components/demo-chat";
 import { ModelsPanel } from "@/components/models-panel";
@@ -954,12 +955,30 @@ export function ArchitectureSwitch() {
   return (
     <div className="min-w-0">
       <div className="mb-4 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          aria-pressed={view === "demo"}
+          onClick={() => setView("demo")}
+          className={`group relative inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize ${
+            view === "demo"
+              ? "border-transparent bg-ink text-paper [--stripe:rgba(255,255,255,0.18)]"
+              : "border-line-strong bg-background text-foreground [--stripe:rgba(0,0,0,0.14)]"
+          }`}
+        >
+          <span className="relative z-10 flex items-center gap-2">
+            Demo <ArrowRight />
+          </span>
+          <span
+            aria-hidden
+            className="stripe-hover pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
+          />
+        </button>
         <div
           className="ml-auto flex w-fit max-w-full flex-wrap justify-end gap-2 lg:gap-0 lg:border lg:border-line"
           role="group"
           aria-label="View"
         >
-          {views.map((item, index) => {
+          {views.filter((item) => item.id !== "demo").map((item, index) => {
             const selected = view === item.id;
             return (
               <button
@@ -985,20 +1004,21 @@ export function ArchitectureSwitch() {
               Architecture
             </p>
             <p className="mt-4 max-w-xl text-base leading-snug text-faint">
-              The orchestrator is the main agent the human interacts with. It opens the right
-              document, calls the right agent, and runs the model the privacy of the request allows.
+              The orchestrator is the main agent the human works with. It opens the right
+              document, calls the right agent, and runs whichever model the privacy of the request
+              allows.
             </p>
             <p className="mt-5 max-w-4xl text-base leading-relaxed text-faint">
-              The Human types into one chat. Applications call one API. Both reach the same gateway.
-              The Human does not open a system, pick an agent, or pick a model. The orchestrator
-              replies in that same chat, naming the document it opened and the agent that answered.
-              Behind the chat, the gateway decides every request.
+              The human types into one chat; applications call one API; both reach the same gateway.
+              The human never has to open a system, pick an agent, or choose a model. The
+              orchestrator answers right there in the chat, naming the document it opened and the
+              agent that replied. Behind the scenes, the gateway is what decides every request.
             </p>
             <p className="mt-3 max-w-4xl text-base leading-relaxed text-faint">
-              We write it in TypeScript and ship it as containers. Agent harnesses, document
-              retrieval, and the local models run beside the gateway, next to the GPUs. Who may see
-              what, which model serves each use case, the budgets, and the logging are
-              configuration, reviewed like code.
+              We write it in TypeScript and ship it as containers. The agent harnesses, document
+              retrieval, and the local models all run beside the gateway, right next to the GPUs.
+              Who may see what, which model serves each use case, the budgets, the logging — all of
+              it is configuration, reviewed like code.
             </p>
 
             <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
@@ -1040,10 +1060,11 @@ export function ArchitectureSwitch() {
                 A request
               </p>
               <p className="mt-3 max-w-4xl text-base leading-relaxed text-faint">
-                The gateway is a stateless service. Policy, logs, and runs live in Postgres. Caches
-                and budget counters live in Redis. Chat answers stream back. The output check reads
-                the answer as it arrives, then the full text before the last event. Logging happens
-                last, so a failed or blocked request is logged too.
+                The gateway itself is stateless. Policy, logs, and runs live in Postgres; caches
+                and budget counters live in Redis. Chat answers stream back as they are generated.
+                The output check reads the answer as it arrives, then the full text just before the
+                last event. Logging comes last, so even a failed or blocked request still gets
+                logged.
               </p>
               <ol className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
                 {[
@@ -1153,8 +1174,8 @@ export function ArchitectureSwitch() {
               Examples
             </p>
             <p className="mt-3 max-w-3xl text-base leading-relaxed text-faint">
-              A human asks, in the chat. This is the experience we envision, not a client of
-              record.
+              A human just asks, in the chat. This is the experience we have in mind, not a client
+              of record.
             </p>
             <ol className="mt-8 grid gap-4 sm:grid-cols-2">
               <li className="border border-line bg-surface p-4">

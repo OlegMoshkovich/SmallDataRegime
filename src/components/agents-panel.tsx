@@ -58,8 +58,8 @@ export function AgentsPanel() {
           <div>
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Durable runs</p>
             <p className="mt-2 max-w-xl text-base leading-relaxed text-faint">
-              Jobs in Postgres (pg-boss): a run survives a restart, can wait days for a human, and
-              replays step by step.
+              Runs are jobs in Postgres (pg-boss), so a run survives a restart, can wait days for a
+              human, and replays step by step.
             </p>
           </div>
           <div className="border border-line-strong px-4 py-4">

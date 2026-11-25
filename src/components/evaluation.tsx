@@ -134,7 +134,7 @@ export function Evaluation() {
       <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
         Sample evaluation results
       </p>
-      <h2 className="mt-4 max-w-4xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
+      <h2 className="mt-4 text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
         Our Agents outperform today&apos;s leading AI models on expert reasoning tasks at a fraction of the cost.
       </h2>
       <p className="mt-4 text-sm leading-snug lg:text-base">

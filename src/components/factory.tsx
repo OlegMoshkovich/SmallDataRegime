@@ -58,27 +58,26 @@ export function Factory() {
           </p>
 
           <div className="flex items-center justify-center">
-            <div className="flex gap-2">
-              <Node>ChatGPT</Node>
-              <Node>Tools + skills</Node>
+            <div className="flex items-center gap-2">
+              <Node>State_Uncertainty_Goal</Node>
+              <Arrow direction="right" className="text-accent" />
+              <Node>Policy</Node>
+              <Arrow direction="right" className="text-accent" />
+              <Node>Action</Node>
+              <Arrow direction="right" />
+              <Node>Tools</Node>
             </div>
           </div>
 
-          <span className="h-px bg-line-strong lg:h-16 lg:w-px" />
+          <span className="h-px bg-line-strong lg:h-16 lg:w-px lg:mx-8" />
 
           <div className="w-fit max-w-full">
             <div className="flex flex-wrap items-center gap-2">
-              <Node>
-                State
-                <br />
-                Uncertainty
-                <br />
-                Goal
-              </Node>
+              <Node>ChatGPT</Node>
+              <Arrow direction="right" className="text-accent" />
+              <Node>Skills</Node>
               <Arrow direction="right" />
-              <Node>Policy</Node>
-              <Arrow direction="right" />
-              <Node>Action</Node>
+              <Node>Tools</Node>
             </div>
           </div>
         </div>
@@ -93,7 +92,7 @@ export function Factory() {
         </div>
 
         <div className="flex justify-center text-foreground lg:col-start-3 lg:row-start-2">
-          <Arrow direction="down" />
+          <Arrow direction="down" className="text-accent" />
         </div>
 
         <div className="h-full self-stretch lg:col-start-1 lg:row-start-3">

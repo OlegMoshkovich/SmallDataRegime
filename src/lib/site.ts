@@ -1,7 +1,8 @@
 export const nav = [
   { href: "/architecture", label: "Architecture" },
   { href: "/research", label: "Research" },
-  { href: "/agent", label: "Coder" },
+  { href: "/coder", label: "Coder" },
+  { href: "/tts", label: "TTS" },
 ] as const;
 
 export const pillars = [

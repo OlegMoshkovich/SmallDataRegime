@@ -62,7 +62,7 @@ export function AgentsPanel() {
               replays step by step.
             </p>
           </div>
-          <div className="border border-accent px-4 py-4">
+          <div className="border border-line-strong px-4 py-4">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Two rules</p>
             <p className="mt-3 text-base leading-relaxed">
               Agents call models through the gateway, so routing, budgets and logs apply to every
@@ -74,7 +74,7 @@ export function AgentsPanel() {
           </div>
         </div>
 
-        <div className="max-w-full min-w-0 overflow-x-auto border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
+        <div className="max-w-full min-w-0 overflow-x-auto bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
           <CodeLine code="interface AgentDefinition<In, Out> {" />
           <CodeLine code="  id: string;" note='// "compliance"' />
           <CodeLine code="  version: string;" note="// semver" />
@@ -102,7 +102,7 @@ export function AgentsPanel() {
         Repository
       </p>
       <div className="mt-8 grid min-w-0 gap-4 *:min-w-0 lg:grid-cols-2">
-        <div className="border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
+        <div className="bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
           <p>apps/</p>
           {apps.map(([path, note]) => (
             <TreeRow key={path} path={path} note={note} depth={1} />
@@ -112,7 +112,7 @@ export function AgentsPanel() {
             <TreeRow key={path} path={path} note={note} />
           ))}
         </div>
-        <div className="border-l-2 border-accent bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
+        <div className="bg-[#f4f3f2] px-5 py-6 font-mono text-[0.8125rem] leading-[1.7]">
           <p>packages/</p>
           {packages.map(([path, note]) => (
             <TreeRow key={path} path={path} note={note} depth={1} />

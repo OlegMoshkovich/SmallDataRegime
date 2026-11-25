@@ -52,7 +52,8 @@ export function ResearchSwitch({ papers }: { papers: readonly Group[] }) {
         </div>
       </div>
       <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
-        <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+        <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+          <span className="size-1.5 bg-accent" aria-hidden />
           Research
         </p>
         <p className="mt-5 max-w-xl text-base leading-snug text-faint">
@@ -68,7 +69,7 @@ export function ResearchSwitch({ papers }: { papers: readonly Group[] }) {
         </p>
         {group ? (
           <div className="mt-12">
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
               {group.label}
             </p>
             <p className="mt-3 max-w-3xl text-base leading-relaxed text-faint">{group.intro}</p>
@@ -78,7 +79,9 @@ export function ResearchSwitch({ papers }: { papers: readonly Group[] }) {
                   <a href={paper.href} className="text-base tracking-[-0.02em] hover:underline">
                     {paper.title}
                   </a>
-                  <p className="mt-2 font-mono text-[0.75rem] text-muted">{paper.meta}</p>
+                  <p className="mt-2 font-mono text-[0.75rem] text-muted">
+                    {paper.meta.split(" · ").find((s) => s.includes("citations")) ?? ""}
+                  </p>
                   <p className="mt-2 max-w-3xl text-sm leading-relaxed text-faint">{paper.note}</p>
                 </li>
               ))}

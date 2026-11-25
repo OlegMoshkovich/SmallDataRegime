@@ -94,9 +94,6 @@ function RequestLifecycle() {
   return (
     <div className="mt-12">
       <Eyebrow>Request lifecycle</Eyebrow>
-      <h3 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-        From question to logged answer.
-      </h3>
       <ol className="mt-8 lg:hidden">
         {lifecycle.map((step, index) => (
           <li key={step.name} className="grid grid-cols-[0.875rem_minmax(0,1fr)] gap-3">
@@ -228,9 +225,6 @@ export function PremisePanel() {
 
       <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
         <Eyebrow>On premise hosting</Eyebrow>
-        <h2 className="mt-3 max-w-5xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-          Two machines. Only the model proxy has a route out.
-        </h2>
         <div className="mt-10 grid items-start gap-4 lg:grid-cols-[minmax(0,1.8fr)_minmax(14rem,0.7fr)]">
           <div className="border border-line p-4">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
@@ -279,9 +273,6 @@ export function PremisePanel() {
         </div>
         <div className="mt-12">
           <Eyebrow>Gateway</Eyebrow>
-          <h3 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-            Nine stages, one pipeline per request.
-          </h3>
           <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               ["01", "Authenticate", "Validates the sign-in token or client credentials.", "auth · 401", ["Auth + policy"]],
@@ -299,9 +290,7 @@ export function PremisePanel() {
               return (
                 <li
                   key={index as string}
-                  className={`border px-4 py-3 ${
-                    tone === "accent" ? "border-accent" : tone === "ink" ? "border-foreground" : "border-line"
-                  }`}
+                  className="border border-line px-4 py-3"
                 >
                   {marks.length ? (
                     <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.65rem] tracking-[-0.01em] uppercase">
@@ -330,9 +319,6 @@ export function PremisePanel() {
 
       <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
         <Eyebrow>On premise hosting</Eyebrow>
-        <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-          Machines and how they are reached
-        </h2>
         <div className="mt-10 max-w-full min-w-0 overflow-x-auto border border-line">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
@@ -368,9 +354,6 @@ export function PremisePanel() {
 
       <section className="border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
         <Eyebrow>Tech stack</Eyebrow>
-        <h2 className="mt-3 max-w-3xl text-[2rem] leading-[1.08] tracking-[-0.04em] lg:text-[2.75rem]">
-          What it is built with
-        </h2>
         <div className="mt-10 max-w-full min-w-0 overflow-x-auto border border-line">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">

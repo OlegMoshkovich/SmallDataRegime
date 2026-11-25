@@ -37,6 +37,7 @@ function PlaneNode({
   y,
   label,
   detail,
+  subdetail,
   info,
   accent = false,
   compact = false,
@@ -48,6 +49,7 @@ function PlaneNode({
   y: number;
   label: string;
   detail?: string;
+  subdetail?: string;
   info: string;
   accent?: boolean;
   compact?: boolean;
@@ -56,6 +58,7 @@ function PlaneNode({
   onHide: () => void;
 }) {
   const hit = compact ? 132 : 156;
+  const extraLines = (detail ? 1 : 0) + (subdetail ? 1 : 0);
   return (
     <g
       className="cursor-help"
@@ -68,7 +71,7 @@ function PlaneNode({
         x={x - hit / 2}
         y={compact ? y - 26 : y - 28}
         width={hit}
-        height={detail ? (compact ? 70 : 80) : compact ? 58 : 62}
+        height={extraLines === 2 ? (compact ? 84 : 96) : extraLines === 1 ? (compact ? 70 : 80) : compact ? 58 : 62}
         fill="transparent"
       />
       <IsoCube x={x} y={y} accent={accent} />
@@ -88,6 +91,16 @@ function PlaneNode({
           className={`fill-faint font-mono tracking-[-0.01em] uppercase ${compact ? "text-[11px]" : "text-[12px]"}`}
         >
           {detail}
+        </text>
+      ) : null}
+      {subdetail ? (
+        <text
+          x={x}
+          y={compact ? y + 50 : y + 54}
+          textAnchor="middle"
+          className={`fill-faint font-mono tracking-[-0.01em] uppercase ${compact ? "text-[11px]" : "text-[12px]"}`}
+        >
+          {subdetail}
         </text>
       ) : null}
     </g>
@@ -265,6 +278,7 @@ function HostingMobile({
         x={L}
         y={r0}
         label="Proxy"
+        detail="TLS entry point"
         info="The single entry point on the internal network. It terminates HTTPS and sends the chat to the chat UI and the API to the gateway."
         {...node}
       />
@@ -272,6 +286,7 @@ function HostingMobile({
         x={R}
         y={r0}
         label="Chat UI"
+        detail="SSO, human interface"
         info="Where a human signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
         {...node}
       />
@@ -279,6 +294,7 @@ function HostingMobile({
         x={L}
         y={r1}
         label="Gateway ×2"
+        detail="policy and routing"
         info="Two Fastify instances on port 8080. They check the request, enforce policy, and route it to a model, an agent, or a search."
         accent
         {...node}
@@ -287,6 +303,7 @@ function HostingMobile({
         x={R}
         y={r1}
         label="OTel"
+        detail="telemetry export"
         info="Sends OpenTelemetry traces out to the monitoring the enterprise already runs."
         {...node}
       />
@@ -294,6 +311,7 @@ function HostingMobile({
         x={L}
         y={r2}
         label="Agent worker ×2"
+        detail="job queue workers"
         info="Two background workers. They run multi-step tasks from the pg-boss queue in Postgres, and call tools through the MCP servers."
         {...node}
       />
@@ -301,6 +319,7 @@ function HostingMobile({
         x={R}
         y={r2}
         label="MCP servers"
+        detail="tool connectors"
         info="Three connectors. They are the tools an agent uses to reach SharePoint, a read-only database, and the sanctions list."
         {...node}
       />
@@ -308,6 +327,7 @@ function HostingMobile({
         x={L}
         y={r3}
         label="Postgres 16"
+        detail="vectors, jobs, logs"
         info="Stores document vectors for search, runs the pg-boss job queue, and keeps the logs and the runs."
         {...node}
       />
@@ -315,6 +335,7 @@ function HostingMobile({
         x={R}
         y={r3}
         label="Redis 7"
+        detail="budgets and cache"
         info="Tracks token budgets as they are spent, and caches frequent responses. The gateway is what talks to it."
         {...node}
       />
@@ -322,6 +343,7 @@ function HostingMobile({
         x={L}
         y={r4}
         label="Ingestion"
+        detail="SharePoint sync"
         info="Syncs new and changed SharePoint files, and skips a file that has not changed. The vectors land in Postgres."
         {...node}
       />
@@ -329,6 +351,7 @@ function HostingMobile({
         x={R}
         y={r4}
         label="Model proxy"
+        detail="sole path to models"
         info="The only path to the models. No other container calls a model directly. It is also the only service with a route out."
         accent
         {...node}
@@ -339,6 +362,7 @@ function HostingMobile({
         y={812}
         label="vLLM Qwen"
         detail="GPU 0 · 8001"
+        subdetail="chat and routing"
         info="Qwen3-30B-A3B in FP8, about 31 GB. It handles chat, answers from retrieved documents, and chooses where a task goes. FP8 is 8-bit floating point, which shrinks the memory it needs."
         {...node}
       />
@@ -347,6 +371,7 @@ function HostingMobile({
         y={812}
         label="vLLM DeepSeek"
         detail="GPU 1 · 8002"
+        subdetail="compliance reasoning"
         info="DeepSeek-R1-Distill-Qwen-32B in FP8, about 33 GB. It does the compliance reasoning that needs step-by-step logic."
         {...node}
       />
@@ -355,6 +380,7 @@ function HostingMobile({
         y={916}
         label="Embeddings"
         detail="BGE-M3 · 8003"
+        subdetail="document vectorization"
         info="BGE-M3, about 2 GB. It turns a document into vectors that can be searched."
         {...node}
       />
@@ -363,6 +389,7 @@ function HostingMobile({
         y={916}
         label="Reranker"
         detail="8004"
+        subdetail="search result scoring"
         info="bge-reranker-v2-m3, about 2 GB. It scores the search results so the most relevant passages reach the model."
         {...node}
       />
@@ -500,7 +527,7 @@ function SummaryHosting() {
 
   return (
     <section ref={sectionRef} className="relative border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
-      <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+      <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
         <span aria-hidden className="size-1.5 bg-accent" />
         On premise pilot
       </p>
@@ -678,6 +705,7 @@ function SummaryHosting() {
           <PlaneNode
             {...proxy}
             label="Proxy"
+            detail="TLS entry point"
             info="The single entry point on the internal network. It terminates HTTPS and sends the chat to the chat UI and the API to the gateway."
             onShow={showTip}
             onHide={hideTip}
@@ -686,6 +714,7 @@ function SummaryHosting() {
           <PlaneNode
             {...chat}
             label="Chat UI"
+            detail="SSO, human interface"
             info="Where a human signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
             onShow={showTip}
             onHide={hideTip}
@@ -694,6 +723,7 @@ function SummaryHosting() {
           <PlaneNode
             {...gateway}
             label="Gateway ×2"
+            detail="policy and routing"
             info="Two Fastify instances on port 8080. They check the request, enforce policy, and route it to a model, an agent, or a search."
             accent
             onShow={showTip}
@@ -703,6 +733,7 @@ function SummaryHosting() {
           <PlaneNode
             {...otel}
             label="OTel"
+            detail="telemetry export"
             info="Sends OpenTelemetry traces out to the monitoring the enterprise already runs."
             onShow={showTip}
             onHide={hideTip}
@@ -711,6 +742,7 @@ function SummaryHosting() {
           <PlaneNode
             {...ingestion}
             label="Ingestion"
+            detail="SharePoint sync"
             info="Syncs new and changed SharePoint files, and skips a file that has not changed. The vectors land in Postgres."
             onShow={showTip}
             onHide={hideTip}
@@ -719,6 +751,7 @@ function SummaryHosting() {
           <PlaneNode
             {...mcp}
             label="MCP servers"
+            detail="tool connectors"
             info="Three connectors. They are the tools an agent uses to reach SharePoint, a read-only database, and the sanctions list."
             onShow={showTip}
             onHide={hideTip}
@@ -727,6 +760,7 @@ function SummaryHosting() {
           <PlaneNode
             {...worker}
             label="Agent worker ×2"
+            detail="job queue workers"
             info="Two background workers. They run multi-step tasks from the pg-boss queue in Postgres, and call tools through the MCP servers."
             onShow={showTip}
             onHide={hideTip}
@@ -735,6 +769,7 @@ function SummaryHosting() {
           <PlaneNode
             {...redis}
             label="Redis 7"
+            detail="budgets and cache"
             info="Tracks token budgets as they are spent, and caches frequent responses. The gateway is what talks to it."
             onShow={showTip}
             onHide={hideTip}
@@ -743,6 +778,7 @@ function SummaryHosting() {
           <PlaneNode
             {...postgres}
             label="Postgres 16"
+            detail="vectors, jobs, logs"
             info="Stores document vectors for search, runs the pg-boss job queue, and keeps the logs and the runs."
             onShow={showTip}
             onHide={hideTip}
@@ -751,6 +787,7 @@ function SummaryHosting() {
           <PlaneNode
             {...model}
             label="Model proxy"
+            detail="sole path to models"
             info="The only path to the models. No other container calls a model directly. It is also the only service with a route out."
             accent
             onShow={showTip}
@@ -762,6 +799,7 @@ function SummaryHosting() {
             {...qwen}
             label="vLLM Qwen"
             detail="GPU 0 · 8001"
+            subdetail="chat and routing"
             info="Qwen3-30B-A3B in FP8, about 31 GB. It handles chat, answers from retrieved documents, and chooses where a task goes. FP8 is 8-bit floating point, which shrinks the memory it needs."
             onShow={showTip}
             onHide={hideTip}
@@ -771,6 +809,7 @@ function SummaryHosting() {
             {...deepseek}
             label="vLLM DeepSeek"
             detail="GPU 1 · 8002"
+            subdetail="compliance reasoning"
             info="DeepSeek-R1-Distill-Qwen-32B in FP8, about 33 GB. It does the compliance reasoning that needs step-by-step logic."
             onShow={showTip}
             onHide={hideTip}
@@ -780,6 +819,7 @@ function SummaryHosting() {
             {...embeddings}
             label="Embeddings"
             detail="BGE-M3 · 8003"
+            subdetail="document vectorization"
             info="BGE-M3, about 2 GB. It turns a document into vectors that can be searched."
             onShow={showTip}
             onHide={hideTip}
@@ -789,6 +829,7 @@ function SummaryHosting() {
             {...reranker}
             label="Reranker"
             detail="8004"
+            subdetail="search result scoring"
             info="bge-reranker-v2-m3, about 2 GB. It scores the search results so the most relevant passages reach the model."
             onShow={showTip}
             onHide={hideTip}
@@ -939,7 +980,8 @@ export function ArchitectureSwitch() {
       {view === "summary" ? (
         <div className="grid min-w-0 gap-16 *:min-w-0">
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+            <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+              <span className="size-1.5 bg-accent" aria-hidden />
               Architecture
             </p>
             <p className="mt-4 max-w-xl text-base leading-snug text-faint">

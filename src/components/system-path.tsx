@@ -179,7 +179,7 @@ function Label({ step }: { step: Step }) {
       >
         <span className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted">{step.n}</span>
         <span
-          className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
+          className={`font-mono text-[0.75rem] tracking-[-0.015rem] underline uppercase ${
             step.tone === "accent" ? "text-accent" : "text-foreground"
           }`}
         >
@@ -364,7 +364,7 @@ export function SystemPath() {
                 <p className="flex items-baseline gap-2">
                   <span className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted">{step.n}</span>
                   <span
-                    className={`font-mono text-[0.75rem] tracking-[-0.015rem] uppercase ${
+                    className={`font-mono text-[0.75rem] tracking-[-0.015rem] underline uppercase ${
                       step.tone === "accent" ? "text-accent" : ""
                     }`}
                   >

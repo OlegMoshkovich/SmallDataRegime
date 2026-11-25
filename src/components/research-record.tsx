@@ -62,9 +62,9 @@ export function ResearchRecord() {
             in the field and providing fundamental solutions that
             are widely recognized and applied across industries.
           </p>
-          <div className="bg-accent p-5 text-paper">
+          <div className="bg-sunken p-5 text-foreground">
             <p className="text-lg leading-snug tracking-[-0.03em]">
-              “Improved Algorithms for Linear Stochastic Bandits”
+              "Improved Algorithms for Linear Stochastic Bandits"
             </p>
             <p className="mt-3 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
               3,006 citations
@@ -123,8 +123,8 @@ export function ResearchRecord() {
         </div>
 
         <div className="grid gap-4">
-          <div className="bg-accent p-5 text-paper">
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+          <div className="bg-sunken p-5 text-foreground">
+            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
               2025
             </p>
             <p className="mt-2 text-lg leading-snug tracking-[-0.03em]">

@@ -54,7 +54,7 @@ export function ContactForm() {
           name="task"
           rows={5}
           className="border border-line bg-surface px-3 py-3 outline-none focus:border-foreground"
-          placeholder="..."
+          placeholder="_"
         />
       </label>
       <button

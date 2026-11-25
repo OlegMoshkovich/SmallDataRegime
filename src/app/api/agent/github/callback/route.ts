@@ -3,7 +3,7 @@ import { exchangeGitHubCode, takeGitHubOAuth } from "@/lib/github-account";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const back = (result: "connected" | "error") => Response.redirect(new URL(`/agent?github=${result}`, url.origin));
+  const back = (result: "connected" | "error") => Response.redirect(new URL(`/coder?github=${result}`, url.origin));
   if (!agentEnabled()) return back("error");
   const code = url.searchParams.get("code") ?? "";
   const oauthState = url.searchParams.get("state") ?? "";

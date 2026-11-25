@@ -960,7 +960,7 @@ export function ArchitectureSwitch() {
             type="button"
             aria-pressed={view === "demo"}
             onClick={() => setView("demo")}
-            className={`group relative inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize ${
+            className={`group relative order-last inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize lg:order-none ${
               view === "demo"
                 ? "border-transparent bg-ink text-paper [--stripe:rgba(255,255,255,0.18)]"
                 : "border-line-strong bg-background text-foreground [--stripe:rgba(0,0,0,0.14)]"

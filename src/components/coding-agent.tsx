@@ -341,10 +341,11 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
 
   return (
     <div className="min-w-0">
-      <div className="mb-4 flex flex-wrap items-center gap-4">
+      <div className="mb-4 grid grid-cols-[auto_1fr] gap-4 lg:flex lg:flex-wrap lg:items-center">
+        <div className="flex flex-col gap-2">
         {headerLeft}
         <div
-          className="flex w-full flex-wrap gap-2 lg:ml-auto lg:w-auto lg:gap-0 lg:border lg:border-line"
+          className="flex flex-wrap gap-2 lg:border lg:border-line"
           role="group"
           aria-label="Agent settings"
         >
@@ -368,8 +369,42 @@ export function CodingAgent({ enabled, initialReady = false, headerLeft }: { ena
             </button>
           ))}
         </div>
+        </div>
+        <div className="grid content-start gap-4 lg:hidden">
+        <div className="grid">
+        <form
+          onSubmit={saveKey}
+          inert={panel !== "key"}
+          className={`col-start-1 row-start-1 grid content-start gap-3 border border-line bg-surface p-4 ${panel === "key" ? "" : "invisible"}`}
+        >
+          <label className="grid gap-2">
+            <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted">OpenRouter API key</span>
+            <input
+              type="password"
+              value={key}
+              onChange={(event) => setKey(event.target.value)}
+              disabled={!enabled || saving}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="sk-or-…"
+              className="w-full border border-line bg-background px-3 py-2 text-sm outline-none"
+            />
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={!enabled || saving || key.trim().length === 0}
+              className="h-[31px] border border-transparent bg-ink px-3.5 font-mono text-[0.8125rem] capitalize text-paper disabled:opacity-40"
+            >
+              {ready ? "Replace" : "Save"}
+            </button>
+            {keyNote ? <p className="text-sm text-muted">{keyNote}</p> : null}
+          </div>
+        </form>
+        </div>
+        </div>
       </div>
-      <div ref={frame} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
+      <div ref={frame} className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
       <div className="flex min-h-0 flex-col border border-line bg-surface">
       <div ref={thread} className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-4">
         {lines.length === 0 ? (

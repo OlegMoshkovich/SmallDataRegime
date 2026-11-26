@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/button";
 import { Wordmark } from "@/components/logo";
 import { applyFontSize, FONT_DEFAULT, FONT_MAX, FONT_MIN, readFontSize } from "@/lib/font-size";
@@ -25,28 +25,48 @@ function FontSlider({
   size: number;
   onSize: (px: number) => void;
 }) {
+  const field = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const input = field.current;
+    if (!input || input.getClientRects().length === 0) return;
+    input.focus();
+  }, []);
+
+  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    onSize(size + (event.key === "ArrowRight" ? 1 : -1));
+  }
+
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-[0.7rem] leading-none text-faint" aria-hidden>
-        A
-      </span>
-      <input
-        type="range"
-        min={FONT_MIN}
-        max={FONT_MAX}
-        step={1}
-        value={size}
-        aria-label="Font size"
-        aria-valuemin={FONT_MIN}
-        aria-valuemax={FONT_MAX}
-        aria-valuenow={size}
-        aria-valuetext={`${size} pixels`}
-        onChange={(event) => onSize(Number(event.target.value))}
-        className="font-size-slider w-full"
-      />
-      <span className="text-[1.05rem] leading-none" aria-hidden>
-        A
-      </span>
+    <div>
+      <p className="font-mono text-[0.65rem] tracking-[-0.015rem] text-muted">use ← →</p>
+      <div className="mt-3 flex items-center gap-3">
+        <span className="text-[0.7rem] leading-none text-faint" aria-hidden>
+          A
+        </span>
+        <input
+          ref={field}
+          type="range"
+          min={FONT_MIN}
+          max={FONT_MAX}
+          step={1}
+          value={size}
+          aria-label="Font size. Use the left and right arrow keys."
+          aria-valuemin={FONT_MIN}
+          aria-valuemax={FONT_MAX}
+          aria-valuenow={size}
+          aria-valuetext={`${size} pixels`}
+          aria-keyshortcuts="ArrowLeft ArrowRight"
+          onKeyDown={onKeyDown}
+          onChange={(event) => onSize(Number(event.target.value))}
+          className="font-size-slider w-full"
+        />
+        <span className="text-[1.05rem] leading-none" aria-hidden>
+          A
+        </span>
+      </div>
     </div>
   );
 }

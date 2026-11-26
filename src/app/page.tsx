@@ -9,8 +9,10 @@ export default function HomePage() {
   return (
     <>
       <section className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-4 pt-24 pb-36 text-center lg:px-9 lg:pt-36 lg:pb-44">
-        <h1 className="max-w-5xl text-[clamp(2rem,4.2vw,4rem)] leading-none font-light tracking-[-0.04em]">
-          small_data_regime
+        <h1 className="max-w-5xl text-[clamp(2rem,4.2vw,4rem)] leading-[1.08] font-light tracking-[-0.04em]">
+          ON_PREMISE
+          <br />
+          AI PLATFORM
         </h1>
         <p className="mt-5 font-mono text-[clamp(0.75rem,1.15vw,1.15rem)] text-muted">
           Sample efficient. Model agnostic. Fully owned.

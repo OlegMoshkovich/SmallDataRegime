@@ -22,7 +22,7 @@ export function ResearchRecord() {
   return (
     <section id="validation" className="mx-auto w-full max-w-[1440px] px-4 pt-40 pb-16 lg:px-9 lg:pt-64 lg:pb-24">
       <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-        Foundational research applied at scale
+        Build on foundational research applied at scale
       </p>
 
       <div className="mt-5 grid grid-cols-[auto_minmax(1.25rem,1fr)_auto_minmax(2.5rem,1.6fr)_auto_minmax(0.75rem,0.45fr)_auto] items-center gap-x-2 sm:gap-x-3">

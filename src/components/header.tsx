@@ -206,7 +206,9 @@ export function Header() {
                               href={child.href}
                               aria-current={childOn ? "page" : undefined}
                               className={`block px-3 py-2 text-[0.75rem] leading-none ${
-                                childOn ? "text-foreground" : "text-faint hover:text-foreground"
+                                childOn
+                                  ? "text-foreground underline underline-offset-4"
+                                  : "text-faint hover:text-foreground"
                               }`}
                               onClick={() => setMenu(false)}
                             >

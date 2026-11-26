@@ -4,7 +4,7 @@ import { agentEnabled } from "@/lib/coding-agent-config";
 import { openRouterReady } from "@/lib/coding-agent";
 
 export const metadata: Metadata = {
-  title: "Coding agent",
+  title: "Coding",
   description: "A coding agent hosted in the app with OpenCode. It edits a workspace beside the site.",
 };
 

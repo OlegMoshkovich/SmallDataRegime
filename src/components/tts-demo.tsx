@@ -46,119 +46,113 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "engineers",
-          label: "Data engineers",
-          note: "Card and transfer events have to keep moving. That pipeline belongs to the engineers, so they are the ones who build it.",
+          id: "chat",
+          label: "Chat UI",
+          note: "Fraud operations asks in the chat. The payment names a customer, so the person starts on the internal URL.",
         },
         {
-          id: "ai-apps",
-          label: "AI apps and agents",
-          note: "The score is needed at the moment of the payment. The app or the agent is already there, so the call starts from them.",
+          id: "apps",
+          label: "Enterprise apps",
+          note: "The payments app calls the API at the moment of the payment. The proxy sends that call to the gateway.",
         },
       ],
       control: [
         {
-          id: "jobs",
-          label: "Notebooks and jobs",
-          note: "The stream is production code that starts, runs, and stops. A job is how that code stays on a schedule.",
+          id: "worker",
+          label: "Agent worker",
+          note: "The triage is a multi-step task. A worker takes it from the pg-boss queue.",
         },
         {
-          id: "gateway",
-          label: "Agents and AI Gateway",
-          note: "The live score is a model call. AI Gateway is in front of it so the caller, the cost, and the limit are recorded.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "The worker reaches the sanctions list and the read-only database through MCP. The payment stays where it already lives.",
         },
       ],
       compute: [
         {
-          id: "spark",
-          label: "Spark clusters",
-          note: "The events arrive as a stream and have to be written into Delta. Spark is the engine that keeps that write going.",
+          id: "model",
+          label: "Model proxy",
+          note: "The model proxy is the only caller of the models. This request does not open the egress proxy.",
         },
         {
-          id: "serving",
-          label: "Model serving",
-          note: "One payment needs one score, at the speed of the transaction. Model serving answers that single request and scales with the traffic.",
+          id: "qwen",
+          label: "Qwen",
+          note: "Qwen on port 8001 scores the payment and routes the alert. Chat and routing are what this GPU is for.",
         },
       ],
       storage: [
         {
-          id: "delta",
-          label: "Delta tables",
-          note: "The events and the scores have to remain for a later review. Delta keeps both, so a later report reads the same tables.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "The run, the log, and the drafted triage stay in Postgres.",
         },
         {
-          id: "models",
-          label: "Models",
-          note: "Serving has to load the approved score model, with its signature. The registry is where that version is kept.",
+          id: "redis",
+          label: "Redis 7",
+          note: "Redis counts the token budget as the call spends it. The gateway is what talks to Redis.",
         },
       ],
       story: [
         {
-          id: "notebooks",
+          id: "chat",
           at: 1,
-          system: "Notebooks",
-          text: "The engineers' notebooks are opened. The streaming job is already saved there. The notebook stays where it is. It is used only to start the job.",
+          system: "Chat UI",
+          text: "The chat opens on ai.enterprise.internal. Fraud operations is signed in with corporate SSO.",
         },
         {
           id: "app",
           at: 1,
-          system: "Payment app",
-          text: "The payment app opens at the moment of the payment and asks for a score. It does not pull the customer's history onto the device.",
-        },
-        {
-          id: "job",
-          at: 2,
-          system: "Streaming job",
-          text: "The job opens and reads new card and transfer events. It writes the events it consumed. When the batch is done, the job stops. The events remain.",
+          system: "Payments app",
+          text: "The app calls the API through the proxy. The proxy terminates TLS and sends the call to the gateway.",
         },
         {
           id: "gateway",
           at: 2,
-          system: "AI Gateway",
-          text: "The gateway opens for the score call. It writes a log of who called and enforces the limit. It does not keep the payment.",
+          system: "Gateway",
+          text: "The gateway checks policy, rights, and budget. The payment names a customer, so the call stays on the enterprise's machines.",
         },
         {
-          id: "spark",
+          id: "worker",
+          at: 2,
+          system: "Agent worker",
+          text: "A worker takes the triage from the queue and opens the sanctions list through MCP.",
+        },
+        {
+          id: "proxy",
           at: 3,
-          system: "Spark",
-          text: "Spark opens the stream, writes the rows into a table, and can shut down afterward. The rows stay in the table.",
+          system: "Model proxy",
+          text: "The model proxy opens port 8001. No other container calls the model.",
         },
         {
-          id: "serving",
+          id: "qwen",
           at: 3,
-          system: "Model serving",
-          text: "The scoring endpoint opens, loads the current fraud model, and returns a score. It does not store the payment after the answer.",
+          system: "Qwen",
+          text: "Qwen returns the score and a short route for the alert. The egress proxy is not used.",
         },
         {
-          id: "delta",
+          id: "postgres",
           at: 4,
-          system: "Delta tables",
-          text: "The events table is opened and the new rows are added. Older rows are left as they were, so a later report can read the same table.",
+          system: "Postgres",
+          text: "The run and the drafted triage are written to Postgres. The customer file is not copied out.",
         },
         {
-          id: "registry",
+          id: "otel",
           at: 4,
-          system: "Model registry",
-          text: "The registry is opened so serving can read the approved model. This payment does not change the model.",
-        },
-        {
-          id: "catalog",
-          at: 4,
-          system: "Unity Catalog",
-          text: "The catalog is checked as each system opens. It allows the job, the table, the model, and the endpoint, and it records that path. It does not hold the payment.",
+          system: "OTel",
+          text: "OTel sends the trace to the monitoring the enterprise already runs. Redis records the tokens spent.",
         },
       ],
       reply:
-        "Fraud and AML uses the engineer path and the agent path. Notebooks and jobs run Lakeflow on Spark, which writes card and transfer events to Delta tables. Model serving loads the MLflow model and answers the app. AI Gateway records the call. Unity Catalog checks the table, the model, and the endpoint.",
+        "Fraud and AML stays on the enterprise's machines. The chat and the payments app both arrive at the gateway. An agent worker reads the sanctions list through MCP. The model proxy calls Qwen. Postgres keeps the run. The egress proxy is not opened.",
       setup: {
         overview:
-          "Two departments share this run. **Payments engineering** keeps the card and transfer events moving. **Fraud operations** scores the payment and triages the alert. The stream and the score run on their own once the pipeline is in place.",
+          "**Fraud operations** asks in the chat. The **payments app** calls the same gateway. The gateway keeps the call inside, because the payment names a customer.",
         time:
-          "The stream stays on through the day. A score comes back in under a second, at the speed of the card payment. The event and the score are in the table within that same minute. A fraud analyst opens the alert later the same day.",
+          "The score comes back in a few seconds. Qwen answers on GPU 0. The analyst reads the triage in the same chat, later the same day.",
         departments:
-          "Payments engineering owns the notebooks and the streaming job. They write the events into Delta and keep the approved model in the registry. Fraud operations is on the payment app. The app asks for the score, and an analyst triages the alert from the event and the score.",
+          "Fraud operations owns the question and the decision on the alert. Payments engineering owns the app that calls the API. Platform operations runs the gateway, the workers, and the model proxy.",
         handoff:
-          "The handoff is the score and the event row. The app calls model serving, and AI Gateway logs who called and the limit. Spark has written the card event into Delta. Fraud operations reads that row and the score. Unity Catalog allows the job, the table, the model, and the endpoint for both sides.",
+          "The handoff is the run in Postgres. The app calls the API. The gateway checks policy and the Redis budget, then the model proxy calls Qwen. The worker drafts the triage through MCP. OTel carries the trace. The answer returns in the chat.",
       },
     },
   },
@@ -168,119 +162,96 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "engineers",
-          label: "Data engineers",
-          note: "The scorecard is trained and refreshed from features the engineers own. They start this path.",
-        },
-        {
-          id: "analysts",
-          label: "Analysts and BI tools",
-          note: "The stress test is a report on tables that are already built. Analysts are the people who read it.",
+          id: "chat",
+          label: "Chat UI",
+          note: "Credit-risk reporting asks in the chat. They want the stress narrative. They do not train a new model.",
         },
       ],
       control: [
         {
-          id: "jobs",
-          label: "Notebooks and jobs",
-          note: "Training has to be repeatable, and it has to write the features it used. A job does both.",
+          id: "worker",
+          label: "Agent worker",
+          note: "The stress test is a multi-step job. A worker runs it from the queue.",
         },
         {
-          id: "genie",
-          label: "Genie and AI/BI",
-          note: "The stress pack is a dashboard over a certified metric. Genie and AI/BI are how analysts open that pack.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "The worker reads the exposure tables through the read-only database connector.",
         },
       ],
       compute: [
         {
-          id: "spark",
-          label: "Spark clusters",
-          note: "Building the features and fitting the scorecard is a heavy batch job. Spark is the engine for that work.",
+          id: "model",
+          label: "Model proxy",
+          note: "The model proxy is the only path to DeepSeek. The call does not leave the building.",
         },
         {
-          id: "warehouse",
-          label: "SQL warehouse",
-          note: "The report is SQL over gold tables that training already wrote. The warehouse is the engine for that read.",
+          id: "deepseek",
+          label: "DeepSeek",
+          note: "DeepSeek on port 8002 does the step-by-step stress reasoning. That is the compliance GPU.",
         },
       ],
       storage: [
         {
-          id: "delta",
-          label: "Delta tables",
-          note: "Exposures, features, and results have to stay as a version the report can reopen. Delta holds that version.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "The draft and the run stay in Postgres. A human owns the filing.",
         },
         {
-          id: "models",
-          label: "Models",
-          note: "The report has to name the scorecard it used. The registry keeps that version next to the tables it read.",
+          id: "redis",
+          label: "Redis 7",
+          note: "Redis holds the budget for the longer reasoning call.",
         },
       ],
       story: [
         {
-          id: "notebooks",
+          id: "chat",
           at: 1,
-          system: "Notebooks",
-          text: "The engineers' notebooks are opened and the training job is started from them. The notebook itself is not copied out.",
+          system: "Chat UI",
+          text: "The chat opens. Credit-risk reporting asks for the expected-loss stress narrative.",
         },
         {
-          id: "analysts",
-          at: 1,
-          system: "Analyst tools",
-          text: "The analyst's dashboard is opened to read the finished stress numbers. It does not retrain the model.",
-        },
-        {
-          id: "job",
+          id: "gateway",
           at: 2,
-          system: "Training job",
-          text: "The job opens the exposure tables, fits the scorecard, and writes the features it used. Then the job stops.",
+          system: "Gateway",
+          text: "The gateway checks policy, risk, rights, and the budget in Redis before a table is opened.",
         },
         {
-          id: "dashboard",
+          id: "worker",
           at: 2,
-          system: "Dashboard",
-          text: "The stress pack opens on the finished tables. It reads. It does not write a new model.",
+          system: "Agent worker",
+          text: "A worker takes the job and opens the exposure tables through MCP. The tables stay in the internal system.",
         },
         {
-          id: "spark",
+          id: "proxy",
           at: 3,
-          system: "Spark",
-          text: "Spark opens the feature tables, writes the results, and shuts down. The results stay.",
+          system: "Model proxy",
+          text: "The model proxy opens port 8002. It is the only service allowed to call DeepSeek.",
         },
         {
-          id: "warehouse",
+          id: "deepseek",
           at: 3,
-          system: "SQL warehouse",
-          text: "The warehouse opens the finished tables and runs the stress query. It does not change the rows.",
+          system: "DeepSeek",
+          text: "DeepSeek drafts the stress narrative. The egress proxy stays closed.",
         },
         {
-          id: "delta",
+          id: "postgres",
           at: 4,
-          system: "Delta tables",
-          text: "The results table is opened and a new version is written. The previous version is kept, so the report can still point at the one it used.",
-        },
-        {
-          id: "registry",
-          at: 4,
-          system: "Model registry",
-          text: "The registry is opened and the scorecard is saved there, with the names of the tables it read.",
-        },
-        {
-          id: "catalog",
-          at: 4,
-          system: "Unity Catalog",
-          text: "The catalog records the line from those tables to the model to the report. That line is the audit.",
+          system: "Postgres",
+          text: "The draft and the run are stored in Postgres. Nothing is filed until a person accepts it.",
         },
       ],
       reply:
-        "Credit risk trains, then reports. Engineers run the scorecard as a job on Spark and register it under Models. Inputs and results are Delta tables. Analysts read the stress numbers through Genie and the SQL warehouse, from those same tables. Unity Catalog lineage is the audit from table to model to report.",
+        "Credit risk stays inside the gateway. Reporting asks in the chat. An agent worker reads the exposures through MCP. The model proxy calls DeepSeek for the narrative. Postgres holds the draft. A human owns the numbers.",
       setup: {
         overview:
-          "Two departments share this run. **Credit-risk engineering** trains the scorecard and writes the results. **Credit-risk reporting** reads the stress pack from those same tables. The job in the middle runs on its own once engineering starts it.",
+          "**Credit-risk reporting** asks for the stress narrative. **Credit-risk engineering** owns the exposure tables the worker is allowed to read. The model stays on GPU 1.",
         time:
-          "The job is set to run overnight. Building the features and fitting the scorecard takes about three hours on Spark. The tables are ready at the start of the business day. Opening the stress pack and reading the numbers takes a few minutes.",
+          "The worker finishes in a few minutes. DeepSeek reasons on GPU 1. The draft is in the chat the same morning. A human still owns the numbers.",
         departments:
-          "Credit-risk engineering opens the notebooks and starts the training job. They own the features, the results table, and the registered scorecard. Credit-risk reporting opens the dashboard and Genie the same morning. They read the finished numbers. The model stays as engineering left it.",
+          "Credit-risk reporting asks and decides. Credit-risk engineering keeps the tables behind the read-only connector. Platform operations runs the gateway and the model proxy.",
         handoff:
-          "The handoff is the table. The job writes a new version of the results and registers the scorecard under Models. Reporting opens that version through the certified metric, in Genie and the SQL warehouse. Unity Catalog names the tables, the model, and the report, so both departments read the same record.",
+          "The handoff is the draft in Postgres. The worker reads the exposures through MCP, the model proxy calls DeepSeek, and the chat shows the narrative. Nothing is filed until a person accepts it. The egress proxy stays closed.",
       },
     },
   },
@@ -290,114 +261,96 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "engineers",
-          label: "Data engineers",
-          note: "The customer is one row. Their products and channels have to be joined into one profile, and that pipeline belongs to the engineers.",
+          id: "chat",
+          label: "Chat UI",
+          note: "A person asks in the chat for the customer's next offer.",
         },
         {
           id: "apps",
-          label: "Business apps",
-          note: "The offer is shown on the customer's screen. The business app reads that one live row.",
+          label: "Enterprise apps",
+          note: "The offer screen calls the API for that one customer. The proxy sends the call to the gateway.",
         },
       ],
       control: [
         {
-          id: "jobs",
-          label: "Notebooks and jobs",
-          note: "Lakeflow rebuilds the customer's profile on a schedule and writes it to Delta Lake. A job is how that rebuild stays repeatable.",
+          id: "worker",
+          label: "Agent worker",
+          note: "The profile is assembled as a job, from the systems that already hold the customer.",
         },
         {
-          id: "apps",
-          label: "Databricks Apps",
-          note: "The offer screen is an app on the platform, so it keeps the signed-in user's Unity Catalog grants.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "MCP opens those internal systems in place. The customer file is not copied out.",
         },
       ],
       compute: [
         {
-          id: "spark",
-          label: "Spark clusters",
-          note: "The profile is a join across the customer's products and channels. Spark is the engine Lakeflow uses to build that row.",
+          id: "model",
+          label: "Model proxy",
+          note: "The model proxy is the only path to Qwen.",
+        },
+        {
+          id: "qwen",
+          label: "Qwen",
+          note: "Qwen drafts the offer from the rows the worker retrieved.",
         },
       ],
       storage: [
         {
-          id: "delta",
-          label: "Delta tables",
-          note: "Delta Lake holds the customer's identity, the joined profile, and its history. Databricks SQL and Genie read that same row.",
-        },
-        {
-          id: "lakebase",
-          label: "Lakebase Postgres",
-          note: "Lakebase holds the live row the app reads, and the offer the app writes back. That write syncs into Delta Lake.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "Postgres logs who opened the customer. The customer record stays in the internal system.",
         },
       ],
       story: [
         {
-          id: "notebooks",
+          id: "chat",
           at: 1,
-          system: "Notebooks",
-          text: "The engineers' notebooks open and start the Lakeflow job that joins the customer's products and channels into one profile.",
+          system: "Chat UI",
+          text: "The chat opens on the internal URL. The person asks for the customer's next offer.",
         },
         {
           id: "app",
           at: 1,
           system: "Offer app",
-          text: "The offer screen opens and asks for the customer. It reads the live row in Lakebase.",
+          text: "The offer screen calls the API. The proxy passes the signed-in user to the gateway.",
         },
         {
-          id: "job",
+          id: "gateway",
           at: 2,
-          system: "Profile job",
-          text: "The job opens the customer's source tables in Delta Lake, writes one profile row, and stops. The sources stay where they are.",
+          system: "Gateway",
+          text: "The gateway checks who may see this customer before any system is opened.",
         },
         {
-          id: "screen",
+          id: "mcp",
           at: 2,
-          system: "App screen",
-          text: "The screen opens on Databricks Apps. Unity Catalog allows only this customer's profile.",
+          system: "MCP servers",
+          text: "MCP reads the internal systems where the customer already lives. No copy is made.",
         },
         {
-          id: "spark",
+          id: "qwen",
           at: 3,
-          system: "Spark",
-          text: "Spark opens the customer's tables, writes the joined profile to Delta Lake, and can shut down. The row remains.",
+          system: "Qwen",
+          text: "The model proxy calls Qwen on port 8001. Qwen drafts the offer from those rows.",
         },
         {
           id: "postgres",
           at: 4,
-          system: "Lakebase",
-          text: "Lakebase opens the live row. The app reads it and writes the offer. That row is what the screen shows.",
-        },
-        {
-          id: "delta",
-          at: 4,
-          system: "Delta Lake",
-          text: "The profile table opens and the joined row is written there. Databricks SQL and Genie can read that same row.",
-        },
-        {
-          id: "sync",
-          at: 4,
-          system: "Sync",
-          text: "The sync copies the offer from Lakebase into the customer's Delta Lake profile. The app and the next job then read one row.",
-        },
-        {
-          id: "catalog",
-          at: 4,
-          system: "Unity Catalog",
-          text: "Unity Catalog allows the job, the app, and both copies, and records who opened the customer's record.",
+          system: "Postgres",
+          text: "Postgres records who opened the customer and what the chat returned. The source systems are unchanged.",
         },
       ],
       reply:
-        "The customer is one row. Lakeflow runs on Spark and writes the joined profile to Delta Lake, where Databricks SQL and Genie can read it. The app reads the live row from Lakebase and writes the offer there. That write syncs back into Delta Lake. Unity Catalog registers both copies and records who opened the record.",
+        "The customer stays in the systems that already hold the file. The chat and the offer app arrive at the gateway. MCP reads in place. The model proxy calls Qwen. Postgres logs the open. No second copy is written.",
       setup: {
         overview:
-          "Two departments share this run. **Customer data engineering** rebuilds the customer's profile from their products and channels. The **digital product team** shows the next offer on the app. The rebuild runs on a schedule. The offer is written when the customer is on the screen.",
+          "The **branch** asks in the chat. The **digital product team** shows the offer in the app. Both arrive at one gateway, and the customer file stays where it already lives.",
         time:
-          "The profile job runs overnight and finishes in about an hour. By morning the joined row is in Delta Lake and synced to the live row. The offer appears in the same session the customer opens the app. The offer the customer takes is written then and copied back into Delta for the next rebuild.",
+          "The offer comes back in a few seconds. Qwen answers on GPU 0. The screen reads that answer in the same session.",
         departments:
-          "Customer data engineering opens the notebooks and starts the Lakeflow job. They own the joined profile. The digital product team owns the offer screen on Databricks Apps. The signed-in user of that app sees only that customer's row.",
+          "The branch asks. The digital product team owns the app. Platform operations runs the gateway. The customer file stays with the system that already holds it.",
         handoff:
-          "The handoff is the customer's one row, kept in two places. Engineering writes the joined profile to Delta Lake, and that row is what Lakebase serves to the app. The app writes the offer into Lakebase. The sync copies that offer back into the Delta profile. Unity Catalog records who opened the record.",
+          "The handoff is the answer in the chat and on the screen. MCP reads the internal systems in place. The model proxy calls Qwen. Postgres logs who opened the customer. No second copy is written.",
       },
     },
   },
@@ -407,108 +360,96 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "engineers",
-          label: "Data engineers",
-          note: "The report tables are rebuilt every period by a pipeline. The engineers own that pipeline, so they start it.",
-        },
-        {
-          id: "analysts",
-          label: "Analysts and BI tools",
-          note: "The published pack is what analysts open. The numbers are already in tables, so they read them.",
+          id: "chat",
+          label: "Chat UI",
+          note: "Regulatory reporting asks in the chat. The pack is a draft until a person files it.",
         },
       ],
       control: [
         {
-          id: "jobs",
-          label: "Notebooks and jobs",
-          note: "The period has to be rebuilt the same way each time. A job does that, and a failed run leaves the previous version in place.",
+          id: "worker",
+          label: "Agent worker",
+          note: "The period pack is a multi-step job. A failed step leaves the previous draft in place.",
         },
         {
-          id: "genie",
-          label: "Genie and AI/BI",
-          note: "The pack is a dashboard on one certified metric. Genie is how a follow-up question uses that same metric.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "The worker opens SharePoint and the read-only database. The sources stay where they are.",
         },
       ],
       compute: [
         {
-          id: "spark",
-          label: "Spark clusters",
-          note: "Rebuilding the period's tables is a batch job over many sources. Spark is the engine for that rebuild.",
+          id: "model",
+          label: "Model proxy",
+          note: "The model proxy is the only path to DeepSeek. The report does not leave through the egress proxy.",
         },
         {
-          id: "warehouse",
-          label: "SQL warehouse",
-          note: "The published report is a SQL read of the tables Spark wrote. The warehouse is the engine for that read.",
+          id: "deepseek",
+          label: "DeepSeek",
+          note: "DeepSeek on port 8002 writes the period narrative. Compliance reasoning is what this GPU is for.",
         },
       ],
       storage: [
         {
-          id: "delta",
-          label: "Delta tables",
-          note: "The report needs gold tables whose lineage points back at the sources. Delta is where that version is kept.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "Ingestion has already stored the SharePoint vectors here. The draft and the log stay beside them.",
+        },
+        {
+          id: "redis",
+          label: "Redis 7",
+          note: "Redis tracks the budget for the reasoning call.",
         },
       ],
       story: [
         {
-          id: "notebooks",
+          id: "chat",
           at: 1,
-          system: "Notebooks",
-          text: "The engineers' notebooks are opened and start the pipeline that rebuilds the report. The notebook stays put.",
+          system: "Chat UI",
+          text: "The chat opens. Regulatory reporting asks for this period's pack.",
         },
         {
-          id: "analysts",
-          at: 1,
-          system: "Analyst tools",
-          text: "The analyst's pack is opened to read the numbers. It does not rebuild them.",
-        },
-        {
-          id: "job",
+          id: "gateway",
           at: 2,
-          system: "Report pipeline",
-          text: "The pipeline opens the source tables and writes the report tables. If it fails, the previous tables stay.",
+          system: "Gateway",
+          text: "The gateway checks policy, risk, rights, and budget before SharePoint or the database is opened.",
         },
         {
-          id: "dashboard",
+          id: "worker",
           at: 2,
-          system: "Dashboard and Genie",
-          text: "The pack opens, and a follow-up question opens Genie on the same metric. Both read. Neither makes a second copy.",
+          system: "Agent worker",
+          text: "A worker opens SharePoint and the read-only database through MCP. A failed step leaves the previous draft.",
         },
         {
-          id: "spark",
+          id: "deepseek",
           at: 3,
-          system: "Spark",
-          text: "Spark opens the sources, writes the report tables, and shuts down. The tables remain.",
+          system: "DeepSeek",
+          text: "The model proxy calls DeepSeek on port 8002. DeepSeek drafts the period narrative.",
         },
         {
-          id: "warehouse",
-          at: 3,
-          system: "SQL warehouse",
-          text: "The warehouse opens those tables and runs the report query. It does not scan the raw files itself.",
-        },
-        {
-          id: "delta",
+          id: "postgres",
           at: 4,
-          system: "Delta tables",
-          text: "The report tables are opened for the new period. A pointer is kept back to the sources they were built from.",
+          system: "Postgres",
+          text: "The draft is stored next to the vectors ingestion already wrote. The auditor can read this run.",
         },
         {
-          id: "catalog",
+          id: "otel",
           at: 4,
-          system: "Unity Catalog",
-          text: "The catalog stores that line from source to figure. That is the record an auditor reads.",
+          system: "OTel",
+          text: "OTel exports the trace. The egress proxy is not opened.",
         },
       ],
       reply:
-        "Regulatory reporting goes in through the engineers and out through the analysts. Lakeflow runs on Spark and lands Delta tables. Databricks SQL and the dashboards read those tables through the warehouse. Unity Catalog lineage is the line from source to figure. Genie can ask a question of the same metric without a second copy.",
+        "Regulatory reporting stays on the enterprise's machines. Reporting asks in the chat. An agent worker reads SharePoint and the database through MCP. The model proxy calls DeepSeek. Postgres keeps the draft and the log. A person files the pack.",
       setup: {
         overview:
-          "Two departments share this run. **Finance engineering** rebuilds the period's report tables. **Regulatory reporting** reads the published pack. The pipeline runs on its own once engineering starts it. A failed run leaves the previous period in place.",
+          "**Regulatory reporting** asks for the period pack. **Finance engineering** owns the tables the worker may read. The draft stays on the enterprise's machines.",
         time:
-          "The pipeline starts after the period closes and runs overnight. Rebuilding the tables takes about four hours on Spark. The pack is ready at the start of the next business day. A follow-up question in Genie comes back in about a minute.",
+          "The worker finishes in a few minutes. DeepSeek writes the narrative on GPU 1. The pack is in the chat the same morning. Filing waits for a person.",
         departments:
-          "Finance engineering opens the notebooks and starts the report pipeline. They own the rebuild from source to table. Regulatory reporting opens the pack and asks the follow-up. An auditor reads the lineage from those same tables.",
+          "Regulatory reporting asks and files. Finance engineering keeps the source tables behind MCP. An auditor reads the run in Postgres. Platform operations runs the gateway.",
         handoff:
-          "The handoff is the period's tables. The pipeline writes a new version and keeps a pointer back to the sources. Reporting opens that version in the dashboard and in Genie, on one certified metric. Unity Catalog stores the line from source to figure, which is the record the auditor reads.",
+          "The handoff is the draft and the log. Ingestion has already synced SharePoint into Postgres. The worker reads the sources through MCP, the model proxy calls DeepSeek, and the chat returns the pack. OTel exports the trace. The egress proxy is not opened.",
       },
     },
   },
@@ -518,75 +459,85 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "analysts",
-          label: "Analysts and BI tools",
-          note: "This is a question on a number that already exists. An analyst asks it, so the path starts with them.",
+          id: "chat",
+          label: "Chat UI",
+          note: "Customer insight asks a question on a number that already exists. No job is queued.",
         },
       ],
       control: [
         {
-          id: "genie",
-          label: "Genie and AI/BI",
-          note: "The question should become SQL against the certified NPS metric. Genie is the place that holds that definition.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "The saved definition is read from the read-only database. The definition is not changed.",
         },
       ],
       compute: [
         {
-          id: "warehouse",
-          label: "SQL warehouse",
-          note: "One SQL question needs an engine that can scale up for the query and back down after. That engine is the warehouse.",
+          id: "model",
+          label: "Model proxy",
+          note: "One short call. The model proxy opens port 8001 and no other port.",
+        },
+        {
+          id: "qwen",
+          label: "Qwen",
+          note: "Qwen answers from the definition. Routing and a short answer are what this GPU is for.",
         },
       ],
       storage: [
         {
-          id: "delta",
-          label: "Delta tables",
-          note: "The metric already points at a gold table. Delta is that table, and the warehouse reads it where it sits.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "Postgres logs the person and the question. The definition stays as it was.",
+        },
+        {
+          id: "redis",
+          label: "Redis 7",
+          note: "Redis counts the budget for one small call.",
         },
       ],
       story: [
         {
-          id: "analysts",
+          id: "chat",
           at: 1,
-          system: "Analyst tools",
-          text: "The analyst's workspace is opened. No job is started and no file is copied.",
+          system: "Chat UI",
+          text: "The chat opens. Customer insight asks for NPS. No file is copied.",
         },
         {
-          id: "genie",
+          id: "gateway",
           at: 2,
-          system: "Genie",
-          text: "Genie opens the question and turns it into SQL against the saved definition of the metric. The definition is read, not changed.",
+          system: "Gateway",
+          text: "The gateway checks the person and the use case before the definition is read.",
         },
         {
-          id: "warehouse",
+          id: "mcp",
+          at: 2,
+          system: "MCP servers",
+          text: "MCP reads the saved definition from the read-only database.",
+        },
+        {
+          id: "qwen",
           at: 3,
-          system: "SQL warehouse",
-          text: "The warehouse opens the table behind that definition, runs the query, and scales back down. The table is unchanged.",
+          system: "Qwen",
+          text: "The model proxy calls Qwen. Qwen answers from that definition and stops.",
         },
         {
-          id: "delta",
+          id: "postgres",
           at: 4,
-          system: "Delta tables",
-          text: "The gold table is opened for reading. No rows are added or changed.",
-        },
-        {
-          id: "catalog",
-          at: 4,
-          system: "Unity Catalog",
-          text: "The catalog checks the person and the table before the query runs. The model is not opened.",
+          system: "Postgres",
+          text: "The question and the person are logged. The definition is unchanged. No model leaves the building.",
         },
       ],
       reply:
-        "Questions on data stay on the analyst path. Genie turns the plain question into SQL and sends it to the SQL warehouse. The warehouse reads the gold Delta table behind the metric view. Unity Catalog checks the person and the table before the query runs. Nothing is copied, and no model is called.",
+        "The question stays on the chat path. The gateway checks the person. MCP reads the saved definition. The model proxy calls Qwen. Postgres logs the call. The definition is left as it was.",
       setup: {
         overview:
-          "One department does this run. **Customer insight** asks a question on a number that already exists. Genie turns the question into SQL and the warehouse reads the gold table. No other team is called for this question.",
+          "**Customer insight** asks in the chat. No other team is called. The gateway checks the person, then Qwen answers from the saved definition.",
         time:
-          "The answer comes back in a few seconds. If the warehouse has to scale up for the query, it can take about a minute, then it scales back down. The table is left as it was.",
+          "The answer comes back in a few seconds. Qwen answers on GPU 0, and the call ends there.",
         departments:
-          "Customer insight asks the question. They open Genie and read NPS from the certified metric. Data engineering published that metric and the gold table earlier. They are not in this run.",
+          "Customer insight asks. Data engineering published the definition into the database the MCP connector can read. They are not in this call.",
         handoff:
-          "The handoff already happened, when the metric was certified. Genie reads that saved definition and sends SQL to the warehouse. The warehouse reads the gold table behind it. Unity Catalog checks the person and the table before the query runs. The definition and the table stay as they were.",
+          "The handoff already happened, when the definition was stored. MCP reads it. The model proxy calls Qwen. Postgres logs the person and the question. The definition stays as it was.",
       },
     },
   },
@@ -596,75 +547,91 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "ai-apps",
-          label: "AI apps and agents",
-          note: "A person asks which passages apply. An agent is the access point, because the answer comes from a search and a model.",
+          id: "chat",
+          label: "Chat UI",
+          note: "Vendor management asks in the chat. The answer has to cite the passages.",
+        },
+        {
+          id: "ingestion",
+          label: "Ingestion",
+          note: "Ingestion already synced SharePoint into Postgres. This question does not sync the files again.",
         },
       ],
       control: [
         {
-          id: "gateway",
-          label: "Agents and AI Gateway",
-          note: "The agent has to retrieve passages and call a model. AI Gateway sits on that call so the caller, the cost, and the limit are recorded.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "The SharePoint connector confirms the policy files still sit where they were embedded.",
         },
       ],
       compute: [
         {
-          id: "serving",
-          label: "Model serving",
-          note: "The answer is one model request, with the index searched beside it. Model serving is the endpoint that returns it.",
+          id: "model",
+          label: "Model proxy",
+          note: "The model proxy calls the embedding model, the reranker, and Qwen. It is the only caller of those ports.",
+        },
+        {
+          id: "embed",
+          label: "Embeddings",
+          note: "BGE-M3 on port 8003 vectorizes the question. The reranker on port 8004 scores the passages.",
         },
       ],
       storage: [
         {
-          id: "models",
-          label: "Models",
-          note: "The vector index and the model version live together. Serving loads that version, and the passages stay the documents that were embedded.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "The vectors live in Postgres. The call is logged. The vendor file is not filed as a new record.",
         },
       ],
       story: [
         {
-          id: "agent",
+          id: "chat",
           at: 1,
-          system: "Agent app",
-          text: "The agent app is opened with the vendor question. The vendor file stays where it already lives.",
+          system: "Chat UI",
+          text: "The chat opens with the vendor question. The vendor file stays where it already lives.",
         },
         {
           id: "gateway",
           at: 2,
-          system: "Agent and AI Gateway",
-          text: "The agent opens the policy index and asks the model a question. The gateway opens on that call, writes a log, and applies the limit. It does not keep the document.",
+          system: "Gateway",
+          text: "The gateway checks the person, the use case, and the budget before the index is searched.",
         },
         {
-          id: "serving",
+          id: "mcp",
+          at: 2,
+          system: "MCP servers",
+          text: "MCP opens SharePoint only to confirm the passages. The files are not copied into the chat.",
+        },
+        {
+          id: "embed",
           at: 3,
-          system: "Model serving",
-          text: "The model endpoint opens, loads the model, and returns an answer. It does not keep the vendor file after the answer.",
+          system: "Embeddings",
+          text: "The model proxy calls port 8003 and port 8004. The reranker scores the passages already stored.",
         },
         {
-          id: "index",
-          at: 4,
-          system: "Document index",
-          text: "The index is opened next to the stored models. The passages that come back are the documents that were already embedded. Nothing new is filed as a record of the vendor.",
+          id: "qwen",
+          at: 3,
+          system: "Qwen",
+          text: "Qwen answers from those passages on port 8001. The egress proxy is not used.",
         },
         {
-          id: "catalog",
+          id: "postgres",
           at: 4,
-          system: "Unity Catalog",
-          text: "The catalog allows the index and the endpoint. It records the call. It does not become the system of record.",
+          system: "Postgres",
+          text: "Postgres holds the vectors and the log of the call. No new record of the vendor is written.",
         },
       ],
       reply:
-        "Documents follow the agent path. Agent Bricks searches the vector index stored with Models, then calls the model through AI Gateway. Model serving loads that model. Unity Catalog governs the index and the endpoint. The answer cites passages. It does not write a system of record.",
+        "Documents stay on the retrieval path. Ingestion has already written the SharePoint vectors to Postgres. The gateway checks the caller. The model proxy calls the embedding model, the reranker, and Qwen. The answer cites passages. It does not write a system of record.",
       setup: {
         overview:
-          "Two departments share this run. **Vendor management** asks which policy passages apply. The agent answers from the policy index and a model. **Platform engineering** keeps the index and the model. They are not on this call.",
+          "**Vendor management** asks which passages apply. **Platform operations** keeps the index, the models, and the gateway. They are not on this call.",
         time:
-          "The answer comes back in a few seconds. The policies were embedded earlier, when the index was built. This question leaves that index as it is. AI Gateway logs the call as it happens.",
+          "The answer comes back in a few seconds. The policies were embedded earlier, when ingestion synced SharePoint.",
         departments:
-          "Vendor management, or compliance, asks in the agent app. The agent searches the passages and calls the model. Platform engineering owns the index, the model version, and the endpoint. The person asking reads the answer in the app.",
+          "Vendor management, or compliance, asks in the chat. Platform operations owns ingestion, Postgres, and the model proxy. The person asking reads the answer in the chat.",
         handoff:
-          "The handoff is the cited passages. The person asks in the app. The agent opens the policy index and the model through AI Gateway, which writes who called, the cost, and the limit. The answer quotes the passages that were already embedded. Unity Catalog allows the index and the endpoint and records the call. The vendor file stays where it already lives.",
+          "The handoff is the cited passages. Ingestion has already written the vectors to Postgres. MCP confirms the file still sits in SharePoint. The model proxy calls the embedding model, the reranker, and Qwen. The answer quotes the passages. The egress proxy stays closed.",
       },
     },
   },
@@ -674,75 +641,96 @@ const samples: { label: string; query: string; route: Route }[] = [
     route: {
       access: [
         {
-          id: "analysts",
-          label: "Analysts and BI tools",
-          note: "Merchant risk is a question on tables the analysts already use. They are the ones who ask it.",
+          id: "chat",
+          label: "Chat UI",
+          note: "Payments analytics asks in the chat. The partner is not given a login.",
+        },
+        {
+          id: "egress",
+          label: "Egress",
+          note: "A share with the partner would leave the building. The gateway does not allow that for this request.",
         },
       ],
       control: [
         {
-          id: "genie",
-          label: "Genie and AI/BI",
-          note: "The internal view is a dashboard, and the partner share is a catalog grant on the same table. Genie is where that question is asked.",
+          id: "mcp",
+          label: "MCP servers",
+          note: "The read-only database opens the merchant figures for the internal answer.",
+        },
+        {
+          id: "otel",
+          label: "OTel",
+          note: "The refused share is part of the trace. OTel exports it to the monitoring already in place.",
         },
       ],
       compute: [
         {
-          id: "warehouse",
-          label: "SQL warehouse",
-          note: "The internal numbers are SQL on the payments tables. The warehouse is the engine that answers them.",
+          id: "model",
+          label: "Model proxy",
+          note: "The model proxy may leave only when the use case policy allows an external model. This request does not.",
+        },
+        {
+          id: "qwen",
+          label: "Qwen",
+          note: "Qwen answers the internal question on port 8001. The egress proxy is not opened.",
         },
       ],
       storage: [
         {
-          id: "delta",
-          label: "Delta tables",
-          note: "One table holds the history. A share on that Delta table lets the partner read it where it sits, so the warehouse and the partner see the same copy.",
+          id: "postgres",
+          label: "Postgres 16",
+          note: "The run is logged, including the refusal. No copy is made for the partner.",
         },
       ],
       story: [
         {
-          id: "analysts",
+          id: "chat",
           at: 1,
-          system: "Analyst tools",
-          text: "The analyst's dashboard is opened for the internal risk numbers. The partner is not given a login to that dashboard.",
+          system: "Chat UI",
+          text: "The chat opens. Payments analytics asks for merchant risk and a share with the partner.",
         },
         {
-          id: "genie",
+          id: "gateway",
           at: 2,
-          system: "Genie",
-          text: "Genie opens the question and sends SQL. The partner share is a permission, not a second pipeline.",
+          system: "Gateway",
+          text: "The gateway allows the internal read and refuses the share. The figures stay on the enterprise's machines.",
         },
         {
-          id: "warehouse",
+          id: "mcp",
+          at: 2,
+          system: "MCP servers",
+          text: "MCP reads the merchant figures from the read-only database. No file is prepared for the partner.",
+        },
+        {
+          id: "qwen",
           at: 3,
-          system: "SQL warehouse",
-          text: "The warehouse opens the payments table and answers the internal question. It does not make a copy for the partner.",
+          system: "Qwen",
+          text: "The model proxy calls Qwen for the internal answer. It does not call the external API.",
         },
         {
-          id: "delta",
-          at: 4,
-          system: "Delta tables",
-          text: "The payments table is opened. A share is granted on that same table. The partner reads it where it sits. No copy is made.",
+          id: "egress",
+          at: 3,
+          system: "Egress proxy",
+          text: "The egress proxy stays closed. Only the model proxy could use it, and this policy does not allow that.",
         },
         {
-          id: "catalog",
+          id: "postgres",
           at: 4,
-          system: "Unity Catalog",
-          text: "The catalog is where that grant is written. The warehouse and the partner then see one version of the table.",
+          system: "Postgres",
+          text: "Postgres logs the answer and the refused share. The partner sees nothing.",
         },
       ],
       reply:
-        "Payments data is one Delta table with two readers. Analysts reach it through Genie and the SQL warehouse. Delta Sharing, granted in Unity Catalog, lets the partner read that same table without a copy. The warehouse and the share see one version.",
+        "Payments data is answered inside the gateway. Analytics asks in the chat. MCP reads the figures. The model proxy calls Qwen and does not open the egress proxy. Postgres logs the refused share. The partner is not given a path out.",
       setup: {
         overview:
-          "**Payments analytics** and an **outside partner** read one table. Analytics asks for merchant risk inside the bank. The partner reads the same table through a share. No second pipeline is built for the partner.",
+          "**Payments analytics** asks inside the bank. An **outside partner** is not given a path out. The gateway refuses the egress because the figures stay on the enterprise's machines.",
         time:
-          "The internal numbers come back in a few seconds, or about a minute if the warehouse scales up. The share is granted once. The partner can read as soon as that grant is written. There is no overnight copy.",
+          "The internal answer comes back in a few seconds. The partner grant is not written. There is no copy to wait for.",
         departments:
-          "Payments analytics opens the dashboard and asks the question in Genie. They see the internal risk numbers. A catalog owner in data governance writes the partner grant. The partner is a separate firm, and they are not given a login to the dashboard.",
+          "Payments analytics asks and reads the answer in the chat. Platform operations owns the egress rule. The partner is a separate firm, and this call does not reach them.",
         handoff:
-          "The handoff is a permission on the payments table. Analysts read it through Genie and the SQL warehouse. Delta Sharing, granted in Unity Catalog, lets the partner read that same table where it sits. The warehouse and the partner see one version.",
+          "The handoff stops at the gateway. The model proxy may leave only when the use case policy allows an external model. This request does not. Qwen answers inside. Postgres logs the refusal of the share. The partner sees nothing.",
       },
     },
   },
@@ -784,11 +772,11 @@ function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
       <div className="mx-auto grid w-max min-w-full grid-cols-[1fr_auto_1fr]">
         <p className="flex items-center justify-end gap-1.5 self-center pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase">
           <span className="size-1.5 bg-accent" />
-          Unity Catalog
+          Gateway
         </p>
         <span className="size-10 justify-self-center self-center bg-foreground" />
         <p className="invisible pr-3 font-mono text-[0.65rem] tracking-[-0.01em] whitespace-nowrap uppercase" aria-hidden>
-          Unity Catalog
+          Gateway
         </p>
         {layers.map((layer, index) => {
           return (
@@ -847,7 +835,7 @@ function Description({ route, step }: { route: Route | null; step: number }) {
   if (!route) {
     return (
       <p className="p-4 text-sm leading-relaxed text-faint">
-        Choose a workflow. This side names each system that opens, and what happens to it.
+        Choose a request. This side names each part of the architecture that opens, and what happens to it.
       </p>
     );
   }
@@ -893,28 +881,28 @@ const setupColumns: {
   storage: { id: string; label: string; detail: string; more: string } | null;
 }[] = [
   {
-    access: { id: "engineers", label: "Data engineers" },
-    control: { id: "jobs", label: "Lakeflow jobs", detail: "Designer and notebooks", more: "Writes the tables" },
-    compute: { id: "spark", label: "Spark clusters", detail: "Distributed processing", more: "Runs jobs at scale" },
-    storage: { id: "delta", label: "Delta Lake, Iceberg", detail: "Open table formats", more: "One copy, many readers" },
+    access: { id: "chat", label: "Chat UI" },
+    control: { id: "proxy", label: "Proxy", detail: "TLS entry point", more: "One URL, corporate SSO" },
+    compute: { id: "qwen", label: "Qwen", detail: "GPU 0 · port 8001", more: "Chat and routing" },
+    storage: { id: "redis", label: "Redis 7", detail: "Budgets and cache", more: "The gateway is the caller" },
   },
   {
-    access: { id: "analysts", label: "Analysts and BI tools" },
-    control: { id: "genie", label: "Genie and AI/BI", detail: "Dashboards, metric views", more: "Questions become SQL" },
-    compute: { id: "warehouse", label: "Databricks SQL", detail: "Warehouse queries", more: "Reads the same tables" },
+    access: { id: "apps", label: "Enterprise apps" },
+    control: { id: "worker", label: "Agent worker", detail: "Job queue workers", more: "Runs multi-step tasks" },
+    compute: { id: "deepseek", label: "DeepSeek", detail: "GPU 1 · port 8002", more: "Compliance reasoning" },
+    storage: { id: "postgres", label: "Postgres 16", detail: "Vectors, jobs, logs", more: "pg-boss queue" },
+  },
+  {
+    access: { id: "ingestion", label: "Ingestion" },
+    control: { id: "mcp", label: "MCP servers", detail: "Tool connectors", more: "SharePoint, database, sanctions" },
+    compute: { id: "embed", label: "Embeddings", detail: "BGE-M3 · port 8003", more: "Reranker on port 8004" },
     storage: null,
   },
   {
-    access: { id: "ai-apps", label: "AI apps and agents" },
-    control: { id: "gateway", label: "Agent Bricks", detail: "AI Gateway routing", more: "Logs every model call" },
-    compute: { id: "serving", label: "Model serving", detail: "Foundation model APIs", more: "Answers one request" },
-    storage: { id: "models", label: "MLflow, Vector Search", detail: "Registry and embeddings", more: "Search the documents" },
-  },
-  {
-    access: { id: "apps", label: "Business apps" },
-    control: { id: "apps", label: "Databricks Apps", detail: "Hosted web apps", more: "Inherit catalog rights" },
-    compute: null,
-    storage: { id: "lakebase", label: "Lakebase Postgres", detail: "Managed Postgres", more: "Synced to Delta" },
+    access: { id: "egress", label: "Egress" },
+    control: { id: "otel", label: "OTel", detail: "Telemetry export", more: "The monitoring already in place" },
+    compute: { id: "model", label: "Model proxy", detail: "Sole path to models", more: "Only service with a route out" },
+    storage: null,
   },
 ];
 
@@ -983,9 +971,9 @@ function SetupMap({
         <div className="px-2 py-3">
           <p className="font-mono text-[0.6rem] tracking-[-0.01em] uppercase">Control</p>
           <p className={`mt-3 font-mono uppercase leading-tight ${catalogOn ? "text-accent" : "text-faint"} ${expanded ? "text-[0.7rem]" : "text-[0.55rem]"}`}>
-            Unity Catalog
+            Gateway
           </p>
-          {expanded ? <p className="mt-1 text-sm leading-snug text-faint">Permission fabric. Checks every query.</p> : null}
+          {expanded ? <p className="mt-1 text-sm leading-snug text-faint">Policy and routing. Checks every request.</p> : null}
         </div>
         <div className={`grid grid-cols-4 ${expanded ? "gap-3" : "gap-1.5"} ${band}`}>
           {setupColumns.map((column) => (
@@ -1214,7 +1202,7 @@ function OperateToggle({
   onSelect: (id: OperateId) => void;
 }) {
   return (
-    <div className="inline-flex max-w-full shrink-0 flex-wrap border border-line" role="group" aria-label="How the workflow runs">
+    <div className="inline-flex max-w-full shrink-0 flex-wrap border border-line" role="group" aria-label="How the request runs">
       {(
         [
           { id: "diagram", label: "Trajectory" },
@@ -1348,7 +1336,7 @@ export function TtsDemo({ label = "Use Cases" }: { label?: string }) {
           </div>
         </div>
         <p className="hidden font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase lg:block">
-          How the workflow runs
+          How the request runs
         </p>
       </div>
       <div ref={frame} className="relative mt-3 flex flex-col">
@@ -1378,7 +1366,7 @@ export function TtsDemo({ label = "Use Cases" }: { label?: string }) {
             <div ref={thread} className="grid h-0 min-h-0 flex-1 content-start gap-3 overflow-y-auto p-4">
               {messages.length === 0 ? (
                 <p className="text-sm leading-relaxed text-faint">
-                  Choose a workflow. The path shows who starts it, the product that runs it, the compute it uses, and where the data is stored.
+                  Choose a request. The path shows who arrives, the gateway check, the model it calls, and where the run is stored.
                 </p>
               ) : (
                 messages.map((message) => (
@@ -1391,7 +1379,7 @@ export function TtsDemo({ label = "Use Cases" }: { label?: string }) {
                     }`}
                   >
                     <span className="mb-1 block font-mono text-[0.65rem] tracking-[-0.01em] uppercase">
-                      {message.role === "person" ? "You" : "Platform"}
+                      {message.role === "person" ? "You" : "System"}
                     </span>
                     {message.text}
                   </p>

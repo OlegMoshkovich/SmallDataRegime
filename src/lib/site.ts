@@ -1,8 +1,16 @@
 export const nav = [
   { href: "/research", label: "Research" },
   { href: "/architecture", label: "System" },
-  { href: "/coder", label: "Coder" },
-  { href: "/data-ecosystem", label: "Data Ecosystem" },
+  {
+    href: "/data-ecosystem",
+    label: "Platform",
+    items: [
+      { href: "/data-ecosystem", label: "Data" },
+      { href: "/documents", label: "Documents", quiet: true },
+      { href: "/coder", label: "Coding" },
+      { href: "/inference", label: "Inference", quiet: true },
+    ],
+  },
 ] as const;
 
 export const pillars = [

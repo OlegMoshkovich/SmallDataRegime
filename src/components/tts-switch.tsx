@@ -1072,25 +1072,25 @@ function GenieView() {
     <div className="grid min-w-0 gap-6 *:min-w-0">
       <Section eyebrow="Text_to_SQL">
         <p className="mt-5 max-w-2xl text-base leading-snug text-faint">
-          The agent is the place an analyst asks a question in plain language and gets an answer from the tables the company already trusts. It does not look through files and it does not invent a number. It writes SQL, a SQL warehouse runs that SQL, and the rows that come back are the answer.
+          The agent is the place an analyst asks a question in plain language and gets an answer from the tables the company already trusts. It does not look through files and it does not invent a number. It writes SQL, a warehouse runs that SQL, and the rows that come back are the answer.
         </p>
         <p className="mt-4 max-w-2xl text-base leading-snug text-faint">
           A person can ask “what is our NPS this quarter?” or “break that down by region.” The second question is not a new search. The agent keeps the first SQL and changes it. The analyst can open the SQL, see the chart, and ask again. The same metric view feeds a dashboard, so the number in the chat and the number on the report are one definition.
         </p>
         <p className="mt-4 max-w-2xl text-base leading-snug text-faint">
-          The agent sits in the analyst column of the setup. The question enters at the agent, the SQL runs on Databricks SQL, and the rows are read from Delta Lake or Iceberg. Unity Catalog checks the signed-in user before a single row returns. The agent never writes a table. Lakeflow does that. The agent never opens the live app row in Lakebase.
+          The agent sits in the analyst column of the setup. The question enters at the agent, the SQL runs on the warehouse, and the rows are read from the lake tables. The catalog checks the signed-in user before a single row returns. The agent never writes a table. The pipelines do that. The agent never opens the live row in the application database.
         </p>
       </Section>
 
       <Section eyebrow="How a space is designed">
         <p className="mt-5 max-w-2xl text-base leading-snug text-faint">
-          An author, usually an analyst who knows the model, builds a Genie space before anyone asks a question. The space is the boundary. The model only knows the tables, the words, and the examples the author put in it. A wide-open warehouse makes a poor space. A space for regulatory reporting, with the certified tables and the certified definitions, makes a good one.
+          An author, usually an analyst who knows the model, builds a space before anyone asks a question. The space is the boundary. The model only knows the tables, the words, and the examples the author put in it. A wide-open warehouse makes a poor space. A space for regulatory reporting, with the certified tables and the certified definitions, makes a good one.
         </p>
         <CardGrid
           items={[
             {
               title: "Tables",
-              body: "The author picks Unity Catalog tables and views. Comments and column descriptions travel with them. A column named bal_amt with no comment is a guess. A column described as “current ledger balance, in major units, one row per account” is an instruction.",
+              body: "The author picks catalog tables and views. Comments and column descriptions travel with them. A column named bal_amt with no comment is a guess. A column described as “current ledger balance, in major units, one row per account” is an instruction.",
             },
             {
               title: "Instructions",
@@ -1102,11 +1102,11 @@ function GenieView() {
             },
             {
               title: "Metric views",
-              body: "A named measure with one formula. NPS, exposure, past-due balance. Genie is told to use the metric instead of rebuilding it from raw columns. The dashboard uses the same view, so the chat and the report cannot drift apart.",
+              body: "A named measure with one formula. NPS, exposure, past-due balance. The agent is told to use the metric instead of rebuilding it from raw columns. The dashboard uses the same view, so the chat and the report cannot drift apart.",
             },
             {
               title: "Trusted questions",
-              body: "Some questions are too important to regenerate. The author saves the SQL, sometimes with a parameter such as region or month. When a new question matches, Genie runs that SQL. The model does not get a chance to rewrite a number the board already signed.",
+              body: "Some questions are too important to regenerate. The author saves the SQL, sometimes with a parameter such as region or month. When a new question matches, the agent runs that SQL. The model does not get a chance to rewrite a number the board already signed.",
             },
             {
               title: "Benchmarks",
@@ -1118,7 +1118,7 @@ function GenieView() {
 
       <Section eyebrow="The harness">
         <p className="mt-5 max-w-2xl text-base leading-snug text-faint">
-          The model does not hold a connection to the warehouse. A harness wraps it. The harness is the code that prepares the question, calls the model, checks what the model wrote, runs it, and either repairs it or returns it. The model proposes. The harness disposes. Take the harness away and Genie is a chatbot guessing at columns.
+          The model does not hold a connection to the warehouse. A harness wraps it. The harness is the code that prepares the question, calls the model, checks what the model wrote, runs it, and either repairs it or returns it. The model proposes. The harness disposes. Take the harness away and the agent is a chatbot guessing at columns.
         </p>
         <div className="mt-8 overflow-x-auto">
           <table className="w-full min-w-[42rem] text-left text-sm">
@@ -1133,8 +1133,8 @@ function GenieView() {
                 ["1. Assemble", "Packs the new question, the earlier questions in the thread, the prior SQL, the schemas, the instructions, the example SQL, and the metric definitions into one prompt. The model never sees the rest of the catalog."],
                 ["2. Choose a path", "Asks the model whether this is a new question, a follow-up that should edit the previous statement, or a match for a trusted question. A match skips generation and runs the saved SQL."],
                 ["3. Write SQL", "The model returns one SELECT. The harness accepts a read. It does not hand the model a tool that inserts, updates, deletes, or creates a table."],
-                ["4. Check the grant", "Unity Catalog evaluates the statement as the person who asked, not as the author of the space. A missing grant stops the query. The model is not allowed to retry its way into another schema."],
-                ["5. Run", "Databricks SQL executes the statement on the warehouse and returns rows. A long scan can be limited. The SQL text is kept, so the analyst can read exactly what ran."],
+                ["4. Check the grant", "The catalog evaluates the statement as the person who asked, not as the author of the space. A missing grant stops the query. The model is not allowed to retry its way into another schema."],
+                ["5. Run", "The warehouse executes the statement and returns rows. A long scan can be limited. The SQL text is kept, so the analyst can read exactly what ran."],
                 ["6. Repair", "An unknown column, a bad join, or a cast error comes back as text. The harness shows that error to the model and asks for a corrected statement. It allows a few tries, then it stops and says the question could not be answered."],
                 ["7. Answer", "Turns the rows into a table, a sentence, and usually a chart. The sentence is a reading of those rows. It is not a second guess from the model about numbers that were not returned."],
                 ["8. Remember the thread", "Stores the question, the SQL, and the shape of the result. The next turn is sent with that state, so “only the north region” is a filter on the same query, not a fresh interpretation of the business."],
@@ -1168,7 +1168,7 @@ function GenieView() {
                 ["Model output", "Accept one decision: a new question, an edit of the previous statement, or a trusted question. A generated question returns one SELECT."],
                 ["Statement check", "Parse that statement before it runs. Reject anything that is not a single read. Do not pass the model a tool that writes or creates a table."],
                 ["Identity", "Run the warehouse as the signed-in user. Do not borrow the author's grants."],
-                ["Execution", "Send the statement to Databricks SQL. Keep the SQL text with the result, and cap a scan that runs too long."],
+                ["Execution", "Send the statement to the warehouse. Keep the SQL text with the result, and cap a scan that runs too long."],
                 ["Repair", "Return a warehouse error to the model with the failed statement. Stop after a fixed number of tries and say the question could not be answered."],
                 ["Response", "Turn the returned rows into a table, a chart, and a sentence. The sentence may only state what those rows contain."],
                 ["Thread", "Store the question, the SQL, and the shape of the result, and send that state with the next turn."],
@@ -1198,7 +1198,7 @@ function GenieView() {
           items={[
             {
               title: "No writes",
-              body: "The only statement that runs is a read. Building or correcting a table is a Lakeflow job, authored and reviewed as code, not a side effect of a question.",
+              body: "The only statement that runs is a read. Building or correcting a table is a pipeline job, authored and reviewed as code, not a side effect of a question.",
             },
             {
               title: "No other schemas",

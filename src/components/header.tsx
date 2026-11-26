@@ -2,17 +2,35 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { Wordmark } from "@/components/logo";
 import { nav } from "@/lib/site";
 
+type Item = (typeof nav)[number];
+
+function itemsOf(item: Item) {
+  return "items" in item ? item.items : null;
+}
+
+function quiet(item: { quiet?: boolean }) {
+  return Boolean(item.quiet);
+}
+
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const platform = useRef<HTMLLIElement>(null);
 
   function current(href: string) {
     return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  function selected(item: Item) {
+    const items = itemsOf(item);
+    if (items) return items.some((child) => current(child.href));
+    return current(item.href);
   }
 
   useEffect(() => {
@@ -21,6 +39,29 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  useEffect(() => {
+    setMenu(false);
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    function outside(event: MouseEvent) {
+      if (!platform.current?.contains(event.target as Node)) setMenu(false);
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenu(false);
+    }
+    document.addEventListener("mousedown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("mousedown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, []);
+
+  const linkClass =
+    "relative text-[0.75rem] leading-none after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 hover:after:w-full";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-background text-foreground lg:bg-transparent">
@@ -39,21 +80,72 @@ export function Header() {
         >
           <ul className="group/menu flex items-center gap-8">
             {nav.map((item) => {
-              const selected = current(item.href);
+              const items = itemsOf(item);
+              const on = selected(item);
+              if (!items) {
+                return (
+                  <li
+                    key={item.href}
+                    className="opacity-100 transition-opacity duration-200 group-hover/menu:opacity-50 hover:opacity-100"
+                  >
+                    <Link
+                      href={item.href}
+                      aria-current={on ? "page" : undefined}
+                      className={`${linkClass} ${on ? "after:w-full" : "after:w-0"}`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              }
               return (
                 <li
-                  key={item.href}
-                  className="opacity-100 transition-opacity duration-200 group-hover/menu:opacity-50 hover:opacity-100"
+                  key={item.label}
+                  ref={platform}
+                  className="relative opacity-100 transition-opacity duration-200 group-hover/menu:opacity-50 hover:opacity-100"
+                  onMouseEnter={() => setMenu(true)}
+                  onMouseLeave={() => setMenu(false)}
                 >
-                  <Link
-                    href={item.href}
-                    aria-current={selected ? "page" : undefined}
-                    className={`relative text-[0.75rem] leading-none after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 hover:after:w-full ${
-                      selected ? "after:w-full" : "after:w-0"
-                    }`}
+                  <button
+                    type="button"
+                    aria-expanded={menu}
+                    aria-haspopup="true"
+                    aria-current={on ? "page" : undefined}
+                    onClick={() => setMenu((value) => !value)}
+                    className={`${linkClass} ${on ? "after:w-full" : "after:w-0"}`}
                   >
                     {item.label}
-                  </Link>
+                  </button>
+                  <div className={`absolute top-full left-1/2 z-50 -translate-x-1/2 pt-3 ${menu ? "" : "hidden"}`}>
+                    <ul className="min-w-36 border border-line bg-surface py-1">
+                      {items.map((child) => {
+                        const childOn = current(child.href);
+                        if (quiet(child)) {
+                          return (
+                            <li key={child.href}>
+                              <span className="block cursor-default px-3 py-2 text-[0.75rem] leading-none text-muted" aria-disabled="true">
+                                {child.label}
+                              </span>
+                            </li>
+                          );
+                        }
+                        return (
+                          <li key={child.href}>
+                            <Link
+                              href={child.href}
+                              aria-current={childOn ? "page" : undefined}
+                              className={`block px-3 py-2 text-[0.75rem] leading-none ${
+                                childOn ? "text-foreground" : "text-faint hover:text-foreground"
+                              }`}
+                              onClick={() => setMenu(false)}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </li>
               );
             })}
@@ -87,17 +179,51 @@ export function Header() {
           <div className="flex h-full flex-col px-4 pt-24 pb-6">
             <ul className="flex flex-1 flex-col gap-1 overflow-auto">
               {nav.map((item) => {
-                const selected = current(item.href);
+                const items = itemsOf(item);
+                if (!items) {
+                  const on = current(item.href);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={on ? "page" : undefined}
+                        className={`block py-3 text-lg ${on ? "text-foreground underline underline-offset-4" : "text-faint"}`}
+                        onClick={() => setOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                }
                 return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      aria-current={selected ? "page" : undefined}
-                      className={`block py-3 text-lg ${selected ? "text-foreground underline underline-offset-4" : "text-faint"}`}
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
+                  <li key={item.label}>
+                    <p className="pt-3 pb-1 text-lg text-foreground">{item.label}</p>
+                    <ul>
+                      {items.map((child) => {
+                        const childOn = current(child.href);
+                        if (quiet(child)) {
+                          return (
+                            <li key={child.href}>
+                              <span className="block cursor-default py-2 pl-4 text-lg text-muted" aria-disabled="true">
+                                {child.label}
+                              </span>
+                            </li>
+                          );
+                        }
+                        return (
+                          <li key={child.href}>
+                            <Link
+                              href={child.href}
+                              aria-current={childOn ? "page" : undefined}
+                              className={`block py-2 pl-4 text-lg ${childOn ? "text-foreground underline underline-offset-4" : "text-faint"}`}
+                              onClick={() => setOpen(false)}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </li>
                 );
               })}

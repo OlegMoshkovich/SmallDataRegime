@@ -652,7 +652,7 @@ export function DocumentsSwitch() {
 
       {view === "summary" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Summary">
+          <Section eyebrow="Documents">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               One place to ask across the documents the company already keeps. Connectors read each source, the index and the graph make that reading searchable, and every answer is limited to what the signed-in person can open.
             </p>

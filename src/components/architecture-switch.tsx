@@ -1024,7 +1024,7 @@ export function ArchitectureSwitch() {
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
             <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
               <span className="size-1.5 bg-accent" aria-hidden />
-              Summary
+              Modules
             </p>
             <div className="mt-8 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
               {[

@@ -248,7 +248,7 @@ export function InferenceSwitch() {
 
       {view === "summary" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Summary">
+          <Section eyebrow="Inference">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               vLLM is the open-source engine that runs a model on the enterprise's GPUs. It began at UC Berkeley's Sky Computing Lab, it is Apache-2.0, and it serves tokens. The weights stay on the machines. A model proxy is the only path in.
             </p>

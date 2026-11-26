@@ -1385,7 +1385,7 @@ export function TtsSwitch() {
 
       {view === "summary" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Summary">
+          <Section eyebrow="Data">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               One cloud platform for everything your data does: storage, pipelines, analytics, machine learning, and AI agents, all kept under a single catalog that handles permissions, lineage, and discovery.
             </p>

@@ -12,7 +12,7 @@ const views = [
   { id: "summary", label: "Summary" },
   { id: "agents", label: "Agents" },
   { id: "models", label: "Models" },
-  { id: "premise", label: "System" },
+  { id: "premise", label: "Architecture" },
   { id: "trajectory", label: "Flow" },
   { id: "demo", label: "Demo" },
   { id: "setup", label: "Setup" },

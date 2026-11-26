@@ -1005,7 +1005,7 @@ export function ArchitectureSwitch() {
           <section className="w-full border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
             <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
               <span className="size-1.5 bg-accent" aria-hidden />
-              Architecture
+              Summary
             </p>
             <p className="mt-4 max-w-4xl text-base leading-relaxed text-faint">
               We write it in TypeScript and ship it as containers. The agent harnesses, document

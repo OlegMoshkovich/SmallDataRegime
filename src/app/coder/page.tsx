@@ -14,6 +14,7 @@ export default function AgentPage() {
   return (
     <article className="bg-background">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
+        <h1 className="mb-6 text-[2.125rem] leading-none tracking-[-0.045em] lg:text-[2.75rem]">Coding</h1>
         {enabled ? (
           <CodingAgent enabled initialReady={openRouterReady()} />
         ) : (

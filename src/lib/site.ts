@@ -6,9 +6,9 @@ export const nav = [
     label: "Platform",
     items: [
       { href: "/data-ecosystem", label: "Data" },
-      { href: "/documents", label: "Documents", quiet: true },
+      { href: "/documents", label: "Documents" },
       { href: "/coder", label: "Coding" },
-      { href: "/inference", label: "Inference", quiet: true },
+      { href: "/inference", label: "Inference" },
     ],
   },
 ] as const;

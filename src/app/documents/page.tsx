@@ -1,20 +1,22 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { Interior } from "@/components/interior";
+import { DocumentsSwitch } from "@/components/documents-switch";
 
 export const metadata: Metadata = {
   title: "Documents",
-  description: "Questions over the documents the company already keeps.",
+  description:
+    "A document platform over the files the company already keeps: connectors, a permission-aware index, and answers that cite the source.",
 };
 
 export default function DocumentsPage() {
   return (
-    <Interior
-      eyebrow="Documents"
-      title="Documents"
-      lede="A question cites the passages that already exist. The files stay where they live, and the answer does not file a new record."
-      space=""
-    >
-      {null}
-    </Interior>
+    <article className="min-h-[calc(100dvh-72px)] bg-background">
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
+        <h1 className="mb-6 text-[2.125rem] leading-none tracking-[-0.045em] lg:text-[2.75rem]">Documents</h1>
+        <Suspense>
+          <DocumentsSwitch />
+        </Suspense>
+      </div>
+    </article>
   );
 }

@@ -13,8 +13,8 @@ function itemsOf(item: Item) {
   return "items" in item ? item.items : null;
 }
 
-function quiet(item: { quiet?: boolean }) {
-  return Boolean(item.quiet);
+function quiet(item: object) {
+  return "quiet" in item && Boolean(item.quiet);
 }
 
 export function Header() {

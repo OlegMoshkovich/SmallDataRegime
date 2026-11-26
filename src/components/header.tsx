@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Button } from "@/components/button";
 import { Wordmark } from "@/components/logo";
 import { applyFontSize, FONT_DEFAULT, FONT_MAX, FONT_MIN, readFontSize } from "@/lib/font-size";
@@ -33,7 +33,7 @@ function FontSlider({
     input.focus();
   }, []);
 
-  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function onKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
     onSize(size + (event.key === "ArrowRight" ? 1 : -1));

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { Wordmark } from "@/components/logo";
+import { applyFontSize, FONT_DEFAULT, FONT_MAX, FONT_MIN, readFontSize } from "@/lib/font-size";
 import { nav } from "@/lib/site";
 
 type Item = (typeof nav)[number];
@@ -17,11 +18,47 @@ function quiet(item: object) {
   return "quiet" in item && Boolean(item.quiet);
 }
 
+function FontSlider({
+  size,
+  onSize,
+}: {
+  size: number;
+  onSize: (px: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-[0.7rem] leading-none text-faint" aria-hidden>
+        A
+      </span>
+      <input
+        type="range"
+        min={FONT_MIN}
+        max={FONT_MAX}
+        step={1}
+        value={size}
+        aria-label="Font size"
+        aria-valuemin={FONT_MIN}
+        aria-valuemax={FONT_MAX}
+        aria-valuenow={size}
+        aria-valuetext={`${size} pixels`}
+        onChange={(event) => onSize(Number(event.target.value))}
+        className="font-size-slider w-full"
+      />
+      <span className="text-[1.05rem] leading-none" aria-hidden>
+        A
+      </span>
+    </div>
+  );
+}
+
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [settings, setSettings] = useState(false);
+  const [fontSize, setFontSize] = useState(FONT_DEFAULT);
   const platform = useRef<HTMLLIElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
 
   function current(href: string) {
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -41,16 +78,30 @@ export function Header() {
   }, [open]);
 
   useEffect(() => {
+    setFontSize(readFontSize());
+  }, []);
+
+  function changeFont(px: number) {
+    setFontSize(applyFontSize(px));
+  }
+
+  useEffect(() => {
     setMenu(false);
+    setSettings(false);
     setOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     function outside(event: MouseEvent) {
-      if (!platform.current?.contains(event.target as Node)) setMenu(false);
+      const target = event.target as Node;
+      if (!platform.current?.contains(target)) setMenu(false);
+      if (!open && !settingsRef.current?.contains(target)) setSettings(false);
     }
     function escape(event: KeyboardEvent) {
-      if (event.key === "Escape") setMenu(false);
+      if (event.key === "Escape") {
+        setMenu(false);
+        setSettings(false);
+      }
     }
     document.addEventListener("mousedown", outside);
     document.addEventListener("keydown", escape);
@@ -58,7 +109,7 @@ export function Header() {
       document.removeEventListener("mousedown", outside);
       document.removeEventListener("keydown", escape);
     };
-  }, []);
+  }, [open]);
 
   const linkClass =
     "relative text-[0.75rem] leading-none after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 hover:after:w-full";
@@ -153,12 +204,31 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 md:flex">
-            <Link
-              href="/signin"
-              className="font-mono text-[0.75rem] tracking-[-0.015rem] capitalize"
-            >
-              Sign in
-            </Link>
+            <div className="relative" ref={settingsRef}>
+              <button
+                type="button"
+                aria-expanded={settings}
+                aria-haspopup="dialog"
+                onClick={() => setSettings((value) => !value)}
+                className="font-mono text-[0.75rem] tracking-[-0.015rem] capitalize"
+              >
+                Settings
+              </button>
+              {settings ? (
+                <div
+                  role="dialog"
+                  aria-label="Settings"
+                  className="absolute top-full right-0 z-50 mt-3 w-56 border border-line bg-surface p-3"
+                >
+                  <p className="font-mono text-[0.65rem] tracking-[-0.015rem] text-muted uppercase">
+                    Font size
+                  </p>
+                  <div className="mt-3">
+                    <FontSlider size={fontSize} onSize={changeFont} />
+                  </div>
+                </div>
+              ) : null}
+            </div>
             <Button href="/contact">Contact</Button>
           </div>
           <button
@@ -229,9 +299,24 @@ export function Header() {
               })}
             </ul>
             <div className="flex flex-col gap-2">
-              <Button href="/signin" variant="ghost" className="w-full">
-                Sign in
-              </Button>
+              <button
+                type="button"
+                aria-expanded={settings}
+                onClick={() => setSettings((value) => !value)}
+                className="inline-flex h-[31px] w-full items-center justify-center border border-line-strong bg-background font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize"
+              >
+                Settings
+              </button>
+              {settings ? (
+                <div className="border border-line bg-surface p-3">
+                  <p className="font-mono text-[0.65rem] tracking-[-0.015rem] text-muted uppercase">
+                    Font size
+                  </p>
+                  <div className="mt-3">
+                    <FontSlider size={fontSize} onSize={changeFont} />
+                  </div>
+                </div>
+              ) : null}
               <Button href="/contact" className="w-full">
                 Contact
               </Button>

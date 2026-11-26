@@ -58,6 +58,11 @@ body {
   color: #fafafa;
 }
 
+.font-size-slider {
+  accent-color: #020202;
+  cursor: pointer;
+}
+
 @keyframes slide-pattern {
   from {
     background-position: 0 0;

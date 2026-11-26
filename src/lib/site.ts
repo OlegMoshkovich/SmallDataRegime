@@ -1,6 +1,6 @@
 export const nav = [
   { href: "/research", label: "Research" },
-  { href: "/architecture", label: "System" },
+  { href: "/architecture", label: "Modules" },
   {
     href: "/data-ecosystem",
     label: "Platform",

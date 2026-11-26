@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { fontSizeBoot } from "@/lib/font-size";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased max-lg:overscroll-y-none`}
     >
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
+        <script dangerouslySetInnerHTML={{ __html: fontSizeBoot }} />
         <Header />
         <div aria-hidden className="h-[72px] shrink-0" />
         <main className="min-h-[calc(100dvh-72px)]">{children}</main>

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ArchitectureSwitch } from "@/components/architecture-switch";
 
 export const metadata: Metadata = {
-  title: "Architecture",
+  title: "Modules",
   description:
     "An enterprise employee chats with one orchestrator. It opens the right document, calls the right agent, and runs the model the privacy of the request allows.",
 };

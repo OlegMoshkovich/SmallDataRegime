@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "@/components/button";
 import { TtsDemo } from "@/components/tts-demo";
 
@@ -11,10 +12,14 @@ const views = [
   { id: "data", label: "Data" },
   { id: "genie", label: "Genie" },
   { id: "demo", label: "Demo" },
-  { id: "setup", label: "Architecture" },
+  { id: "setup", label: "Setup" },
 ] as const;
 
 type View = (typeof views)[number]["id"];
+
+function isView(value: string | null): value is View {
+  return views.some((item) => item.id === value);
+}
 
 function DbCube({ x, y, accent = false }: { x: number; y: number; accent?: boolean }) {
   const top = `${x},${y - 20} ${x + 11},${y - 14} ${x},${y - 8} ${x - 11},${y - 14}`;
@@ -30,25 +35,25 @@ function DbCube({ x, y, accent = false }: { x: number; y: number; accent?: boole
 }
 
 function DbNode({
-  x, y, accent = false, label, label2, sublabel, detail, more, info, onShow, onHide, onPress, onSelect,
+  x, y, accent = false, label, label2, sublabel, detail, more, info, example, onShow, onHide, onPress, onSelect,
 }: {
   x: number; y: number; accent?: boolean; label: string; label2?: string; sublabel?: string;
-  detail?: string; more?: string; info?: string;
-  onShow?: (e: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
+  detail?: string; more?: string; info?: string; example?: string;
+  onShow?: (e: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) => void;
   onHide?: () => void;
-  onPress?: (e: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
+  onPress?: (e: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) => void;
   onSelect?: () => void;
 }) {
   const cls = `font-mono text-[11px] tracking-tight uppercase ${accent ? "fill-accent" : "fill-foreground"}`;
   const l1y = label2 ? y + 16 : y + 22;
   const nodeLabel = label2 ? `${label} ${label2}` : label;
-  const handlers = info && onShow && onHide && onPress ? {
+  const handlers = (info || example) && onShow && onHide && onPress ? {
     className: "cursor-pointer",
-    onMouseEnter: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info),
-    onMouseMove: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info),
+    onMouseEnter: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info ?? "", example ?? ""),
+    onMouseMove: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info ?? "", example ?? ""),
     onMouseLeave: onHide,
     onClick: (e: ReactMouseEvent<SVGGElement>) => {
-      onPress(e, nodeLabel, info);
+      onPress(e, nodeLabel, info ?? "", example ?? "");
       onSelect?.();
     },
   } : {};
@@ -73,8 +78,10 @@ function DatabricksConnectDiagram() {
   const sY = 540;
 
   const sectionRef = useRef<HTMLElement>(null);
-  const [tip, setTip] = useState<{ title: string; body: string; x: number; y: number } | null>(null);
+  const [tip, setTip] = useState<{ title: string; info: string; example: string; x: number; y: number } | null>(null);
   const [route, setRoute] = useState<string | null>(null);
+  const [tips, setTips] = useState(false);
+  const [examples, setExamples] = useState(false);
 
   function choose(id: string) {
     setRoute((current) => (current === id ? null : id));
@@ -89,7 +96,7 @@ function DatabricksConnectDiagram() {
     return window.matchMedia("(hover: none)").matches;
   }
 
-  function placeTip(event: { clientX: number; clientY: number }, title: string, body: string) {
+  function placeTip(event: { clientX: number; clientY: number }, title: string, info: string, example: string) {
     const bounds = sectionRef.current?.getBoundingClientRect();
     if (!bounds) return null;
     const width = 288;
@@ -98,20 +105,26 @@ function DatabricksConnectDiagram() {
     let y = event.clientY - bounds.top + 18;
     if (x + width > bounds.width - 8) x = event.clientX - bounds.left - width - 10;
     if (y + height > bounds.height - 8) y = event.clientY - bounds.top - height - 10;
-    return { title, body, x: Math.max(8, x), y: Math.max(8, y) };
+    return {
+      title,
+      info: tips ? info : "",
+      example: examples ? example : "",
+      x: Math.max(8, x),
+      y: Math.max(8, y),
+    };
   }
 
-  function showTip(event: { clientX: number; clientY: number }, title: string, body: string) {
-    if (coarsePointer()) return;
-    const next = placeTip(event, title, body);
-    if (next) setTip(next);
+  function showTip(event: { clientX: number; clientY: number }, title: string, info: string, example: string) {
+    if (coarsePointer() || (!tips && !examples)) return;
+    const next = placeTip(event, title, info, example);
+    if (next && (next.info || next.example)) setTip(next);
   }
 
-  function pressTip(event: ReactMouseEvent<SVGElement>, title: string, body: string) {
+  function pressTip(event: ReactMouseEvent<SVGElement>, title: string, info: string, example: string) {
     event.stopPropagation();
-    if (!coarsePointer()) return;
-    const next = placeTip(event, title, body);
-    if (!next) return;
+    if (!coarsePointer() || (!tips && !examples)) return;
+    const next = placeTip(event, title, info, example);
+    if (!next || (!next.info && !next.example)) return;
     setTip((current) => (current?.title === title ? null : next));
   }
 
@@ -198,22 +211,26 @@ function DatabricksConnectDiagram() {
             {
               id: "engineers",
               title: "Data engineers",
-              body: "They own the pipelines that build the tables.\n\nA job joins a customer's products and channels into one profile and commits that row to Delta.",
+              info: "They own the pipelines that build the tables.",
+              example: "A job joins a customer's products and channels into one profile and commits that row to Delta.",
             },
             {
               id: "analysts",
               title: "Analysts and BI tools",
-              body: "They ask questions and open reports.\n\nAn analyst asks Genie for this period's totals, and the SQL warehouse reads those figures from Delta.",
+              info: "They ask questions and open reports.",
+              example: "An analyst asks Genie for this period's totals, and the SQL warehouse reads those figures from Delta.",
             },
             {
               id: "ai",
               title: "AI apps and agents",
-              body: "They retrieve records and call a model.\n\nAn agent reads the customer's Delta row, searches the documents, and model serving returns the score.",
+              info: "They retrieve records and call a model.",
+              example: "An agent reads the customer's Delta row, searches the documents, and model serving returns the score.",
             },
             {
               id: "business",
               title: "Business apps",
-              body: "They read and write the live row on a screen.\n\nThe offer app opens the customer's Lakebase record, writes the next product, and that write syncs to Delta.",
+              info: "They read and write the live row on a screen.",
+              example: "The offer app opens the customer's Lakebase record, writes the next product, and that write syncs to Delta.",
             },
           ] as const).map((item, i) => (
             <rect
@@ -224,11 +241,11 @@ function DatabricksConnectDiagram() {
               height={114}
               fill="transparent"
               className="cursor-pointer"
-              onMouseEnter={(e) => showTip(e, item.title, item.body)}
-              onMouseMove={(e) => showTip(e, item.title, item.body)}
+              onMouseEnter={(e) => showTip(e, item.title, item.info, item.example)}
+              onMouseMove={(e) => showTip(e, item.title, item.info, item.example)}
               onMouseLeave={hideTip}
               onClick={(e) => {
-                pressTip(e, item.title, item.body);
+                pressTip(e, item.title, item.info, item.example);
                 choose(item.id);
               }}
             />
@@ -257,30 +274,35 @@ function DatabricksConnectDiagram() {
             detail="permission fabric"
             more="checks every query"
             info={"Unity Catalog is the single governance layer. Every table, model, file, and function is registered here. Access policies, lineage, and audit logs all flow through it, whichever service runs the query.\n\nA notebook, a Genie question, an agent call, and an app query each ask Catalog before they touch data. Catalog records who read a table, which job wrote it, and which model was trained on it. A missing grant stops the query."}
+            example="The risk team opens silver.card_payments. Catalog allows the read and records it. A marketing notebook that names the same table is refused."
             onSelect={() => choose("catalog")}
             {...node} />
           <DbNode x={c[0]} y={cY} label="LAKEFLOW" label2="JOBS"
             detail="designer and notebooks"
             more="writes the tables"
             info={"Lakeflow is where engineers ingest and transform data. Pipelines are built in Lakeflow Designer or in notebooks, and jobs run them on a schedule, on Spark. The result is written as Delta or Iceberg tables.\n\nBronze-to-silver pipelines live here: clean a raw feed, join it to a reference table, and commit the output. Unity Catalog decides which tables the job may read and which schema it may write."}
+            example="cards_hourly reads the new card events, drops declined authorizations, joins the customer, and commits silver.card_payments."
             onSelect={() => choose("jobs")}
             {...node} />
           <DbNode x={c[1]} y={cY} label="GENIE" label2="AI/BI"
             detail="dashboards, metric views"
             more="questions become SQL"
             info={"Genie lets analysts ask a question in plain language and get an answer from Delta tables. It turns the question into SQL, sends it to the SQL warehouse, and returns a table or a chart. AI/BI dashboards use the same metric views, so a question and a report share one definition.\n\nThe warehouse returns only the tables that the analyst is allowed to read. A follow-up question stays on that same governed set of tables."}
+            example={'An analyst asks "what is our NPS this quarter?" Genie writes the SQL against the metric view, the warehouse runs it, and the number comes back.'}
             onSelect={() => choose("genie")}
             {...node} />
           <DbNode x={c[2]} y={cY} label="AGENT BRICKS" label2="AI GATEWAY"
             detail="build and run agents"
             more="logs every model call"
             info={"Agents AI is where teams build, evaluate, and deploy agents on enterprise data. An agent retrieves rows or documents, calls a model, and returns an answer or a next step. AI Gateway sits in front of model serving and records the caller, the model, the token cost, and the response on every call.\n\nRate limits and spend controls are applied at the gateway. Unity Catalog still decides which tables, files, and model versions that agent may open."}
+            example="A compliance agent retrieves the customer's rows and the policy passages, calls the model through the gateway, and drafts the review."
             onSelect={() => choose("agents")}
             {...node} />
           <DbNode x={c[3]} y={cY} label="DATABRICKS" label2="APPS"
             detail="hosted web apps"
             more="inherit catalog rights"
             info={"Databricks Apps hosts internal web applications, in Python or React, on the platform itself. The app runs next to the data and keeps the signed-in user's Unity Catalog grants, so a screen can only show what that user is allowed to query.\n\nLive operational screens usually read and write Lakebase Postgres. Reports go to the SQL warehouse, and predictions go to model serving, under the same Catalog grants."}
+            example="The offer screen reads one live row in Lakebase, writes the next product, and that write syncs into Delta."
             onSelect={() => choose("apps")}
             {...node} />
 
@@ -289,18 +311,21 @@ function DatabricksConnectDiagram() {
             detail="distributed processing"
             more="runs jobs at scale"
             info={"Apache Spark clusters run notebooks and jobs across many machines. A transformation is split into tasks, then committed as one Delta transaction, so a reader sees a finished update. Clusters scale out for a large run and scale back when the run ends.\n\nSpark is the engine under the engineering path. It writes the Delta tables that the SQL warehouse later reads."}
+            example="The join of card events to customers is split across the machines. Spark commits silver.card_payments as one update, and the cluster can shut down."
             onSelect={() => choose("spark")}
             {...node} />
           <DbNode x={c[1]} y={pY} label="DATABRICKS" label2="SQL"
             detail="warehouse queries"
             more="reads the same tables"
             info={"The SQL warehouse is a serverless engine for BI queries. Genie, dashboards, and JDBC or ODBC tools all send SQL here. The warehouse reads the Delta tables Spark wrote, applies the Catalog grant, and returns rows.\n\nAn idle warehouse scales down, so a quiet dashboard does not keep machines running. A burst of questions scales it back up."}
+            example="The NPS dashboard sends SELECT nps FROM gold.customer_metrics WHERE quarter = '2026-Q3'. The warehouse returns one number."
             onSelect={() => choose("warehouse")}
             {...node} />
           <DbNode x={c[2]} y={pY} label="MODEL" label2="SERVING"
             detail="foundation model APIs"
             more="answers one request"
             info={"You choose the model in MLflow: a named version of your own model, or a foundation model by name. Serving hosts that choice on an endpoint, with a workload size, and scales with the requests.\n\nAgent Bricks calls the endpoint through AI Gateway, which logs the caller, the cost, and the limit. Serving loads the weights from MLflow. Unity Catalog decides who may register the model and who may call it."}
+            example="One card payment arrives at the endpoint. Serving loads the fraud model from MLflow and returns a score. The gateway logs the call."
             onSelect={() => choose("serving")}
             {...node} />
 
@@ -310,12 +335,14 @@ function DatabricksConnectDiagram() {
             detail="open table formats"
             more="one copy, many readers"
             info={"Delta and Iceberg tables are Parquet files in the enterprise cloud account, with transactions, schema changes, and time travel. A commit finishes as a whole, so a reader sees the previous version or the new one. Iceberg readers reach the same tables through UniForm.\n\nSpark writes these tables. The SQL warehouse, agents, and apps read the same files. The paths meet on this one copy."}
+            example="Spark writes silver.card_payments. The warehouse, the agent, and the app all read that same table."
             onSelect={() => choose("delta")}
             {...node} />
           <DbNode x={c[2]} y={sY} label="MLFLOW" label2="VECTOR SEARCH"
             detail="registry and embeddings"
             more="search the documents"
             info={"The MLflow registry stores each model version: weights, signature, and the files needed to load it. A training run in a notebook logs the version, and someone promotes it when it is ready to serve. Feature tables and vector indexes sit here too, including the document indexes agents search.\n\nModel Serving and agents load a named version. Catalog decides who may register a model and who may call it."}
+            example="A training notebook logs fraud_score version 12. Someone promotes it. Serving loads that version when the next payment is scored."
             onSelect={() => choose("models")}
             {...node} />
           <DbNode x={c[3]} y={sY} label="LAKEBASE" label2="POSTGRES"
@@ -323,10 +350,10 @@ function DatabricksConnectDiagram() {
             detail="managed Postgres"
             more="live reads and writes"
             info={"Lakebase is managed Postgres for live application data, so it sits with storage. Business apps insert, update, and read rows with short transactions. Each change is captured and streamed into a Delta table, so Spark, the warehouse, and agents see the same records shortly after the app writes them.\n\nCatalog governs the Postgres tables and the Delta tables they land in. The app keeps its fast reads and writes on Postgres."}
+            example="The offer screen updates one Postgres row. That change lands in Delta, and the next report sees the offer the app just made."
             onSelect={() => choose("lakebase")}
             {...node} />
 
-          {/* Right legend */}
           <text x="845" y="166" className="fill-muted font-mono text-[11px] uppercase">HOW TO READ IT</text>
           {([
             { y: 192, lines: ["Lakeflow jobs run on", "Spark, which writes Delta", "and Iceberg tables."] },
@@ -342,9 +369,34 @@ function DatabricksConnectDiagram() {
               ))}
             </g>
           ))}
-          <text x="870" y="472" className="fill-faint font-mono text-[11px]">Unity Catalog checks</text>
-          <text x="870" y="486" className="fill-faint font-mono text-[11px]">permissions on every</text>
-          <text x="870" y="500" className="fill-faint font-mono text-[11px]">service and table.</text>
+          <g
+            role="switch"
+            aria-checked={tips}
+            aria-label="Show hover details"
+            className="cursor-pointer"
+            onClick={() => {
+              setTips((open) => !open);
+              setTip(null);
+            }}
+          >
+            <rect x="845" y="456" width="34" height="16" rx="8" fill={tips ? "#101010" : "#f4f3f2"} stroke="#101010" />
+            <circle cx={tips ? 870 : 854} cy="464" r="5" fill={tips ? "#ffffff" : "#101010"} />
+            <text x="889" y="468" className="fill-muted font-mono text-[11px] uppercase">Info</text>
+          </g>
+          <g
+            role="switch"
+            aria-checked={examples}
+            aria-label="Show hover examples"
+            className="cursor-pointer"
+            onClick={() => {
+              setExamples((open) => !open);
+              setTip(null);
+            }}
+          >
+            <rect x="960" y="456" width="34" height="16" rx="8" fill={examples ? "#101010" : "#f4f3f2"} stroke="#101010" />
+            <circle cx={examples ? 985 : 969} cy="464" r="5" fill={examples ? "#ffffff" : "#101010"} />
+            <text x="1004" y="468" className="fill-muted font-mono text-[11px] uppercase">Example</text>
+          </g>
         </svg>
       </div>
       {tip ? (
@@ -353,9 +405,17 @@ function DatabricksConnectDiagram() {
           style={{ left: tip.x, top: tip.y }}
         >
           <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">{tip.title}</p>
-          {tip.body.split("\n\n").map((para) => (
+          {tip.info.split("\n\n").filter(Boolean).map((para) => (
             <p key={para} className="mt-2 text-sm leading-snug text-faint first:mt-1">{para}</p>
           ))}
+          {tip.example ? (
+            <>
+              {tip.info ? (
+                <p className="mt-3 font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">Example</p>
+              ) : null}
+              <p className="mt-1 text-sm leading-snug text-faint">{tip.example}</p>
+            </>
+          ) : null}
         </div>
       ) : null}
     </section>
@@ -864,6 +924,7 @@ const productInfo: Record<string, string> = {
 
 function ExampleView() {
   const [tip, setTip] = useState<{ name: string; body: string; x: number; y: number } | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
   const rows: [string, string, string, string][] = [
     ["Identity", "Name, date of birth, address", "Delta Lake, Unity Catalog", "The copy the rest of the platform reads, and who is allowed to see it."],
     ["Balance", "Current account balance", "Lakeflow, Delta Lake", "Each change lands in the table."],
@@ -890,6 +951,27 @@ function ExampleView() {
     setTip({ name, body, x: Math.max(8, x), y: Math.max(8, y) });
   }
 
+  function productNames(list: string) {
+    return list.split(", ").map((name, index) => (
+      <span key={name}>
+        {index > 0 ? ", " : null}
+        <button
+          type="button"
+          aria-pressed={picked === name}
+          className={`cursor-pointer border-0 bg-transparent p-0 font-[inherit] uppercase tracking-[inherit] underline decoration-dotted decoration-line underline-offset-[3px] ${
+            picked === name ? "text-accent" : "text-inherit"
+          }`}
+          onClick={() => setPicked((current) => (current === name ? null : name))}
+          onMouseEnter={(event) => showTip(event, name)}
+          onMouseMove={(event) => showTip(event, name)}
+          onMouseLeave={() => setTip(null)}
+        >
+          {name}
+        </button>
+      </span>
+    ));
+  }
+
   return (
     <div className="grid min-w-0 gap-6 *:min-w-0">
       <Section eyebrow="One person">
@@ -914,19 +996,7 @@ function ExampleView() {
                   </td>
                   <td className="px-4 py-3 text-sm text-faint">{fact}</td>
                   <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase">
-                    {product.split(", ").map((name, index) => (
-                      <span key={name}>
-                        {index > 0 ? ", " : null}
-                        <span
-                          className="cursor-help underline decoration-dotted decoration-line underline-offset-[3px]"
-                          onMouseEnter={(event) => showTip(event, name)}
-                          onMouseMove={(event) => showTip(event, name)}
-                          onMouseLeave={() => setTip(null)}
-                        >
-                          {name}
-                        </span>
-                      </span>
-                    ))}
+                    {productNames(product)}
                   </td>
                   <td className="px-4 py-3 text-sm text-faint">{where}</td>
                 </tr>
@@ -935,6 +1005,55 @@ function ExampleView() {
           </table>
         </div>
       </Section>
+      {(
+        [
+          {
+            eyebrow: "A loan",
+            intro: "One mortgage facility, and who may see the collateral.",
+            rows: [["Loan", "Outstanding principal, rate, and the collateral on a mortgage", "Lakeflow, Delta Lake, Unity Catalog", "The facility is copied from the core system, and only credit staff may see the collateral."]] as [string, string, string, string][],
+          },
+          {
+            eyebrow: "A ledger line",
+            intro: "One month of interest income, read by finance.",
+            rows: [["Ledger", "The interest-income journal for the month", "Lakeflow, Delta Lake, Databricks SQL", "The posted lines land in a table, then finance reads them as a report."]] as [string, string, string, string][],
+          },
+          {
+            eyebrow: "A trading position",
+            intro: "One bond holding, with the model that valued it.",
+            rows: [["Position", "A government bond holding and today's valuation", "Lakeflow, Delta Lake, MLflow", "The holding is stored, and the valuation model version is kept with the number."]] as [string, string, string, string][],
+          },
+        ]
+      ).map((table) => (
+        <Section key={table.eyebrow} eyebrow={table.eyebrow}>
+          <p className="mt-5 max-w-xl text-base leading-snug text-faint">{table.intro}</p>
+          <div className="mt-8 overflow-x-auto">
+            <table className="w-full min-w-[48rem] text-left text-sm">
+              <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+                <tr>
+                  <th className="px-4 py-3 font-normal text-muted">Data</th>
+                  <th className="px-4 py-3 font-normal text-muted">The fact</th>
+                  <th className="px-4 py-3 font-normal text-muted">Product</th>
+                  <th className="px-4 py-3 font-normal text-muted">Where it lives</th>
+                </tr>
+              </thead>
+              <tbody>
+                {table.rows.map(([kind, fact, product, where]) => (
+                  <tr key={kind} className="border-t border-line">
+                    <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
+                      {kind}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-faint">{fact}</td>
+                    <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase">
+                      {productNames(product)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-faint">{where}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Section>
+      ))}
       {tip ? (
         <div
           className="pointer-events-none fixed z-50 w-72 border border-line bg-surface px-4 py-3 shadow-sm"
@@ -1029,6 +1148,40 @@ function GenieView() {
             </tbody>
           </table>
         </div>
+        <p className="mt-10 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase">
+          Implementation spec
+        </p>
+        <p className="mt-3 max-w-2xl text-base leading-snug text-faint">
+          What the code has to guarantee. The model never receives a warehouse connection, a write, or a catalog outside the space.
+        </p>
+        <div className="mt-8 overflow-x-auto">
+          <table className="w-full min-w-[42rem] text-left text-sm">
+            <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+              <tr>
+                <th className="px-4 py-3 font-normal text-muted">Piece</th>
+                <th className="px-4 py-3 font-normal text-muted">The code must</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Prompt", "Build one prompt from the new question, the thread, the prior SQL, and only the space: schemas, instructions, example SQL, and metric views."],
+                ["Model output", "Accept one decision: a new question, an edit of the previous statement, or a trusted question. A generated question returns one SELECT."],
+                ["Statement check", "Parse that statement before it runs. Reject anything that is not a single read. Do not pass the model a tool that writes or creates a table."],
+                ["Identity", "Run the warehouse as the signed-in user. Do not borrow the author's grants."],
+                ["Execution", "Send the statement to Databricks SQL. Keep the SQL text with the result, and cap a scan that runs too long."],
+                ["Repair", "Return a warehouse error to the model with the failed statement. Stop after a fixed number of tries and say the question could not be answered."],
+                ["Response", "Turn the returned rows into a table, a chart, and a sentence. The sentence may only state what those rows contain."],
+                ["Thread", "Store the question, the SQL, and the shape of the result, and send that state with the next turn."],
+                ["Benchmark", "Run the same path offline against the author's saved questions. Accept a change to the space only when that score holds."],
+              ].map(([piece, spec]) => (
+                <tr key={piece} className="border-t border-line">
+                  <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">{piece}</td>
+                  <td className="px-4 py-3 text-sm text-faint">{spec}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Section>
 
       <Section eyebrow="One question, end to end">
@@ -1107,17 +1260,67 @@ const hoverInfo: Record<string, string> = {
     "Policy documents are split into passages and embedded. A question returns the passages closest in meaning, and the agent reads those before it answers.",
   "Agent Bricks":
     "A compliance agent is built here and checked on past cases. It retrieves the relevant rows and passages, calls the model through the gateway, and drafts the review.",
+  Notebook:
+    "payments_to_silver\n\nCell 1 reads bronze.payments.\nCell 2 drops declined authorizations and joins the customer.\nCell 3 writes silver.payments and shows the row count.",
+  Pipeline:
+    "cards_hourly, every hour\n\nRead the new card events.\nCheck the amount and the currency.\nJoin the customer.\nCommit silver.card_payments.\n\nThe same steps can be drawn in Lakeflow Designer.",
+  Job:
+    "cards_hourly, 25 Nov at 14:00. The machines start, the pipeline commits that hour's rows to silver.card_payments, and the machines shut down. The 15:00 run is a separate job.",
+  Cluster:
+    "explore stays up all day so the payments team can run notebooks. cards_hourly uses a second cluster that exists only from 14:00 until that run finishes.",
+  Spark:
+    "The join of card events to customers is split across the machines in the cluster. Each machine handles a slice. Spark then commits silver.card_payments as one update.",
+  "SQL warehouse":
+    "The NPS dashboard sends SELECT nps FROM gold.customer_metrics WHERE quarter = '2026-Q3'. The warehouse returns one number. Genie sends the same kind of statement.",
+  Table:
+    "prod.payments.card_events is the name a notebook, a dashboard, and Genie all open. Under that name are Parquet files, and a log of which files belong to the current version.",
+  Parquet:
+    "One file holds the amount column for a slice of card events. The next holds currency. A total of amount reads the amount files and leaves currency closed.",
+  Catalog:
+    "prod.payments.card_events. prod is the catalog, payments is the schema, card_events is the table. The catalog records that risk may read it and marketing may not.",
+  Schema:
+    "silver.card_payments has event_id, customer_id, amount, currency, and booked_at. The next pipeline run adds merchant_country. That added column is the schema change.",
+  "Bronze, silver, gold":
+    "bronze.card_events keeps each payment as the switch sent it.\nsilver.card_payments drops declined rows and joins the customer.\ngold.customer_spend is the monthly total the report reads.",
+  Workspace:
+    "payments-dev holds the notebooks still being changed. payments-prod holds the jobs that write the tables the reports read.",
+  Lineage:
+    "core.cards, then bronze.card_events, then silver.card_payments, then gold.customer_spend, then the NPS dashboard. The catalog stores that chain, and the job that wrote each step.",
+  "Metric view":
+    "nps is defined once, on gold.surveys: promoters minus detractors, divided by the number of responses. The dashboard and the question \"what is our NPS?\" both read that view.",
+  "Object storage":
+    "s3://bank-prod-lake/payments/card_events/ holds the Parquet files. The table name prod.payments.card_events is the catalog's pointer to that folder.",
+  Serverless:
+    "An analyst runs a cell in a notebook. Databricks starts the machines, runs the cell, and releases them. Nobody chose a cluster size.",
+  Grant:
+    "Risk has SELECT on prod.payments.card_events. A marketing notebook that names the same table is stopped before a row is read.",
+  Transaction:
+    "The 14:00 job fails halfway through silver.card_payments. Readers still see the 13:00 version. The 15:00 job commits a finished table, and every reader moves to it together.",
+  "Time travel":
+    "The Tuesday report used gold.customer_spend as of 24 Nov, 18:00. Opening that version again returns the rows the report was signed on.",
 };
 
 export function TtsSwitch() {
-  const [view, setView] = useState<View>("summary");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("view");
+  const view: View = isView(requested) ? requested : "summary";
   const [hoverTip, setHoverTip] = useState<{ title: string; body: string; x: number; y: number } | null>(null);
+
+  function select(next: View) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "summary") params.delete("view");
+    else params.set("view", next);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   function showHover(event: ReactMouseEvent<HTMLElement>, title: string) {
     const body = hoverInfo[title];
     if (!body) return;
     const width = 320;
-    const height = 190;
+    const height = 240;
     let x = event.clientX + 14;
     let y = event.clientY + 16;
     if (x + width > window.innerWidth - 8) x = event.clientX - width - 12;
@@ -1132,7 +1335,7 @@ export function TtsSwitch() {
           <button
             type="button"
             aria-pressed={view === "demo"}
-            onClick={() => setView("demo")}
+            onClick={() => select("demo")}
             className={`group relative order-last inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize lg:order-none ${
               view === "demo"
                 ? "border-transparent bg-ink text-paper [--stripe:rgba(255,255,255,0.18)]"
@@ -1161,7 +1364,7 @@ export function TtsSwitch() {
                     key={item.id}
                     type="button"
                     aria-pressed={selected}
-                    onClick={() => setView(item.id)}
+                    onClick={() => select(item.id)}
                     className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
                       index > 0 ? "lg:border-l lg:border-line" : ""
                     } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
@@ -1176,7 +1379,7 @@ export function TtsSwitch() {
 
       {view === "summary" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Databricks">
+          <Section eyebrow="Data Ecosystem : 6 layers">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               One cloud platform for everything your data does: storage, pipelines, analytics, machine learning, and AI agents, all kept under a single catalog that handles permissions, lineage, and discovery.
             </p>
@@ -1209,6 +1412,116 @@ export function TtsSwitch() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-faint">{products}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-10 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase">
+              Concepts
+            </p>
+            <p className="mt-3 max-w-2xl text-base leading-snug text-faint">
+              The words the rest of this page uses. Hover a name to see an example.
+            </p>
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full min-w-[40rem] text-left text-sm">
+                <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+                  <tr>
+                    <th className="px-4 py-3 font-normal text-muted">Concept</th>
+                    <th className="px-4 py-3 font-normal text-muted">What it means</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    [
+                      "Notebook",
+                      "The document an engineer writes in. It holds code, notes, and the result of the last run. People explore here, then save the notebook so a job can run the same code later.",
+                    ],
+                    [
+                      "Pipeline",
+                      "A repeatable sequence that brings data in, cleans it, joins it, and writes a table. It runs on a schedule or when new data arrives. Lakeflow Designer draws the same pipeline without code.",
+                    ],
+                    [
+                      "Job",
+                      "One run of a notebook or a pipeline. It starts, does the work, and stops. A schedule, a file landing, or a person starts the next run.",
+                    ],
+                    [
+                      "Cluster",
+                      "The machines that do the work. An all-purpose cluster stays up while people explore in notebooks. A job cluster starts for one run and shuts down when that run ends.",
+                    ],
+                    [
+                      "Spark",
+                      "The engine on those machines. Apache Spark splits a transformation into tasks, runs them together, and commits the result as one table update. Spark writes the tables. The SQL warehouse reads them.",
+                    ],
+                    [
+                      "SQL warehouse",
+                      "A separate engine for questions, dashboards, and Genie. It runs SQL against tables that already exist and returns rows.",
+                    ],
+                    [
+                      "Table",
+                      "A named set of rows. Here a table is files in object storage plus a log that says which files currently belong to it. Readers use the name. The log is what makes a commit, a schema change, and time travel possible.",
+                    ],
+                    [
+                      "Parquet",
+                      "The file format the rows are stored in. Values for one column sit together, so a query reads only the columns it needs. Delta Lake and Iceberg are the table formats on top of these files.",
+                    ],
+                    [
+                      "Catalog",
+                      "The registry of names and permissions. A name such as prod.payments.transactions points at the files, and the catalog decides who may read or write them. Lineage and the audit log sit here too.",
+                    ],
+                    [
+                      "Schema",
+                      "The columns of a table: their names and types. Schema is also the folder of tables inside a catalog. A pipeline that adds a column is changing the schema.",
+                    ],
+                    [
+                      "Bronze, silver, gold",
+                      "Three stages of the same data. Bronze keeps the feed as it arrived. Silver is cleaned and joined. Gold is the table a report or a question reads.",
+                    ],
+                    [
+                      "Workspace",
+                      "Where a team works: notebooks, jobs, dashboards, and permissions. A bank usually keeps one workspace per environment, such as development and production.",
+                    ],
+                    [
+                      "Lineage",
+                      "The recorded path from a source to a table, and from that table to a model or a report. An auditor reads this path.",
+                    ],
+                    [
+                      "Metric view",
+                      "A named measure with one formula, such as NPS or past-due balance. Genie and dashboards both use that view, so a question and a report return the same number.",
+                    ],
+                    [
+                      "Object storage",
+                      "Where the files live, in the enterprise cloud account: S3, ADLS, or GCS. The analytical copy is those files.",
+                    ],
+                    [
+                      "Serverless",
+                      "The platform runs and scales the machines. A person starts a notebook, a job, or a warehouse. An idle warehouse scales down.",
+                    ],
+                    [
+                      "Grant",
+                      "A permission on a table, a model, or a file. The catalog checks the grant before a notebook, a job, a question, or an app reads the data. A missing grant stops the request.",
+                    ],
+                    [
+                      "Transaction",
+                      "A commit that finishes as a whole. A reader sees the previous version of a table or the new one.",
+                    ],
+                    [
+                      "Time travel",
+                      "Reading a table as it was at an earlier commit. The log still points at those older files, so a report can be rerun on last Tuesday's rows.",
+                    ],
+                  ].map(([concept, meaning]) => (
+                    <tr key={concept} className="border-t border-line">
+                      <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
+                        <span
+                          className="cursor-help underline decoration-dotted decoration-line underline-offset-[3px]"
+                          onMouseEnter={(event) => showHover(event, concept)}
+                          onMouseMove={(event) => showHover(event, concept)}
+                          onMouseLeave={() => setHoverTip(null)}
+                        >
+                          {concept}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-faint">{meaning}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1301,7 +1614,7 @@ export function TtsSwitch() {
               style={{ left: hoverTip.x, top: hoverTip.y }}
             >
               <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">{hoverTip.title}</p>
-              <p className="mt-1 text-sm leading-snug text-faint">{hoverTip.body}</p>
+              <p className="mt-1 text-sm leading-snug whitespace-pre-line text-faint">{hoverTip.body}</p>
             </div>
           ) : null}
         </div>
@@ -1344,9 +1657,6 @@ export function TtsSwitch() {
                 </div>
               ))}
             </div>
-            <p className="mt-4 text-sm leading-snug text-faint">
-              Unity Catalog checks permissions on every service and table.
-            </p>
           </Section>
 
           <Section eyebrow="Account and workspaces">
@@ -1376,6 +1686,41 @@ export function TtsSwitch() {
                   <p className="mt-2 text-sm leading-snug text-faint">{item.body}</p>
                 </div>
               ))}
+            </div>
+          </Section>
+
+          <Section eyebrow="Five kinds of control">
+            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
+              These are the products people and applications call. Each one asks Unity Catalog
+              before it reads or writes a table, a model, or a file.
+            </p>
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full min-w-[40rem] text-left text-sm">
+                <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+                  <tr>
+                    <th className="px-4 py-3 font-normal text-muted">Control</th>
+                    <th className="px-4 py-3 font-normal text-muted">Used for</th>
+                    <th className="px-4 py-3 font-normal text-muted">How it runs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Unity Catalog", "Permissions, lineage, audit, and discovery", "Checks every query before it runs"],
+                    ["Lakeflow Jobs", "Pipelines, notebooks, and scheduled jobs", "Writes Delta and Iceberg tables on Spark"],
+                    ["Genie and AI/BI", "Questions, dashboards, and metric views", "Turns a question into SQL for the warehouse"],
+                    ["Agent Bricks, AI Gateway", "Build and run agents, and model calls", "Logs the caller, the cost, and the limit"],
+                    ["Databricks Apps", "Hosted web apps next to the data", "Keeps the signed-in user's catalog grants"],
+                  ].map(([control, use, how]) => (
+                    <tr key={control} className="border-t border-line">
+                      <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
+                        {control}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-faint">{use}</td>
+                      <td className="px-4 py-3 text-sm text-faint">{how}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </Section>
 
@@ -1414,10 +1759,49 @@ export function TtsSwitch() {
             </div>
           </Section>
 
+          <Section eyebrow="Three kinds of storage">
+            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
+              The bytes stay in the enterprise cloud account. Compute reads and writes these stores.
+              It does not keep a private copy of its own.
+            </p>
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full min-w-[40rem] text-left text-sm">
+                <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+                  <tr>
+                    <th className="px-4 py-3 font-normal text-muted">Storage</th>
+                    <th className="px-4 py-3 font-normal text-muted">Used for</th>
+                    <th className="px-4 py-3 font-normal text-muted">How it is kept</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Delta Lake, Iceberg", "Shared analytical tables", "Parquet files plus a transaction log"],
+                    ["MLflow, Vector Search", "Model versions and document search", "A registry of weights, and embeddings of passages"],
+                    ["Lakebase Postgres", "Live rows an app reads and writes", "Managed Postgres, synced to Delta"],
+                  ].map(([storage, use, how]) => (
+                    <tr key={storage} className="border-t border-line">
+                      <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
+                        {storage}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-faint">{use}</td>
+                      <td className="px-4 py-3 text-sm text-faint">{how}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Section>
+
           <Section eyebrow="Existing databases">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Copy the data in, or leave it where it sits and query from there. Either way, on-prem
-              databases need a network path from the cloud: a VPN or a private line.
+              The systems already running the bank stay in place. Copy the tables a real use case
+              needs, or leave them where they sit and query from there. The source keeps serving
+              the bank until the new copy is trusted.
+            </p>
+            <p className="mt-4 max-w-xl text-base leading-snug text-faint">
+              On-prem databases need a network path from the cloud first: a VPN or a private line,
+              with no public endpoint. Unity Catalog registers the source before anyone queries it,
+              so the grant on the new table matches the grant on the old one.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {[
@@ -1448,75 +1832,38 @@ export function TtsSwitch() {
                 </div>
               ))}
             </div>
-          </Section>
-
-          <Section eyebrow="Three ways to start">
-            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Most companies work through all three in order: coexist first, land the priority
-              data, then migrate system by system.
+            <p className="mt-10 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase">
+              What you do with each system
             </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                {
-                  label: "A · Coexist",
-                  title: "Query in place",
-                  body: "Federate existing databases and Hive metastores into Unity Catalog. No data moves; read-only. Best for discovery, quick wins, proofs of concept.",
-                },
-                {
-                  label: "B · Land and expand",
-                  title: "Recommended start",
-                  body: "Stream changes from priority sources into bronze with CDC. Build new workloads on Databricks; legacy keeps running. Best for new analytics, ML and AI without disruption.",
-                },
-                {
-                  label: "C · Migrate and retire",
-                  title: "Move workloads",
-                  body: "Convert warehouse SQL and ETL, reconcile results, run in parallel, then switch off the old system. Best for cutting licence and hardware cost.",
-                },
-              ].map((item) => (
-                <div key={item.label} className="border border-line bg-surface px-4 py-5">
-                  <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
-                    {item.label}
-                  </p>
-                  <p className="mt-1 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase">
-                    {item.title}
-                  </p>
-                  <p className="mt-2 text-sm leading-snug text-faint">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section eyebrow="Legacy component mapping">
-            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Where each legacy component lands, and the tooling that handles the move.
+            <p className="mt-3 max-w-xl text-base leading-snug text-faint">
+              Start with the tables a report or a model actually reads. Leave the rest on the
+              source. History is loaded once, then changes keep the copy current, and the counts
+              are compared before anyone switches a report.
             </p>
             <div className="mt-8 overflow-x-auto">
-              <table className="w-full min-w-[40rem] text-left text-sm">
+              <table className="w-full min-w-[48rem] text-left text-sm">
                 <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
                   <tr>
-                    <th className="px-4 py-3 font-normal text-muted">Legacy component</th>
-                    <th className="px-4 py-3 font-normal text-muted">Databricks route</th>
-                    <th className="px-4 py-3 font-normal text-muted">Tooling</th>
+                    <th className="px-4 py-3 font-normal text-muted">Already running</th>
+                    <th className="px-4 py-3 font-normal text-muted">What you do</th>
+                    <th className="px-4 py-3 font-normal text-muted">What stays</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    ["Operational databases", "Stay; CDC into bronze or federate", "Lakeflow Connect, Federation"],
-                    ["Enterprise data warehouse", "Migrate to Databricks SQL over time", "Lakebridge analyze, convert, reconcile"],
-                    ["Hadoop and Hive", "Federate the metastore, then upgrade tables", "Hive metastore federation, UCX"],
-                    ["ETL (Informatica, DataStage)", "Keep and land into bronze, or convert", "Lakeflow pipelines, Lakebridge"],
-                    ["Schedulers (Control-M, Airflow)", "Keep, calling Databricks jobs, or move", "Jobs API, Lakeflow Jobs"],
-                    ["SAS and R models", "Rebuild in Python, track in MLflow", "MLflow, Model Serving"],
-                    ["BI tools", "Keep; point at SQL warehouses", "JDBC/ODBC, partner connectors"],
-                    ["Catalogue (Collibra etc.)", "Keep; sync metadata with Unity Catalog", "Partner integrations, APIs"],
-                    ["Active Directory or Entra ID", "Sync users and groups to the account", "SCIM, single sign-on"],
-                  ].map(([legacy, route, tooling]) => (
-                    <tr key={legacy} className="border-t border-line">
+                    ["Core banking database", "CDC the accounts, balances, and payments a use case needs into bronze", "The core system keeps taking the transactions"],
+                    ["Enterprise warehouse", "Rebuild the reports that matter on Databricks SQL, and compare the figures", "The old warehouse keeps the board pack until the numbers match"],
+                    ["Hadoop and Hive", "Federate the metastore, then rebuild the tables people still open", "The cluster stays until those tables have a new home"],
+                    ["ETL jobs", "Land their output into bronze, or convert the job when it blocks a report", "The scheduler keeps running the jobs you have not converted"],
+                    ["Files and shares", "Register them in Catalog. Copy the ones a report needs every day", "The share stays the place a person drops a file"],
+                    ["Company directory", "Sync groups, so a grant on the new table matches the old one", "The directory remains the list of who works at the bank"],
+                  ].map(([system, action, stays]) => (
+                    <tr key={system} className="border-t border-line">
                       <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
-                        {legacy}
+                        {system}
                       </td>
-                      <td className="px-4 py-3 text-sm text-faint">{route}</td>
-                      <td className="px-4 py-3 text-sm text-faint">{tooling}</td>
+                      <td className="px-4 py-3 text-sm text-faint">{action}</td>
+                      <td className="px-4 py-3 text-sm text-faint">{stays}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1528,111 +1875,6 @@ export function TtsSwitch() {
 
       {view === "data" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Delta Lake">
-            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Plain files that behave like database tables: Parquet underneath, with a transaction
-              log on top. Iceberg readers get in through UniForm.
-            </p>
-            <CardGrid
-              items={[
-                {
-                  title: "ACID transactions",
-                  body: "A failed job leaves the previous version intact; readers never see half-written data.",
-                },
-                {
-                  title: "Schema control",
-                  body: "Bad columns are rejected; planned changes evolve the schema safely.",
-                },
-                {
-                  title: "Time travel",
-                  body: "Query or restore a table as it was at an earlier version or time.",
-                },
-                {
-                  title: "Merge and upserts",
-                  body: "Apply inserts, updates and deletes, as from a CDC feed.",
-                },
-                {
-                  title: "Change data feed",
-                  body: "Downstream jobs read only the rows that changed.",
-                },
-                {
-                  title: "Open format",
-                  body: "Parquet files plus a transaction log; Iceberg readers via UniForm.",
-                },
-              ]}
-            />
-          </Section>
-
-          <Section eyebrow="Medallion architecture">
-            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              A common naming pattern: prod.sales_bronze, prod.sales_silver, prod.sales_gold.
-              Access is granted layer by layer, and most people only ever see gold.
-            </p>
-            <div className="mt-8 overflow-x-auto">
-              <table className="w-full min-w-[36rem] text-left text-sm">
-                <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
-                  <tr>
-                    {["Bronze", "Silver", "Gold"].map((h) => (
-                      <th key={h} className="px-4 py-3 font-normal text-muted">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ["Raw, as received", "Cleaned, validated", "Business-ready"],
-                    ["Full history kept", "Types and keys fixed", "Aggregates, metrics"],
-                    ["Replayable", "Duplicates removed", "Data products"],
-                    ["No business logic", "Sources joined", "Feeds BI, Genie, ML"],
-                  ].map((row, i) => (
-                    <tr key={i} className="border-t border-line">
-                      {row.map((cell, j) => (
-                        <td key={j} className="px-4 py-3 text-sm text-faint">
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Section>
-
-          <Section eyebrow="Unity Catalog">
-            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              A single place to handle permissions, lineage, audit, discovery, and sharing across
-              every workspace you run.
-            </p>
-            <CardGrid
-              items={[
-                {
-                  title: "Permissions",
-                  body: "SQL GRANTs on catalogs, schemas and tables, inherited downwards; groups from the company directory.",
-                },
-                {
-                  title: "Row and column rules",
-                  body: "Row filters and column masks hide records or fields by user or group.",
-                },
-                {
-                  title: "Lineage",
-                  body: "Tracks which jobs, notebooks and dashboards read and write each table, down to columns.",
-                },
-                {
-                  title: "Audit",
-                  body: "System tables record who accessed what, query history and costs.",
-                },
-                {
-                  title: "Discovery",
-                  body: "Search, descriptions, tags and classification of sensitive data.",
-                },
-                {
-                  title: "Sharing",
-                  body: "Delta Sharing gives other platforms or companies read access without copying.",
-                },
-              ]}
-            />
-          </Section>
           <ExampleView />
         </div>
       ) : null}

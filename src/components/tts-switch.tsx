@@ -11,7 +11,7 @@ const views = [
   { id: "data", label: "Data" },
   { id: "genie", label: "Genie" },
   { id: "demo", label: "Demo" },
-  { id: "setup", label: "Setup" },
+  { id: "setup", label: "Architecture" },
 ] as const;
 
 type View = (typeof views)[number]["id"];

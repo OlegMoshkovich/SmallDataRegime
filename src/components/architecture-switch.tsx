@@ -14,7 +14,7 @@ const views = [
   { id: "agents", label: "Agents" },
   { id: "models", label: "Models" },
   { id: "gateway", label: "Gateway" },
-  { id: "premise", label: "System" },
+  { id: "premise", label: "Details" },
   { id: "trajectory", label: "Flow" },
   { id: "demo", label: "Demo" },
   { id: "setup", label: "Architecture" },

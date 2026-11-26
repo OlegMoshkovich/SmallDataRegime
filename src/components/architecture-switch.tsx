@@ -4,6 +4,7 @@ import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
 import { DemoChat } from "@/components/demo-chat";
+import { GatewayPanel } from "@/components/gateway-panel";
 import { ModelsPanel } from "@/components/models-panel";
 import { PremisePanel } from "@/components/premise-panel";
 import { SystemPath } from "@/components/system-path";
@@ -12,6 +13,7 @@ const views = [
   { id: "summary", label: "Summary" },
   { id: "agents", label: "Agents" },
   { id: "models", label: "Models" },
+  { id: "gateway", label: "Gateway" },
   { id: "premise", label: "System" },
   { id: "trajectory", label: "Flow" },
   { id: "demo", label: "Demo" },
@@ -1251,6 +1253,7 @@ export function ArchitectureSwitch() {
       {view === "agents" ? <AgentsPanel /> : null}
       {view === "premise" ? <PremisePanel /> : null}
       {view === "models" ? <ModelsPanel /> : null}
+      {view === "gateway" ? <GatewayPanel /> : null}
       {view === "demo" ? (
         <div className="flex min-w-0 flex-col">
           <DemoChat embedded />

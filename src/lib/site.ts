@@ -1,6 +1,6 @@
 export const nav = [
-  { href: "/architecture", label: "Architecture" },
   { href: "/research", label: "Research" },
+  { href: "/architecture", label: "System" },
   { href: "/coder", label: "Coder" },
   { href: "/tts", label: "TTS" },
 ] as const;

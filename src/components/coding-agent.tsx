@@ -280,7 +280,7 @@ export function CodingAgent({ enabled, initialReady = false }: { enabled: boolea
     }
   }
 
-  async function submit(event: React.FormEvent) {
+  async function submit(event: { preventDefault(): void }) {
     event.preventDefault();
     const text = prompt.trim();
     if (!text || busy) return;
@@ -384,21 +384,35 @@ export function CodingAgent({ enabled, initialReady = false }: { enabled: boolea
               : "Add an OpenRouter API key and connect GitHub to turn the agent on."}
           </p>
         ) : (
-          lines.map((line) => (
-            <p
-              key={line.id}
-              className={
-                line.role === "note"
-                  ? "font-mono text-xs tracking-[-0.01em] text-muted"
-                  : line.role === "you"
-                    ? "text-sm"
-                    : "whitespace-pre-wrap text-sm"
-              }
-            >
-              {line.role === "you" ? "You. " : line.role === "note" ? "" : "Agent. "}
-              {line.text || (busy && line.role === "agent" ? "…" : "")}
-            </p>
-          ))
+          lines.map((line, index) => {
+            const waiting =
+              line.role === "agent" &&
+              index === lines.findLastIndex((item) => item.role === "agent") &&
+              (busy || lines[lines.length - 1]?.role === "agent");
+            return (
+              <p
+                key={line.id}
+                className={
+                  line.role === "note"
+                    ? "font-mono text-xs tracking-[-0.01em] text-muted"
+                    : line.role === "you"
+                      ? "text-sm"
+                      : "whitespace-pre-wrap text-sm"
+                }
+              >
+                {line.role === "you" ? "You: " : line.role === "note" ? "" : "Agent: "}
+                {line.text}
+                {waiting ? (
+                  <>
+                    {line.text ? " " : null}
+                    <span className="cursor-blink" aria-hidden>
+                      _
+                    </span>
+                  </>
+                ) : null}
+              </p>
+            );
+          })
         )}
       </div>
       <form onSubmit={submit} className="flex shrink-0 items-end gap-3 border-t border-line p-4">
@@ -407,6 +421,11 @@ export function CodingAgent({ enabled, initialReady = false }: { enabled: boolea
           <textarea
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              submit(event);
+            }}
             disabled={!enabled || !ready || !selectedModel || busy}
             rows={3}
             placeholder="Write a short note in the workspace about the current change."

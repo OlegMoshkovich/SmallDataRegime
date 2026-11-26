@@ -3,7 +3,7 @@
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "@/components/button";
-import { TtsDemo } from "@/components/tts-demo";
+import { DemoChat } from "@/components/demo-chat";
 
 const views = [
   { id: "summary", label: "Summary" },
@@ -11,7 +11,7 @@ const views = [
   { id: "platform", label: "Platform" },
   { id: "data", label: "Data" },
   { id: "genie", label: "Text-to-SQL" },
-  { id: "demo", label: "Demo" },
+  { id: "demo", label: "Use Cases" },
   { id: "setup", label: "Architecture" },
 ] as const;
 
@@ -585,7 +585,7 @@ const databaseFamilies: {
 function DatabasesView() {
   return (
     <div className="grid min-w-0 gap-6 *:min-w-0">
-      <Section eyebrow="Families">
+      <Section eyebrow="Databases">
         <p className="mt-5 max-w-xl text-base leading-snug text-faint">
           The families below cover the types enterprises actually run day to day. The query column
           shows the access style each one is built around.
@@ -974,9 +974,9 @@ function ExampleView() {
 
   return (
     <div className="grid min-w-0 gap-6 *:min-w-0">
-      <Section eyebrow="One person">
+      <Section eyebrow="Data representation">
         <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-          Amina Okafor is customer 12. Her name, balance, payments, documents, and score each have a home, and the platform keeps a shared copy wherever more than one system reads the same fact.
+          A customer is one row. The name, balance, payments, documents, and score each have a home, and the platform keeps a shared copy wherever more than one system reads the same fact.
         </p>
         <div className="mt-8 overflow-x-auto">
           <table className="w-full min-w-[48rem] text-left text-sm">
@@ -1070,15 +1070,15 @@ function ExampleView() {
 function GenieView() {
   return (
     <div className="grid min-w-0 gap-6 *:min-w-0">
-      <Section eyebrow="What it is">
+      <Section eyebrow="Text_to_SQL">
         <p className="mt-5 max-w-2xl text-base leading-snug text-faint">
-          Genie is the place an analyst asks a question in plain language and gets an answer from the tables the company already trusts. It does not look through files and it does not invent a number. It writes SQL, a SQL warehouse runs that SQL, and the rows that come back are the answer.
+          The agent is the place an analyst asks a question in plain language and gets an answer from the tables the company already trusts. It does not look through files and it does not invent a number. It writes SQL, a SQL warehouse runs that SQL, and the rows that come back are the answer.
         </p>
         <p className="mt-4 max-w-2xl text-base leading-snug text-faint">
-          A person can ask “what is our NPS this quarter?” or “break that down by region.” The second question is not a new search. Genie keeps the first SQL and changes it. The analyst can open the SQL, see the chart, and ask again. The same metric view feeds a dashboard, so the number in the chat and the number on the report are one definition.
+          A person can ask “what is our NPS this quarter?” or “break that down by region.” The second question is not a new search. The agent keeps the first SQL and changes it. The analyst can open the SQL, see the chart, and ask again. The same metric view feeds a dashboard, so the number in the chat and the number on the report are one definition.
         </p>
         <p className="mt-4 max-w-2xl text-base leading-snug text-faint">
-          Genie sits in the analyst column of the setup. The question enters at Genie, the SQL runs on Databricks SQL, and the rows are read from Delta Lake or Iceberg. Unity Catalog checks the signed-in user before a single row returns. Genie never writes a table. Lakeflow does that. Genie never opens the live app row in Lakebase.
+          The agent sits in the analyst column of the setup. The question enters at the agent, the SQL runs on Databricks SQL, and the rows are read from Delta Lake or Iceberg. Unity Catalog checks the signed-in user before a single row returns. The agent never writes a table. Lakeflow does that. The agent never opens the live app row in Lakebase.
         </p>
       </Section>
 
@@ -1298,6 +1298,12 @@ const hoverInfo: Record<string, string> = {
     "The 14:00 job fails halfway through silver.card_payments. Readers still see the 13:00 version. The 15:00 job commits a finished table, and every reader moves to it together.",
   "Time travel":
     "The Tuesday report used gold.customer_spend as of 24 Nov, 18:00. Opening that version again returns the rows the report was signed on.",
+  "Data warehouse":
+    "The monthly board pack reads gold.customer_spend in the SQL warehouse. The figures were cleaned overnight. The report sums them by region.",
+  "Data lake":
+    "s3://bank-prod-lake/bronze/card_events/ keeps every payment file as it arrived, including late and corrected files. The next pipeline reads that folder. The files stay after silver.card_payments is written.",
+  Lakehouse:
+    "silver.card_payments is Parquet in the cloud account, plus a Delta log. Spark commits the hour as one update. The SQL warehouse and a plain question both read that table.",
 };
 
 export function TtsSwitch() {
@@ -1343,7 +1349,7 @@ export function TtsSwitch() {
             }`}
           >
             <span className="relative z-10 flex items-center gap-2">
-              Demo <ArrowRight />
+              Use Cases <ArrowRight />
             </span>
             <span
               aria-hidden
@@ -1379,7 +1385,7 @@ export function TtsSwitch() {
 
       {view === "summary" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="Data Ecosystem : 6 layers">
+          <Section eyebrow="Summary">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               One cloud platform for everything your data does: storage, pipelines, analytics, machine learning, and AI agents, all kept under a single catalog that handles permissions, lineage, and discovery.
             </p>
@@ -1433,6 +1439,18 @@ export function TtsSwitch() {
                 </thead>
                 <tbody>
                   {[
+                    [
+                      "Data warehouse",
+                      "A store built for questions over history. Pipelines clean and model the rows into tables a report can scan, sum, and join. Analysts, dashboards, and regulatory reports read those tables.",
+                    ],
+                    [
+                      "Data lake",
+                      "Files kept in object storage, close to the feed as it arrived. A later pipeline can impose a schema and build a table. The original files remain.",
+                    ],
+                    [
+                      "Lakehouse",
+                      "A data lake with table transactions on the files. Delta Lake or Iceberg adds a log, so a commit, a schema change, and time travel apply to that copy. Spark writes it. The SQL warehouse, agents, and apps read it.",
+                    ],
                     [
                       "Notebook",
                       "The document an engineer writes in. It holds code, notes, and the result of the last run. People explore here, then save the notebook so a job can run the same code later.",
@@ -1622,7 +1640,7 @@ export function TtsSwitch() {
 
       {view === "platform" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <Section eyebrow="How it connects">
+          <Section eyebrow="Clients">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               Four different flows, one shared set of Delta tables underneath, and Unity Catalog checking every one of them.
             </p>
@@ -1884,7 +1902,7 @@ export function TtsSwitch() {
 
       {view === "demo" ? (
         <div className="flex min-w-0 flex-col">
-          <TtsDemo />
+          <DemoChat embedded label="Use Cases" />
         </div>
       ) : null}
       {view === "setup" ? <DatabricksConnectDiagram /> : null}

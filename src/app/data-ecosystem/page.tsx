@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { TtsSwitch } from "@/components/tts-switch";
 
 export const metadata: Metadata = {
-  title: "TTS",
+  title: "Data Ecosystem",
   description:
     "Databricks platform overview, a map of database types, enterprise workloads, and legacy migration.",
 };

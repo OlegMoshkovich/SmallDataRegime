@@ -4,7 +4,7 @@ import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
-import { DemoChat } from "@/components/demo-chat";
+import { TtsDemo } from "@/components/tts-demo";
 import { GatewayPanel } from "@/components/gateway-panel";
 import { ModelsPanel } from "@/components/models-panel";
 import { PremisePanel } from "@/components/premise-panel";
@@ -1190,7 +1190,7 @@ export function ArchitectureSwitch() {
       {view === "gateway" ? <GatewayPanel /> : null}
       {view === "demo" ? (
         <div className="flex min-w-0 flex-col">
-          <DemoChat embedded />
+          <TtsDemo label="Demo" />
         </div>
       ) : null}
       {view === "setup" ? <SummaryHosting /> : null}

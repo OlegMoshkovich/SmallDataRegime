@@ -2,7 +2,7 @@ export const nav = [
   { href: "/research", label: "Research" },
   { href: "/architecture", label: "System" },
   { href: "/coder", label: "Coder" },
-  { href: "/tts", label: "Text_to_SQL" },
+  { href: "/data-ecosystem", label: "Data Ecosystem" },
 ] as const;
 
 export const pillars = [

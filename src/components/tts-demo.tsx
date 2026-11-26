@@ -16,6 +16,13 @@ type Beat = {
   text: string;
 };
 
+type Setup = {
+  overview: string;
+  time: string;
+  departments: string;
+  handoff: string;
+};
+
 type Route = {
   access: Piece[];
   control: Piece[];
@@ -23,6 +30,7 @@ type Route = {
   storage: Piece[];
   story: Beat[];
   reply: string;
+  setup?: Setup;
 };
 
 type Message = {
@@ -142,6 +150,16 @@ const samples: { label: string; query: string; route: Route }[] = [
       ],
       reply:
         "Fraud and AML uses the engineer path and the agent path. Notebooks and jobs run Lakeflow on Spark, which writes card and transfer events to Delta tables. Model serving loads the MLflow model and answers the app. AI Gateway records the call. Unity Catalog checks the table, the model, and the endpoint.",
+      setup: {
+        overview:
+          "Two departments share this run. **Payments engineering** keeps the card and transfer events moving. **Fraud operations** scores the payment and triages the alert. The stream and the score run on their own once the pipeline is in place.",
+        time:
+          "The stream stays on through the day. A score comes back in under a second, at the speed of the card payment. The event and the score are in the table within that same minute. A fraud analyst opens the alert later the same day.",
+        departments:
+          "Payments engineering owns the notebooks and the streaming job. They write the events into Delta and keep the approved model in the registry. Fraud operations is on the payment app. The app asks for the score, and an analyst triages the alert from the event and the score.",
+        handoff:
+          "The handoff is the score and the event row. The app calls model serving, and AI Gateway logs who called and the limit. Spark has written the card event into Delta. Fraud operations reads that row and the score. Unity Catalog allows the job, the table, the model, and the endpoint for both sides.",
+      },
     },
   },
   {
@@ -254,53 +272,63 @@ const samples: { label: string; query: string; route: Route }[] = [
       ],
       reply:
         "Credit risk trains, then reports. Engineers run the scorecard as a job on Spark and register it under Models. Inputs and results are Delta tables. Analysts read the stress numbers through Genie and the SQL warehouse, from those same tables. Unity Catalog lineage is the audit from table to model to report.",
+      setup: {
+        overview:
+          "Two departments share this run. **Credit-risk engineering** trains the scorecard and writes the results. **Credit-risk reporting** reads the stress pack from those same tables. The job in the middle runs on its own once engineering starts it.",
+        time:
+          "The job is set to run overnight. Building the features and fitting the scorecard takes about three hours on Spark. The tables are ready at the start of the business day. Opening the stress pack and reading the numbers takes a few minutes.",
+        departments:
+          "Credit-risk engineering opens the notebooks and starts the training job. They own the features, the results table, and the registered scorecard. Credit-risk reporting opens the dashboard and Genie the same morning. They read the finished numbers. The model stays as engineering left it.",
+        handoff:
+          "The handoff is the table. The job writes a new version of the results and registers the scorecard under Models. Reporting opens that version through the certified metric, in Genie and the SQL warehouse. Unity Catalog names the tables, the model, and the report, so both departments read the same record.",
+      },
     },
   },
   {
     label: "Customer 360",
-    query: "Build Amina Okafor's profile and offer her the next product.",
+    query: "Build a customer's profile and offer the next product.",
     route: {
       access: [
         {
           id: "engineers",
           label: "Data engineers",
-          note: "Amina is customer 12. Her products and channels have to be joined into one profile, and that pipeline belongs to the engineers.",
+          note: "The customer is one row. Their products and channels have to be joined into one profile, and that pipeline belongs to the engineers.",
         },
         {
           id: "apps",
           label: "Business apps",
-          note: "The offer is shown on her screen. The business app reads her one live row.",
+          note: "The offer is shown on the customer's screen. The business app reads that one live row.",
         },
       ],
       control: [
         {
           id: "jobs",
           label: "Notebooks and jobs",
-          note: "Lakeflow rebuilds her profile on a schedule and writes it to Delta Lake. A job is how that rebuild stays repeatable.",
+          note: "Lakeflow rebuilds the customer's profile on a schedule and writes it to Delta Lake. A job is how that rebuild stays repeatable.",
         },
         {
           id: "apps",
           label: "Databricks Apps",
-          note: "Her offer screen is an app on the platform, so it keeps the signed-in user's Unity Catalog grants.",
+          note: "The offer screen is an app on the platform, so it keeps the signed-in user's Unity Catalog grants.",
         },
       ],
       compute: [
         {
           id: "spark",
           label: "Spark clusters",
-          note: "Her profile is a join across products and channels. Spark is the engine Lakeflow uses to build that row.",
+          note: "The profile is a join across the customer's products and channels. Spark is the engine Lakeflow uses to build that row.",
         },
       ],
       storage: [
         {
           id: "delta",
           label: "Delta tables",
-          note: "Delta Lake holds her identity, her joined profile, and its history. Databricks SQL and Genie read that same row.",
+          note: "Delta Lake holds the customer's identity, the joined profile, and its history. Databricks SQL and Genie read that same row.",
         },
         {
           id: "lakebase",
           label: "Lakebase Postgres",
-          note: "Lakebase holds the live row her app reads, and the offer the app writes back. That write syncs into Delta Lake.",
+          note: "Lakebase holds the live row the app reads, and the offer the app writes back. That write syncs into Delta Lake.",
         },
       ],
       story: [
@@ -308,59 +336,69 @@ const samples: { label: string; query: string; route: Route }[] = [
           id: "notebooks",
           at: 1,
           system: "Notebooks",
-          text: "The engineers' notebooks open and start the Lakeflow job that joins Amina's products and channels into one profile.",
+          text: "The engineers' notebooks open and start the Lakeflow job that joins the customer's products and channels into one profile.",
         },
         {
           id: "app",
           at: 1,
           system: "Offer app",
-          text: "Her offer screen opens and asks for customer 12. It reads the live row in Lakebase.",
+          text: "The offer screen opens and asks for the customer. It reads the live row in Lakebase.",
         },
         {
           id: "job",
           at: 2,
           system: "Profile job",
-          text: "The job opens her source tables in Delta Lake, writes one profile row, and stops. The sources stay where they are.",
+          text: "The job opens the customer's source tables in Delta Lake, writes one profile row, and stops. The sources stay where they are.",
         },
         {
           id: "screen",
           at: 2,
           system: "App screen",
-          text: "The screen opens on Databricks Apps. Unity Catalog allows only Amina's profile.",
+          text: "The screen opens on Databricks Apps. Unity Catalog allows only this customer's profile.",
         },
         {
           id: "spark",
           at: 3,
           system: "Spark",
-          text: "Spark opens her tables, writes the joined profile to Delta Lake, and can shut down. The row remains.",
+          text: "Spark opens the customer's tables, writes the joined profile to Delta Lake, and can shut down. The row remains.",
         },
         {
           id: "postgres",
           at: 4,
           system: "Lakebase",
-          text: "Lakebase opens her live row. The app reads it and writes the offer. That row is what her screen shows.",
+          text: "Lakebase opens the live row. The app reads it and writes the offer. That row is what the screen shows.",
         },
         {
           id: "delta",
           at: 4,
           system: "Delta Lake",
-          text: "Her profile table opens and the joined row is written there. Databricks SQL and Genie can read that same row.",
+          text: "The profile table opens and the joined row is written there. Databricks SQL and Genie can read that same row.",
         },
         {
           id: "sync",
           at: 4,
           system: "Sync",
-          text: "The sync copies the offer from Lakebase into her Delta Lake profile. The app and the next job then read one row.",
+          text: "The sync copies the offer from Lakebase into the customer's Delta Lake profile. The app and the next job then read one row.",
         },
         {
           id: "catalog",
           at: 4,
           system: "Unity Catalog",
-          text: "Unity Catalog allows the job, the app, and both copies, and records who opened Amina's record.",
+          text: "Unity Catalog allows the job, the app, and both copies, and records who opened the customer's record.",
         },
       ],
       reply:
-        "Amina Okafor is customer 12. Lakeflow runs on Spark and writes her joined profile to Delta Lake, where Databricks SQL and Genie can read it. Her app reads the live row from Lakebase and writes the offer there. That write syncs back into Delta Lake. Unity Catalog registers both copies and records who opened her record.",
+        "The customer is one row. Lakeflow runs on Spark and writes the joined profile to Delta Lake, where Databricks SQL and Genie can read it. The app reads the live row from Lakebase and writes the offer there. That write syncs back into Delta Lake. Unity Catalog registers both copies and records who opened the record.",
+      setup: {
+        overview:
+          "Two departments share this run. **Customer data engineering** rebuilds the customer's profile from their products and channels. The **digital product team** shows the next offer on the app. The rebuild runs on a schedule. The offer is written when the customer is on the screen.",
+        time:
+          "The profile job runs overnight and finishes in about an hour. By morning the joined row is in Delta Lake and synced to the live row. The offer appears in the same session the customer opens the app. The offer the customer takes is written then and copied back into Delta for the next rebuild.",
+        departments:
+          "Customer data engineering opens the notebooks and starts the Lakeflow job. They own the joined profile. The digital product team owns the offer screen on Databricks Apps. The signed-in user of that app sees only that customer's row.",
+        handoff:
+          "The handoff is the customer's one row, kept in two places. Engineering writes the joined profile to Delta Lake, and that row is what Lakebase serves to the app. The app writes the offer into Lakebase. The sync copies that offer back into the Delta profile. Unity Catalog records who opened the record.",
+      },
     },
   },
   {
@@ -462,6 +500,16 @@ const samples: { label: string; query: string; route: Route }[] = [
       ],
       reply:
         "Regulatory reporting goes in through the engineers and out through the analysts. Lakeflow runs on Spark and lands Delta tables. Databricks SQL and the dashboards read those tables through the warehouse. Unity Catalog lineage is the line from source to figure. Genie can ask a question of the same metric without a second copy.",
+      setup: {
+        overview:
+          "Two departments share this run. **Finance engineering** rebuilds the period's report tables. **Regulatory reporting** reads the published pack. The pipeline runs on its own once engineering starts it. A failed run leaves the previous period in place.",
+        time:
+          "The pipeline starts after the period closes and runs overnight. Rebuilding the tables takes about four hours on Spark. The pack is ready at the start of the next business day. A follow-up question in Genie comes back in about a minute.",
+        departments:
+          "Finance engineering opens the notebooks and starts the report pipeline. They own the rebuild from source to table. Regulatory reporting opens the pack and asks the follow-up. An auditor reads the lineage from those same tables.",
+        handoff:
+          "The handoff is the period's tables. The pipeline writes a new version and keeps a pointer back to the sources. Reporting opens that version in the dashboard and in Genie, on one certified metric. Unity Catalog stores the line from source to figure, which is the record the auditor reads.",
+      },
     },
   },
   {
@@ -530,6 +578,16 @@ const samples: { label: string; query: string; route: Route }[] = [
       ],
       reply:
         "Questions on data stay on the analyst path. Genie turns the plain question into SQL and sends it to the SQL warehouse. The warehouse reads the gold Delta table behind the metric view. Unity Catalog checks the person and the table before the query runs. Nothing is copied, and no model is called.",
+      setup: {
+        overview:
+          "One department does this run. **Customer insight** asks a question on a number that already exists. Genie turns the question into SQL and the warehouse reads the gold table. No other team is called for this question.",
+        time:
+          "The answer comes back in a few seconds. If the warehouse has to scale up for the query, it can take about a minute, then it scales back down. The table is left as it was.",
+        departments:
+          "Customer insight asks the question. They open Genie and read NPS from the certified metric. Data engineering published that metric and the gold table earlier. They are not in this run.",
+        handoff:
+          "The handoff already happened, when the metric was certified. Genie reads that saved definition and sends SQL to the warehouse. The warehouse reads the gold table behind it. Unity Catalog checks the person and the table before the query runs. The definition and the table stay as they were.",
+      },
     },
   },
   {
@@ -598,6 +656,16 @@ const samples: { label: string; query: string; route: Route }[] = [
       ],
       reply:
         "Documents follow the agent path. Agent Bricks searches the vector index stored with Models, then calls the model through AI Gateway. Model serving loads that model. Unity Catalog governs the index and the endpoint. The answer cites passages. It does not write a system of record.",
+      setup: {
+        overview:
+          "Two departments share this run. **Vendor management** asks which policy passages apply. The agent answers from the policy index and a model. **Platform engineering** keeps the index and the model. They are not on this call.",
+        time:
+          "The answer comes back in a few seconds. The policies were embedded earlier, when the index was built. This question leaves that index as it is. AI Gateway logs the call as it happens.",
+        departments:
+          "Vendor management, or compliance, asks in the agent app. The agent searches the passages and calls the model. Platform engineering owns the index, the model version, and the endpoint. The person asking reads the answer in the app.",
+        handoff:
+          "The handoff is the cited passages. The person asks in the app. The agent opens the policy index and the model through AI Gateway, which writes who called, the cost, and the limit. The answer quotes the passages that were already embedded. Unity Catalog allows the index and the endpoint and records the call. The vendor file stays where it already lives.",
+      },
     },
   },
   {
@@ -666,6 +734,16 @@ const samples: { label: string; query: string; route: Route }[] = [
       ],
       reply:
         "Payments data is one Delta table with two readers. Analysts reach it through Genie and the SQL warehouse. Delta Sharing, granted in Unity Catalog, lets the partner read that same table without a copy. The warehouse and the share see one version.",
+      setup: {
+        overview:
+          "**Payments analytics** and an **outside partner** read one table. Analytics asks for merchant risk inside the bank. The partner reads the same table through a share. No second pipeline is built for the partner.",
+        time:
+          "The internal numbers come back in a few seconds, or about a minute if the warehouse scales up. The share is granted once. The partner can read as soon as that grant is written. There is no overnight copy.",
+        departments:
+          "Payments analytics opens the dashboard and asks the question in Genie. They see the internal risk numbers. A catalog owner in data governance writes the partner grant. The partner is a separate firm, and they are not given a login to the dashboard.",
+        handoff:
+          "The handoff is a permission on the payments table. Analysts read it through Genie and the SQL warehouse. Delta Sharing, granted in Unity Catalog, lets the partner read that same table where it sits. The warehouse and the partner see one version.",
+      },
     },
   },
 ];
@@ -752,19 +830,48 @@ function FlowDiagram({ route, step }: { route: Route | null; step: number }) {
   );
 }
 
+function emphasis(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) =>
+    part.startsWith("**") ? (
+      <strong key={index} className="font-semibold text-foreground">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      <Fragment key={index}>{part}</Fragment>
+    ),
+  );
+}
+
 function Description({ route, step }: { route: Route | null; step: number }) {
   const beats = route?.story?.filter((beat) => beat.at <= step) ?? [];
-  if (!route || beats.length === 0) {
+  if (!route) {
     return (
       <p className="p-4 text-sm leading-relaxed text-faint">
-        {route
-          ? "The systems are opening."
-          : "Choose a workflow. This side names each system that opens, and what happens to it."}
+        Choose a workflow. This side names each system that opens, and what happens to it.
       </p>
     );
   }
+  if (!route.setup && beats.length === 0) {
+    return <p className="p-4 text-sm leading-relaxed text-faint">The systems are opening.</p>;
+  }
+  const setup = route.setup
+    ? [
+        ["Setup", route.setup.overview],
+        ["Time", route.setup.time],
+        ["Departments", route.setup.departments],
+        ["Handoff", route.setup.handoff],
+      ]
+    : [];
   return (
     <div className="grid content-start gap-3 p-4">
+      {setup.map(([label, text]) => (
+        <article key={label} className="border border-line px-3 py-3">
+          <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">{label}</p>
+          <p className="mt-2 text-sm leading-relaxed text-faint">
+            {label === "Setup" ? emphasis(text) : text}
+          </p>
+        </article>
+      ))}
       {beats.map((beat) => (
         <article key={beat.id} className="border border-line px-3 py-3">
           <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">
@@ -1148,7 +1255,7 @@ function DiagramTab({ open, onClick }: { open: boolean; onClick: () => void }) {
   );
 }
 
-export function TtsDemo() {
+export function TtsDemo({ label = "Use Cases" }: { label?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
   const [step, setStep] = useState(0);
@@ -1232,7 +1339,7 @@ export function TtsDemo() {
         <div className="flex min-w-0 items-end gap-3 lg:block">
           <div className="min-w-0">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-              Demo
+              {label}
             </p>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2 lg:hidden">

@@ -438,8 +438,10 @@ function OperateToggle({
 
 export function DemoChat({
   embedded = false,
+  label = "Demo",
 }: {
   embedded?: boolean;
+  label?: string;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [route, setRoute] = useState<Route | null>(null);
@@ -520,7 +522,7 @@ export function DemoChat({
       <div className="flex min-w-0 items-end gap-3 lg:block">
         <div className="min-w-0">
           <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-            Demo
+            {label}
           </p>
         </div>
         <div className="ml-auto shrink-0 lg:hidden">

@@ -10,9 +10,9 @@ const views = [
   { id: "databases", label: "Databases" },
   { id: "platform", label: "Platform" },
   { id: "data", label: "Data" },
-  { id: "genie", label: "Genie" },
+  { id: "genie", label: "Text-to-SQL" },
   { id: "demo", label: "Demo" },
-  { id: "setup", label: "Setup" },
+  { id: "setup", label: "Architecture" },
 ] as const;
 
 type View = (typeof views)[number]["id"];
@@ -585,6 +585,37 @@ const databaseFamilies: {
 function DatabasesView() {
   return (
     <div className="grid min-w-0 gap-6 *:min-w-0">
+      <Section eyebrow="Families">
+        <p className="mt-5 max-w-xl text-base leading-snug text-faint">
+          The families below cover the types enterprises actually run day to day. The query column
+          shows the access style each one is built around.
+        </p>
+        <div className="mt-8 overflow-x-auto">
+          <table className="w-full min-w-[56rem] text-left text-sm">
+            <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
+              <tr>
+                <th className="px-4 py-3 font-normal text-muted">Family</th>
+                <th className="px-4 py-3 font-normal text-muted">What it stores</th>
+                <th className="px-4 py-3 font-normal text-muted">How you query</th>
+                <th className="px-4 py-3 font-normal text-muted">Enterprise use</th>
+              </tr>
+            </thead>
+            <tbody>
+              {databaseFamilies.map((family) => (
+                <tr key={family.title} className="border-t border-line">
+                  <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
+                    {family.title}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-faint">{family.stores}</td>
+                  <td className="px-4 py-3 text-sm text-faint">{family.query}</td>
+                  <td className="px-4 py-3 text-sm text-faint">{family.use}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+
       <Section eyebrow="The question picks the store">
         <p className="mt-5 max-w-xl text-base leading-snug text-faint">
           A database holds data, finds it by a known access pattern, and lets many programs share
@@ -666,37 +697,6 @@ function DatabasesView() {
               <p className="mt-2 text-sm leading-snug text-faint">{step.body}</p>
             </div>
           ))}
-        </div>
-      </Section>
-
-      <Section eyebrow="Families">
-        <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-          The families below cover the types enterprises actually run day to day. The query column
-          shows the access style each one is built around.
-        </p>
-        <div className="mt-8 overflow-x-auto">
-          <table className="w-full min-w-[56rem] text-left text-sm">
-            <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">
-              <tr>
-                <th className="px-4 py-3 font-normal text-muted">Family</th>
-                <th className="px-4 py-3 font-normal text-muted">What it stores</th>
-                <th className="px-4 py-3 font-normal text-muted">How you query</th>
-                <th className="px-4 py-3 font-normal text-muted">Enterprise use</th>
-              </tr>
-            </thead>
-            <tbody>
-              {databaseFamilies.map((family) => (
-                <tr key={family.title} className="border-t border-line">
-                  <td className="px-4 py-3 font-mono text-[0.75rem] tracking-[-0.015rem] text-foreground uppercase whitespace-nowrap">
-                    {family.title}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-faint">{family.stores}</td>
-                  <td className="px-4 py-3 text-sm text-faint">{family.query}</td>
-                  <td className="px-4 py-3 text-sm text-faint">{family.use}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </Section>
 
@@ -1659,36 +1659,6 @@ export function TtsSwitch() {
             </div>
           </Section>
 
-          <Section eyebrow="Account and workspaces">
-            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-              Think of it as one account for the whole company, one Unity Catalog metastore in each
-              region, and a workspace for each environment or team.
-            </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                {
-                  label: "Account",
-                  body: "Users, groups and billing, synced from the company directory. One per company.",
-                },
-                {
-                  label: "Workspace",
-                  body: "Where people work: notebooks, jobs, dashboards. Usually one per environment or team.",
-                },
-                {
-                  label: "Unity Catalog",
-                  body: "One shared catalog of all data for every workspace in a region. Names read catalog.schema.table.",
-                },
-              ].map((item) => (
-                <div key={item.label} className="border border-line bg-surface px-4 py-5">
-                  <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm leading-snug text-faint">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </Section>
-
           <Section eyebrow="Five kinds of control">
             <p className="mt-5 max-w-xl text-base leading-snug text-faint">
               These are the products people and applications call. Each one asks Unity Catalog
@@ -1868,6 +1838,36 @@ export function TtsSwitch() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </Section>
+
+          <Section eyebrow="Account and workspaces">
+            <p className="mt-5 max-w-xl text-base leading-snug text-faint">
+              Think of it as one account for the whole company, one Unity Catalog metastore in each
+              region, and a workspace for each environment or team.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  label: "Account",
+                  body: "Users, groups and billing, synced from the company directory. One per company.",
+                },
+                {
+                  label: "Workspace",
+                  body: "Where people work: notebooks, jobs, dashboards. Usually one per environment or team.",
+                },
+                {
+                  label: "Unity Catalog",
+                  body: "One shared catalog of all data for every workspace in a region. Names read catalog.schema.table.",
+                },
+              ].map((item) => (
+                <div key={item.label} className="border border-line bg-surface px-4 py-5">
+                  <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-sm leading-snug text-faint">{item.body}</p>
+                </div>
+              ))}
             </div>
           </Section>
         </div>

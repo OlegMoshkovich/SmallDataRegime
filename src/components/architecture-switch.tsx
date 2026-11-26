@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
 import { DemoChat } from "@/components/demo-chat";
@@ -14,13 +15,18 @@ const views = [
   { id: "agents", label: "Agents" },
   { id: "models", label: "Models" },
   { id: "gateway", label: "Gateway" },
-  { id: "premise", label: "Details" },
+  { id: "premise", label: "Machines" },
   { id: "trajectory", label: "Flow" },
   { id: "demo", label: "Demo" },
   { id: "setup", label: "Architecture" },
 ] as const;
 
 type View = (typeof views)[number]["id"];
+
+function viewFromParam(value: string | null): View {
+  const match = views.find((item) => item.label.toLowerCase() === value);
+  return match?.id ?? "summary";
+}
 
 function IsoCube({ x, y, accent = false }: { x: number; y: number; accent?: boolean }) {
   const top = `${x},${y - 20} ${x + 11},${y - 14} ${x},${y - 8} ${x - 11},${y - 14}`;
@@ -952,7 +958,18 @@ function SummaryHosting() {
 }
 
 export function ArchitectureSwitch() {
-  const [view, setView] = useState<View>("summary");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const view = viewFromParam(searchParams.get("view"));
+
+  function select(next: View) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "summary") params.delete("view");
+    else params.set("view", views.find((item) => item.id === next)!.label.toLowerCase());
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   return (
     <div className="min-w-0">
@@ -961,7 +978,7 @@ export function ArchitectureSwitch() {
           <button
             type="button"
             aria-pressed={view === "demo"}
-            onClick={() => setView("demo")}
+            onClick={() => select("demo")}
             className={`group relative order-last inline-flex h-[31px] items-center justify-center overflow-hidden border px-3.5 font-mono text-[0.8125rem] leading-none tracking-[-0.0175rem] capitalize lg:order-none ${
               view === "demo"
                 ? "border-transparent bg-ink text-paper [--stripe:rgba(255,255,255,0.18)]"
@@ -990,7 +1007,7 @@ export function ArchitectureSwitch() {
                     key={item.id}
                     type="button"
                     aria-pressed={selected}
-                    onClick={() => setView(item.id)}
+                    onClick={() => select(item.id)}
                     className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
                       index > 0 ? "lg:border-l lg:border-line" : ""
                     } ${selected ? "bg-foreground text-background" : "bg-surface text-muted"}`}
@@ -1009,14 +1026,7 @@ export function ArchitectureSwitch() {
               <span className="size-1.5 bg-accent" aria-hidden />
               Summary
             </p>
-            <p className="mt-4 max-w-4xl text-base leading-relaxed text-faint">
-              We write it in TypeScript and ship it as containers. The agents, document
-              retrieval, and the local models all run beside the gateway, right next to the GPUs.
-              Who may see what, which model serves each use case, the budgets, the logging: all of
-              it is configuration, reviewed like code.
-            </p>
-
-            <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
               {[
                 [
                   "Single access point",
@@ -1054,13 +1064,6 @@ export function ArchitectureSwitch() {
               <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
                 A request
               </p>
-              <p className="mt-3 max-w-4xl text-base leading-relaxed text-faint">
-                The gateway itself is stateless. Policy, logs, and runs live in Postgres; caches
-                and budget counters live in Redis. Chat answers stream back as they are generated.
-                The output check reads the answer as it arrives, then the full text just before the
-                last event. Logging comes last, so even a failed or blocked request still gets
-                logged.
-              </p>
               <ol className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
                 {[
                   ["01 Authenticate", "The human’s sign-in token, or the application’s credentials."],
@@ -1086,33 +1089,20 @@ export function ArchitectureSwitch() {
             <div className="mt-12 grid gap-10 lg:grid-cols-2">
               <div>
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  Where it runs
+                  Gateway
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
-                  The router picks what serves the request, then applies a hard rule for where it
-                  may run. A use case can only tighten that rule. Customer data stays local. A
-                  confidential draft stays local unless that use case names an external model.
-                  Internal questions try local first. A public question may use a local or an
-                  external model. Financial-crime use cases stay local at every level.
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  A named use case goes straight to its agent. Otherwise the request is compared
-                  with examples for each route, then a small local model chooses, and a general
-                  local chat route catches what is still unsure. Each model group has an ordered
-                  fallback. An external model may fall back to a local one. A failed model is
-                  skipped for a short time, and each model is watched on its own.
+                  The gateway is the door for every model call, agent run, and document lookup.
+                  Applications call the gateway. The gateway calls the model. It checks the sign-in,
+                  the person and their team, the policy for that use case, and how sensitive the
+                  request is. It then picks a model, an agent, or a search, reserves the budget, and
+                  runs the call. It blocks an answer that leaks an identifier or breaks its schema,
+                  and it logs the route, the model, the cost, and the latency.
                 </p>
               </div>
               <div>
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  Products
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  Document search has two paths. Live search asks the document store with the human’s
-                  own token, so a file they cannot open never reaches the model. An index keeps changed
-                  files, splits them, and stores who may read each piece. At question time the
-                  gateway filters by the human’s groups, ranks the pieces, and sends a short set
-                  to a local model, each with its file link.
+                  Agent
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
                   The compliance agent is a versioned harness. It reads the checklist, screens
@@ -1163,62 +1153,6 @@ export function ArchitectureSwitch() {
                 </p>
               </div>
             </div>
-          </section>
-          <section className="border-t border-line pt-8">
-            <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-              Examples
-            </p>
-            <p className="mt-3 max-w-3xl text-base leading-relaxed text-faint">
-              A human just asks, in the chat. This is the experience we have in mind, not a client
-              of record.
-            </p>
-            <ol className="mt-8 grid gap-4 sm:grid-cols-2">
-              <li className="border border-line bg-surface p-4">
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  A facility
-                </p>
-                <p className="mt-2 text-base">Can we waive the covenant on this facility?</p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  The orchestrator opens the credit policy and the facility file where they already
-                  live. The question names a client, so the file does not leave the enterprise. It hands
-                  the question to Compliance. Compliance answers on Qwen 30B, on the enterprise’s
-                  machines.
-                </p>
-              </li>
-              <li className="border border-line bg-surface p-4">
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  A document
-                </p>
-                <p className="mt-2 text-base">Find the policy that covers this covenant.</p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  The orchestrator finds the document and opens it where it already lives. The
-                  passage comes back in the chat. The human does not open the system, and the file
-                  is not copied out.
-                </p>
-              </li>
-              <li className="border border-line bg-surface p-4">
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  A fraud alert
-                </p>
-                <p className="mt-2 text-base">What should we do with this fraud alert?</p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  The orchestrator opens the alert and the account activity, then hands the question
-                  to the anti-fraud agent. The agent drafts what it found. A human decides. Nothing
-                  is filed. The alert names a client, so the model stays on the enterprise’s machines.
-                </p>
-              </li>
-              <li className="border border-line bg-surface p-4">
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  A public question
-                </p>
-                <p className="mt-2 text-base">
-                  How should we describe this product on the public site?
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  No client file is opened. The orchestrator may send that request to Claude.
-                </p>
-              </li>
-            </ol>
           </section>
           <section className="border-t border-line pt-8">
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">

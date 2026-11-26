@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ArchitectureSwitch } from "@/components/architecture-switch";
 
@@ -36,7 +37,9 @@ export default function ArchitecturePage() {
   return (
     <article className="bg-background">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
-      <ArchitectureSwitch />
+      <Suspense>
+        <ArchitectureSwitch />
+      </Suspense>
 
       <div className="mt-20 grid gap-16">
         <section className="hidden border-t border-line pt-8">

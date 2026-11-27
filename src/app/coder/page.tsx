@@ -1,26 +1,24 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { CodingAgent } from "@/components/coding-agent";
+import { CodingSwitch } from "@/components/coding-switch";
 import { agentEnabled } from "@/lib/coding-agent-config";
 import { openRouterReady } from "@/lib/coding-agent";
 
 export const metadata: Metadata = {
   title: "Coding",
-  description: "A coding agent hosted in the app with OpenCode. It edits a workspace beside the site.",
+  description:
+    "A coding agent that takes a task, works in a repository, and returns a change a person reviews.",
 };
 
 export default function AgentPage() {
   const enabled = agentEnabled();
 
   return (
-    <article className="bg-background">
+    <article className="min-h-[calc(100dvh-72px)] bg-background">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
-        {enabled ? (
-          <CodingAgent enabled initialReady={openRouterReady()} />
-        ) : (
-          <p className="border border-line bg-surface p-4 text-sm">
-            The agent is off. Set <span className="font-mono text-[0.8125rem]">OPENCODE_AGENT=1</span> to turn it on outside development.
-          </p>
-        )}
+        <Suspense>
+          <CodingSwitch enabled={enabled} initialReady={openRouterReady()} />
+        </Suspense>
       </div>
     </article>
   );

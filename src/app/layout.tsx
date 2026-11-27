@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/footer";
@@ -33,7 +34,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script dangerouslySetInnerHTML={{ __html: fontSizeBoot }} />
-        <Header />
+        <Suspense>
+          <Header />
+        </Suspense>
         <div aria-hidden className="h-[72px] shrink-0" />
         <main className="min-h-[calc(100dvh-72px)]">{children}</main>
         <Footer />

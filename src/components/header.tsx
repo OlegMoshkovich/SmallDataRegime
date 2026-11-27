@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Button } from "@/components/button";
 import { Wordmark } from "@/components/logo";
@@ -73,15 +73,23 @@ function FontSlider({
 
 export function Header() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
-  const [menu, setMenu] = useState(false);
+  const [menu, setMenu] = useState<string | null>(null);
   const [settings, setSettings] = useState(false);
   const [fontSize, setFontSize] = useState(FONT_DEFAULT);
-  const platform = useRef<HTMLLIElement>(null);
+  const menus = useRef(new Map<string, HTMLLIElement>());
   const settingsRef = useRef<HTMLDivElement>(null);
 
   function current(href: string) {
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const url = new URL(href, "http://local");
+    const pathOn =
+      pathname === url.pathname || (url.pathname !== "/" && pathname.startsWith(`${url.pathname}/`));
+    if (!pathOn) return false;
+    const group = url.searchParams.get("group");
+    if (!group) return true;
+    const active = searchParams.get("group") ?? "sdr";
+    return pathname === "/research" && active === group;
   }
 
   function selected(item: Item) {
@@ -106,7 +114,7 @@ export function Header() {
   }
 
   useEffect(() => {
-    setMenu(false);
+    setMenu(null);
     setSettings(false);
     setOpen(false);
   }, [pathname]);
@@ -114,12 +122,13 @@ export function Header() {
   useEffect(() => {
     function outside(event: MouseEvent) {
       const target = event.target as Node;
-      if (!platform.current?.contains(target)) setMenu(false);
+      const openMenu = menu ? menus.current.get(menu) : null;
+      if (openMenu && !openMenu.contains(target)) setMenu(null);
       if (!open && !settingsRef.current?.contains(target)) setSettings(false);
     }
     function escape(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setMenu(false);
+        setMenu(null);
         setSettings(false);
       }
     }
@@ -129,7 +138,7 @@ export function Header() {
       document.removeEventListener("mousedown", outside);
       document.removeEventListener("keydown", escape);
     };
-  }, [open]);
+  }, [open, menu]);
 
   const linkClass =
     "relative text-[0.75rem] leading-none after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 hover:after:w-full";
@@ -172,23 +181,26 @@ export function Header() {
               return (
                 <li
                   key={item.label}
-                  ref={platform}
+                  ref={(node) => {
+                    if (node) menus.current.set(item.label, node);
+                    else menus.current.delete(item.label);
+                  }}
                   className="relative opacity-100 transition-opacity duration-200 group-hover/menu:opacity-50 hover:opacity-100"
-                  onMouseEnter={() => setMenu(true)}
-                  onMouseLeave={() => setMenu(false)}
+                  onMouseEnter={() => setMenu(item.label)}
+                  onMouseLeave={() => setMenu(null)}
                 >
                   <button
                     type="button"
-                    aria-expanded={menu}
+                    aria-expanded={menu === item.label}
                     aria-haspopup="true"
                     aria-current={on ? "page" : undefined}
-                    onClick={() => setMenu((value) => !value)}
+                    onClick={() => setMenu((value) => (value === item.label ? null : item.label))}
                     className={`${linkClass} ${on ? "after:w-full" : "after:w-0"}`}
                   >
                     {item.label}
                   </button>
-                  <div className={`absolute top-full left-1/2 z-50 -translate-x-1/2 pt-3 ${menu ? "" : "hidden"}`}>
-                    <ul className="min-w-36 border border-line bg-surface py-1">
+                  <div className={`absolute top-full left-1/2 z-50 -translate-x-1/2 pt-3 ${menu === item.label ? "" : "hidden"}`}>
+                    <ul className="w-max min-w-36 border border-line bg-surface py-1">
                       {items.map((child) => {
                         const childOn = current(child.href);
                         if (quiet(child)) {
@@ -205,12 +217,12 @@ export function Header() {
                             <Link
                               href={child.href}
                               aria-current={childOn ? "page" : undefined}
-                              className={`block px-3 py-2 text-[0.75rem] leading-none ${
+                              className={`block px-3 py-2 text-[0.75rem] leading-none whitespace-nowrap ${
                                 childOn
                                   ? "text-foreground underline underline-offset-4"
                                   : "text-faint hover:text-foreground"
                               }`}
-                              onClick={() => setMenu(false)}
+                              onClick={() => setMenu(null)}
                             >
                               {child.label}
                             </Link>

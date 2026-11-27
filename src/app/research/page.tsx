@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ResearchSwitch } from "@/components/research-switch";
 
@@ -137,7 +138,9 @@ export default function ResearchPage() {
   return (
     <article className="bg-background">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-4 lg:px-9">
-        <ResearchSwitch papers={papers} />
+        <Suspense>
+          <ResearchSwitch papers={papers} />
+        </Suspense>
       </div>
     </article>
   );

@@ -1,5 +1,13 @@
 export const nav = [
-  { href: "/research", label: "Research" },
+  {
+    href: "/research",
+    label: "Research",
+    items: [
+      { href: "/research?group=sdr", label: "Small-data regime" },
+      { href: "/research?group=hrm", label: "Hierarchical reasoning" },
+      { href: "/research/market", label: "Market case" },
+    ],
+  },
   { href: "/architecture", label: "Modules" },
   {
     href: "/data-ecosystem",

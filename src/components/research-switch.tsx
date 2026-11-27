@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Paper = {
   title: string;
@@ -21,9 +21,19 @@ const filters = [
 ] as const;
 
 export function ResearchSwitch({ papers }: { papers: readonly Group[] }) {
-  const [filter, setFilter] = useState<(typeof filters)[number]["id"]>("sdr");
+  const params = useSearchParams();
+  const router = useRouter();
+  const filter = params.get("group") === "hrm" ? "hrm" : "sdr";
   const selected = filters.find((item) => item.id === filter) ?? filters[0];
   const group = papers.find((item) => item.label === selected.group);
+
+  function select(id: (typeof filters)[number]["id"]) {
+    const next = new URLSearchParams(params.toString());
+    if (id === "sdr") next.delete("group");
+    else next.set("group", id);
+    const query = next.toString();
+    router.replace(query ? `/research?${query}` : "/research", { scroll: false });
+  }
 
   return (
     <div className="min-w-0">
@@ -40,7 +50,7 @@ export function ResearchSwitch({ papers }: { papers: readonly Group[] }) {
                 key={item.id}
                 type="button"
                 aria-pressed={pressed}
-                onClick={() => setFilter(item.id)}
+                onClick={() => select(item.id)}
                 className={`h-[31px] px-3.5 font-mono text-[0.75rem] tracking-[-0.015rem] uppercase max-lg:border max-lg:border-line ${
                   index > 0 ? "lg:border-l lg:border-line" : ""
                 } ${pressed ? "bg-foreground text-background" : "bg-surface text-muted"}`}

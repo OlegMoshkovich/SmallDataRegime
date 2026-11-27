@@ -11,6 +11,7 @@ const views = [
   { id: "platform", label: "Platform" },
   { id: "agent", label: "Agent" },
   { id: "review", label: "Review" },
+  { id: "implementation", label: "Implementation" },
   { id: "demo", label: "Demo" },
   { id: "setup", label: "Architecture" },
 ] as const;
@@ -21,7 +22,7 @@ function isView(value: string | null): value is View {
   return views.some((item) => item.id === value);
 }
 
-function IsoCube({ x, y, accent = false }: { x: number; y: number; accent?: boolean }) {
+function CodeCube({ x, y, accent = false }: { x: number; y: number; accent?: boolean }) {
   const top = `${x},${y - 20} ${x + 11},${y - 14} ${x},${y - 8} ${x - 11},${y - 14}`;
   const left = `${x - 11},${y - 14} ${x},${y - 8} ${x},${y + 4} ${x - 11},${y - 2}`;
   const right = `${x},${y - 8} ${x + 11},${y - 14} ${x + 11},${y - 2} ${x},${y + 4}`;
@@ -34,111 +35,97 @@ function IsoCube({ x, y, accent = false }: { x: number; y: number; accent?: bool
   );
 }
 
-function PlaneNode({
-  x,
-  y,
-  label,
-  detail,
-  subdetail,
-  info,
-  accent = false,
-  onShow,
-  onPress,
-  onHide,
+function CodeNode({
+  x, y, accent = false, label, label2, sublabel, detail, more, info, example, onShow, onHide, onPress, onSelect,
 }: {
-  x: number;
-  y: number;
-  label: string;
-  detail?: string;
-  subdetail?: string;
-  info: string;
-  accent?: boolean;
-  onShow: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
-  onPress: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
-  onHide: () => void;
+  x: number; y: number; accent?: boolean; label: string; label2?: string; sublabel?: string;
+  detail?: string; more?: string; info?: string; example?: string;
+  onShow?: (e: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) => void;
+  onHide?: () => void;
+  onPress?: (e: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) => void;
+  onSelect?: () => void;
 }) {
-  const extraLines = (detail ? 1 : 0) + (subdetail ? 1 : 0);
+  const cls = `font-mono text-[11px] tracking-tight uppercase ${accent ? "fill-accent" : "fill-foreground"}`;
+  const l1y = label2 ? y + 16 : y + 22;
+  const nodeLabel = label2 ? `${label} ${label2}` : label;
+  const handlers = (info || example) && onShow && onHide && onPress ? {
+    className: "cursor-pointer",
+    onMouseEnter: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info ?? "", example ?? ""),
+    onMouseMove: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info ?? "", example ?? ""),
+    onMouseLeave: onHide,
+    onClick: (e: ReactMouseEvent<SVGGElement>) => {
+      onPress(e, nodeLabel, info ?? "", example ?? "");
+      onSelect?.();
+    },
+  } : {};
   return (
-    <g
-      className="cursor-help"
-      onMouseEnter={(event) => onShow(event, label, info)}
-      onMouseMove={(event) => onShow(event, label, info)}
-      onMouseLeave={onHide}
-      onClick={(event) => onPress(event, label, info)}
-    >
-      <rect x={x - 78} y={y - 28} width={156} height={extraLines === 2 ? 96 : extraLines === 1 ? 80 : 62} fill="transparent" />
-      <IsoCube x={x} y={y} accent={accent} />
-      <text x={x} y={y + 22} textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-        {label}
-      </text>
-      {detail ? (
-        <text x={x} y={y + 38} textAnchor="middle" className="fill-faint font-mono text-[12px] tracking-[-0.01em] uppercase">
-          {detail}
-        </text>
-      ) : null}
-      {subdetail ? (
-        <text x={x} y={y + 54} textAnchor="middle" className="fill-faint font-mono text-[12px] tracking-[-0.01em] uppercase">
-          {subdetail}
-        </text>
-      ) : null}
+    <g {...handlers}>
+      <rect x={x - 70} y={y - 26} width={140} height={label2 ? (more ? 100 : detail ? 86 : 68) : (more ? 90 : detail ? 72 : 56)} fill="transparent" />
+      <CodeCube x={x} y={y} accent={accent} />
+      <text x={x} y={l1y} textAnchor="middle" className={cls}>{label}</text>
+      {label2 ? <text x={x} y={l1y + 13} textAnchor="middle" className={cls}>{label2}</text> : null}
+      {sublabel ? <text x={x} y={l1y + (label2 ? 26 : 13)} textAnchor="middle" className="fill-muted font-mono text-[10px]">{sublabel}</text> : null}
+      {detail ? <text x={x} y={l1y + (label2 ? 39 : 26)} textAnchor="middle" className="fill-faint font-mono text-[10px]">{detail}</text> : null}
+      {more ? <text x={x} y={l1y + (label2 ? 51 : 38)} textAnchor="middle" className="fill-faint font-mono text-[10px]">{more}</text> : null}
     </g>
   );
 }
 
-function CodingDiagram() {
-  const frameX = 76;
-  const frameW = 760;
-  const frameCenter = frameX + frameW / 2;
-  const col = [170, 360, 554, 744];
-  const proxy = { x: col[0], y: 230 };
-  const task = { x: col[1], y: 230 };
-  const gateway = { x: col[2], y: 230 };
-  const otel = { x: col[3], y: 230 };
-  const ticket = { x: col[0], y: 324 };
-  const tools = { x: col[1], y: 324 };
-  const sandbox = { x: col[2], y: 324 };
-  const redis = { x: col[3], y: 324 };
-  const postgres = { x: (col[0] + col[1]) / 2, y: 418 };
-  const model = { x: col[2], y: 418 };
-  const plan = { x: col[0], y: 640 };
-  const tests = { x: col[1], y: 640 };
-  const branch = { x: col[2], y: 640 };
-  const review = { x: col[3], y: 640 };
-  const humanX = (col[0] + col[1]) / 2;
-  const appsX = (col[2] + col[3]) / 2;
-  const gitX = frameX + frameW + 48;
-  const gitCenter = gitX + 80;
-  const dash = "5 4";
+function CodeConnectDiagram() {
+  const gateX = 148;
+  const c = [300, 448, 596, 744];
+  const cY = 202;
+  const pY = 374;
+  const sY = 540;
+
   const sectionRef = useRef<HTMLElement>(null);
-  const [tip, setTip] = useState<{ title: string; body: string; x: number; y: number } | null>(null);
+  const [tip, setTip] = useState<{ title: string; info: string; example: string; x: number; y: number } | null>(null);
+  const [route, setRoute] = useState<string | null>(null);
+  const [tips, setTips] = useState(false);
+  const [examples, setExamples] = useState(false);
+
+  function choose(id: string) {
+    setRoute((current) => (current === id ? null : id));
+  }
+
+  function pick(owners: string[]) {
+    const on = route !== null && owners.includes(route);
+    return { stroke: on ? "#FF5C00" : "#b5b2b0", strokeWidth: on ? 1.8 : 1.2 };
+  }
 
   function coarsePointer() {
     return window.matchMedia("(hover: none)").matches;
   }
 
-  function placeTip(event: ReactMouseEvent<SVGGElement>, title: string, body: string) {
+  function placeTip(event: { clientX: number; clientY: number }, title: string, info: string, example: string) {
     const bounds = sectionRef.current?.getBoundingClientRect();
     if (!bounds) return null;
     const width = 288;
-    const height = 148;
+    const height = 320;
     let x = event.clientX - bounds.left + 14;
     let y = event.clientY - bounds.top + 18;
     if (x + width > bounds.width - 8) x = event.clientX - bounds.left - width - 10;
     if (y + height > bounds.height - 8) y = event.clientY - bounds.top - height - 10;
-    return { title, body, x: Math.max(8, x), y: Math.max(8, y) };
+    return {
+      title,
+      info: tips ? info : "",
+      example: examples ? example : "",
+      x: Math.max(8, x),
+      y: Math.max(8, y),
+    };
   }
 
-  function showTip(event: ReactMouseEvent<SVGGElement>, title: string, body: string) {
-    if (coarsePointer()) return;
-    const next = placeTip(event, title, body);
-    if (next) setTip(next);
+  function showTip(event: { clientX: number; clientY: number }, title: string, info: string, example: string) {
+    if (coarsePointer() || (!tips && !examples)) return;
+    const next = placeTip(event, title, info, example);
+    if (next && (next.info || next.example)) setTip(next);
   }
 
-  function pressTip(event: ReactMouseEvent<SVGGElement>, title: string, body: string) {
+  function pressTip(event: ReactMouseEvent<SVGElement>, title: string, info: string, example: string) {
     event.stopPropagation();
-    if (!coarsePointer()) return;
-    const next = placeTip(event, title, body);
-    if (!next) return;
+    if (!coarsePointer() || (!tips && !examples)) return;
+    const next = placeTip(event, title, info, example);
+    if (!next || (!next.info && !next.example)) return;
     setTip((current) => (current?.title === title ? null : next));
   }
 
@@ -147,186 +134,280 @@ function CodingDiagram() {
     setTip(null);
   }
 
-  const node = { onShow: showTip, onPress: pressTip, onHide: hideTip };
+  const node = { onShow: showTip, onHide: hideTip, onPress: pressTip };
 
   return (
     <section ref={sectionRef} className="relative border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
       <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
-        <span aria-hidden className="size-1.5 bg-accent" />
-        Architecture
+        <span className="size-1.5 bg-accent" aria-hidden />
+        How it connects
       </p>
-      <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-        A task enters through the gateway. A sandbox clones the repository, calls the model only
-        through the model proxy, and leaves a pull request. The repository stays where it is.
-      </p>
-      <div className="mt-5 max-w-full min-w-0 overflow-x-auto">
+      <div className="mt-6 max-w-full min-w-0 overflow-x-auto">
         <svg
-          onClick={() => {
-            if (coarsePointer()) setTip(null);
-          }}
-          viewBox="0 0 1120 760"
-          className="block h-auto w-full min-w-[64rem]"
+          viewBox="0 0 1120 640"
+          className="block h-auto w-full min-w-[48rem]"
           role="img"
-          aria-label="Coding architecture. A person and the git host arrive at one URL. The gateway checks the task, a sandbox runs the tools, and the model proxy is the only path to the model. The pull request is what leaves."
+          aria-label="The agent is the program you opened in the IDE. It runs in that window, on your machine, in the folder already open. You type a task, it plans and edits there, and the diff stays in the editor until you accept it."
         >
-          <rect x={frameX} y="176" width={frameW} height="292" fill="#f4f3f2" stroke="#d6d3d2" />
-          <rect x={frameX} y="584" width={frameW} height="140" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x="90" y="152" width="722" height="136" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x="90" y="324" width="722" height="132" fill="#f4f3f2" stroke="#d6d3d2" />
+          <rect x="90" y="492" width="722" height="124" fill="#f4f3f2" stroke="#d6d3d2" />
 
-          <g fill="none" stroke="#c8c4c2" strokeWidth="1.25" strokeDasharray={dash}>
-            <path d={`M${proxy.x + 12},${proxy.y - 14} L${task.x - 12},${task.y - 14}`} />
-            <path d={`M${task.x + 12},${task.y - 14} L${gateway.x - 12},${gateway.y - 14}`} />
-            <path d={`M${proxy.x},${proxy.y - 22} C ${task.x},${proxy.y - 64} ${task.x},${gateway.y - 64} ${gateway.x},${gateway.y - 22}`} />
-            <path d={`M${gateway.x + 12},${gateway.y - 14} L${otel.x - 12},${otel.y - 14}`} />
-            <path d={`M${gateway.x + 8},${gateway.y + 2} L${redis.x - 8},${redis.y - 18}`} />
-            <path d={`M${gateway.x},${gateway.y + 4} L${sandbox.x},${sandbox.y - 20}`} />
-            <path d={`M${gateway.x - 10},${gateway.y + 2} L${postgres.x + 8},${postgres.y - 20}`} />
-            <path d={`M${sandbox.x - 12},${sandbox.y - 10} L${tools.x + 12},${tools.y - 10}`} />
-            <path d={`M${sandbox.x - 8},${sandbox.y + 2} L${postgres.x + 10},${postgres.y - 18}`} />
-            <path d={`M${ticket.x + 6},${ticket.y + 4} L${postgres.x - 8},${postgres.y - 18}`} />
-          </g>
-          <path
-            d={`M${gateway.x + 14},${gateway.y - 8} C ${gateway.x + 150},${gateway.y + 24} ${model.x + 150},${model.y - 80} ${model.x + 12},${model.y - 18}`}
-            fill="none"
-            stroke="#FF5C00"
-            strokeWidth="1.6"
-          />
-          <path
-            d={`M${model.x + 18},${model.y - 2} H ${gitCenter} V 548`}
-            fill="none"
-            stroke="#FF5C00"
-            strokeWidth="1.5"
-            strokeDasharray={dash}
-          />
+          <text x="5" y="66" className="fill-foreground font-mono text-[11px] uppercase">ACCESS</text>
+          <text x="5" y="81" className="fill-muted font-mono text-[10px]">Users, tools</text>
+          <line x1="5" y1="96" x2="82" y2="96" stroke="#d6d3d2" strokeWidth="0.8" />
 
-          <g fill="none" stroke="#101010" strokeWidth="1.25">
-            {[humanX, appsX].map((x) => (
-              <g key={x}>
-                <path d={`M${x},128 v18`} />
-                <path d={`M${x - 3.5},133 l3.5,-6 l3.5,6`} />
-                <path d={`M${x - 3.5},141 l3.5,6 l3.5,-6`} />
-              </g>
-            ))}
-          </g>
-          <g fill="none" stroke="#FF5C00" strokeWidth="1.35">
-            <path d={`M${model.x},456 v36`} />
-            <path d={`M${model.x - 3.5},462 l3.5,-6 l3.5,6`} />
-            <path d={`M${model.x - 3.5},486 l3.5,6 l3.5,-6`} />
-            <path d={`M${model.x},552 v24`} />
-            <path d={`M${model.x - 3.5},558 l3.5,-6 l3.5,6`} />
-            <path d={`M${model.x - 3.5},570 l3.5,6 l3.5,-6`} />
+          <text x="5" y="187" className="fill-foreground font-mono text-[11px] uppercase">CONTROL</text>
+          <text x="5" y="202" className="fill-muted font-mono text-[10px]">Run on</text>
+          <text x="5" y="215" className="fill-muted font-mono text-[10px]">your machines</text>
+          <line x1="5" y1="276" x2="82" y2="276" stroke="#d6d3d2" strokeWidth="0.8" />
+
+          <text x="5" y="359" className="fill-foreground font-mono text-[11px] uppercase">COMPUTE</text>
+          <text x="5" y="374" className="fill-muted font-mono text-[10px]">In the</text>
+          <text x="5" y="387" className="fill-muted font-mono text-[10px]">editor</text>
+          <line x1="5" y1="444" x2="82" y2="444" stroke="#d6d3d2" strokeWidth="0.8" />
+
+          <text x="5" y="526" className="fill-foreground font-mono text-[11px] uppercase">STORAGE</text>
+          <text x="5" y="541" className="fill-muted font-mono text-[10px]">The files</text>
+          <text x="5" y="554" className="fill-muted font-mono text-[10px]">you have open</text>
+          <line x1="5" y1="604" x2="82" y2="604" stroke="#d6d3d2" strokeWidth="0.8" />
+
+          {c.map((cx, i) => (
+            <g key={cx}>
+              <circle cx={cx} cy="128" r="9" fill="#101010" />
+              <text x={cx} y="132" textAnchor="middle" fill="white" fontSize="11" className="font-mono">{i + 1}</text>
+            </g>
+          ))}
+
+          {[c[0], c[3]].map((cx) => (
+            <g key={cx} fill="none" stroke="#101010" strokeWidth="1.2" transform={`translate(${cx} 44)`}>
+              <circle cx="0" cy="0" r="6" />
+              <path d="M-9 18c1.5-6 4.5-9 9-9s7.5 3 9 9" />
+            </g>
+          ))}
+          {[c[1], c[2]].map((cx) => (
+            <g key={cx} fill="none" stroke="#101010" strokeWidth="1.2" transform={`translate(${cx} 44)`}>
+              <rect x="-10" y="-8" width="20" height="14" />
+              <path d="M0 6v5M-6 11h12" />
+            </g>
+          ))}
+
+          {([
+            [c[0], "YOU", "IN THE IDE"],
+            [c[1], "AGENT", "PLAN"],
+            [c[2], "AGENT", "EDIT"],
+            [c[3], "YOU", "THE DIFF"],
+          ] as [number, string, string][]).map(([cx, l1, l2]) => (
+            <g key={cx}>
+              <text x={cx} y="84" textAnchor="middle" fill="#101010" fontSize="11" className="font-mono uppercase">{l1}</text>
+              <text x={cx} y="98" textAnchor="middle" fill="#101010" fontSize="11" className="font-mono uppercase">{l2}</text>
+            </g>
+          ))}
+          {([
+            {
+              id: "ide",
+              title: "You in the IDE",
+              info: "You open the agent inside the editor and type the task. The files already open stay the files it works on.",
+              example: "In VS Code you type: change this function so the empty case returns early.",
+            },
+            {
+              id: "plan",
+              title: "The plan",
+              info: "The agent reads the open files and writes the steps. You can stop it before a file changes.",
+              example: "It names the function, the test it will run, and waits.",
+            },
+            {
+              id: "edit",
+              title: "The edit",
+              info: "It changes the code in the workspace and runs the check from the terminal.",
+              example: "It edits the function, runs the test, and the red check stays in the session.",
+            },
+            {
+              id: "diff",
+              title: "The diff",
+              info: "The change appears in the editor. Nothing is saved as the new code until you accept it.",
+              example: "You keep the edit. The file on disk updates. Rejecting it leaves the file as it was.",
+            },
+          ] as const).map((item, i) => (
+            <rect
+              key={item.id}
+              x={c[i] - 62}
+              y={24}
+              width={124}
+              height={114}
+              fill="transparent"
+              className="cursor-pointer"
+              onMouseEnter={(e) => showTip(e, item.title, item.info, item.example)}
+              onMouseMove={(e) => showTip(e, item.title, item.info, item.example)}
+              onMouseLeave={hideTip}
+              onClick={(e) => {
+                pressTip(e, item.title, item.info, item.example);
+                choose(item.id);
+              }}
+            />
+          ))}
+
+          <g fill="none" strokeDasharray="4 3">
+            <line x1={c[0]} y1="138" x2={c[0]} y2={cY - 22} {...pick(["ide", "task", "read", "gateway"])} />
+            <line x1={c[1]} y1="138" x2={c[1]} y2={cY - 22} {...pick(["plan", "steps", "model", "gateway"])} />
+            <line x1={c[2]} y1="138" x2={c[2]} y2={cY - 22} {...pick(["edit", "apply", "check", "gateway"])} />
+            <line x1={c[3]} y1="138" x2={c[3]} y2={cY - 22} {...pick(["diff", "accept", "files", "gateway"])} />
+            <line x1={c[0]} y1="278" x2={c[0]} y2={pY - 22} {...pick(["ide", "task", "read", "workspace", "gateway"])} />
+            <line x1={c[0]} y1="448" x2={c[0]} y2={sY - 22} {...pick(["ide", "task", "read", "workspace", "gateway"])} />
+            <line x1={c[1]} y1="278" x2={c[1]} y2={pY - 22} {...pick(["plan", "steps", "model", "workspace", "gateway"])} />
+            <line x1={c[1]} y1="448" x2={c[1]} y2="478" {...pick(["plan", "steps", "model", "workspace", "gateway"])} />
+            <line x1={c[2]} y1="278" x2={c[2]} y2={pY - 22} {...pick(["edit", "apply", "check", "log", "workspace", "gateway"])} />
+            <line x1={c[2]} y1="448" x2={c[2]} y2={sY - 22} {...pick(["edit", "apply", "check", "log", "gateway"])} />
+            <line x1={c[3]} y1="278" x2={c[3]} y2={sY - 22} {...pick(["diff", "accept", "files", "workspace", "gateway"])} />
+            <line x1={c[3]} y1="478" x2={c[2]} y2="478" {...pick(["diff", "accept", "files", "workspace", "gateway"])} />
+            <line x1={c[2]} y1="478" x2={c[1]} y2="478" {...pick(["edit", "apply", "check", "diff", "accept", "files", "workspace", "gateway"])} />
+            <line x1={c[1]} y1="478" x2={c[0]} y2="478" {...pick(["plan", "steps", "model", "edit", "apply", "check", "diff", "accept", "files", "workspace", "gateway"])} />
           </g>
 
+          <CodeNode x={gateX} y={cY} accent label="GATEWAY" label2="CHECK"
+            detail="who and budget"
+            more="before a file opens"
+            info={"The task hits the gateway first. It checks the person, the policy, and the budget.\n\nThe editor does not call a model on its own. That call goes through the gateway, then the model proxy."}
+            example="You are signed in. The gateway allows the task. A person without access to the folder never gets a plan."
+            onSelect={() => choose("gateway")}
+            {...node} />
+          <CodeNode x={c[0]} y={cY} label="TASK" label2="WORDS"
+            detail="what you typed"
+            more="change the code"
+            info={"The task is the sentence in the IDE. It names the change. It does not name a new repository.\n\nThe files already open are the files the agent is allowed to read."}
+            example="You type: change this function so the empty case returns early."
+            onSelect={() => choose("task")}
+            {...node} />
+          <CodeNode x={c[1]} y={cY} label="PLAN" label2="STEPS"
+            detail="what it will touch"
+            more="you can stop it"
+            info={"The agent writes the steps before it edits: which file, which function, which check.\n\nYou can edit the plan or stop the run. A file it did not name stays closed."}
+            example="The plan says: read the function, change the empty case, run the test. You remove the test. It does not run."
+            onSelect={() => choose("steps")}
+            {...node} />
+          <CodeNode x={c[2]} y={cY} label="EDIT" label2="APPLY"
+            detail="in the open folder"
+            more="not a second repo"
+            info={"The agent edits the file in the workspace you already have open. It uses the terminal in that same editor.\n\nIt does not clone the project somewhere else, and it does not commit."}
+            example="The function changes in the buffer. The terminal runs the test. The file on disk is still the old one."
+            onSelect={() => choose("apply")}
+            {...node} />
+          <CodeNode x={c[3]} y={cY} label="DIFF" label2="ACCEPT"
+            detail="shown in the IDE"
+            more="you keep or reject"
+            info={"The change is a diff in the editor. Accept writes it. Reject throws it away.\n\nThe agent does not save over the file, and it does not push."}
+            example="You accept. The file updates. Rejecting leaves the function as it was when you typed the task."
+            onSelect={() => choose("accept")}
+            {...node} />
+
+          <CodeNode x={c[0]} y={pY} label="READ" label2="FILES"
+            detail="what is open"
+            more="nothing else"
+            info={"The agent reads the files in the workspace, and the ones the plan names.\n\nA file outside that folder is not opened. The model sees the passages the read step returned."}
+            example="It reads the function you pointed at, and the test file next to it. It does not open the rest of the disk."
+            onSelect={() => choose("read")}
+            {...node} />
+          <CodeNode x={c[1]} y={pY} label="MODEL" label2="CALL"
+            detail="through the proxy"
+            more="this task only"
+            info={"The model decides how to read the code, which edit to try, and when it has enough.\n\nThe call goes through the model proxy. The editor does not open a port on the GPU. Your code is not used to train the model."}
+            example="The model proposes the early return. The weights stay on the enterprise’s machines."
+            onSelect={() => choose("model")}
+            {...node} />
+          <CodeNode x={c[2]} y={pY} label="CHECK" label2="TERMINAL"
+            detail="the command you use"
+            more="a red check stays"
+            info={"The terminal runs the check the project already has. The agent does not invent a new definition of done.\n\nA failure stays on the session, next to the diff."}
+            example="The test fails on the empty case. The diff still appears, with that failure named."
+            onSelect={() => choose("check")}
+            {...node} />
+
+          <CodeNode x={c[0]} y={sY} label="WORKSPACE" label2="FOLDER"
+            sublabel="the files you opened"
+            detail="stays in the IDE"
+            more="not copied out"
+            info={"The folder open in the editor is the place the agent reads and the place the diff is about.\n\nThe files are not uploaded as a second copy. The plan, the edit, and the diff all point back here."}
+            example="VS Code has the project open. The agent works in that window. Closing the task does not move the folder."
+            onSelect={() => choose("workspace")}
+            {...node} />
+          <CodeNode x={c[2]} y={sY} label="SESSION" label2="LOG"
+            detail="each step"
+            more="replay, not a copy"
+            info={"The log keeps the task, the plan, each edit, and each model call. You can read a run that went wrong.\n\nIt is not a second copy of the folder."}
+            example="You open the log and see the test command and the red check, in order."
+            onSelect={() => choose("log")}
+            {...node} />
+          <CodeNode x={c[3]} y={sY} label="FILES" label2="ON DISK"
+            sublabel="after you accept"
+            detail="the saved change"
+            more="reject leaves them"
+            info={"Accept writes the diff into the files. Reject does not.\n\nA commit and a push are still yours. The agent stops at the diff."}
+            example="You accept. The function on disk has the early return. You commit when you are ready."
+            onSelect={() => choose("files")}
+            {...node} />
+
+          <text x="845" y="166" className="fill-muted font-mono text-[11px] uppercase">HOW TO READ IT</text>
+          {([
+            { y: 192, lines: ["The agent is the program", "in the IDE. Code fixes", "its steps. You type the task."] },
+            { y: 260, lines: ["It runs in that window,", "on your machine, in the", "folder you have open."] },
+            { y: 328, lines: ["Plan and edit stay there.", "Only the model call leaves,", "through the gateway,", "on your machines."] },
+            { y: 410, lines: ["The diff stays in the IDE.", "Accept writes the file.", "The agent does not push."] },
+          ] as { y: number; lines: string[] }[]).map((item, i) => (
+            <g key={item.y}>
+              <circle cx="855" cy={item.y} r="9" fill="#101010" />
+              <text x="855" y={item.y + 4} textAnchor="middle" fill="white" className="font-mono text-[11px]">{i + 1}</text>
+              {item.lines.map((line, j) => (
+                <text key={j} x="870" y={item.y + (j * 14) + 4} className="fill-faint font-mono text-[11px]">{line}</text>
+              ))}
+            </g>
+          ))}
           <g
-            className="cursor-help"
-            onMouseEnter={(event) =>
-              showTip(event, "One URL", "A person and the git host both arrive here. The repository is not copied out. Sign-in is the enterprise’s single sign-on.")
-            }
-            onMouseMove={(event) =>
-              showTip(event, "One URL", "A person and the git host both arrive here. The repository is not copied out. Sign-in is the enterprise’s single sign-on.")
-            }
-            onMouseLeave={hideTip}
-            onClick={(event) =>
-              pressTip(event, "One URL", "A person and the git host both arrive here. The repository is not copied out. Sign-in is the enterprise’s single sign-on.")
-            }
+            role="switch"
+            aria-checked={tips}
+            aria-label="Show hover details"
+            className="cursor-pointer"
+            onClick={() => {
+              setTips((open) => !open);
+              setTip(null);
+            }}
           >
-            <rect x={frameX} y="78" width={frameW} height="36" fill="#ffffff" stroke="#101010" />
-            <text x={frameCenter} y="101" textAnchor="middle" className="fill-foreground font-mono text-[14px] tracking-[-0.01em] uppercase">
-              HTTPS · the repo stays · Corporate SSO
-            </text>
+            <rect x="845" y="500" width="34" height="16" rx="8" fill={tips ? "#101010" : "#f4f3f2"} stroke="#101010" />
+            <circle cx={tips ? 870 : 854} cy="508" r="5" fill={tips ? "#ffffff" : "#101010"} />
+            <text x="889" y="512" className="fill-muted font-mono text-[11px] uppercase">Info</text>
           </g>
           <g
-            className="cursor-help"
-            onMouseEnter={(event) =>
-              showTip(event, "The coding model", "The model proxy is the only caller. The sandbox does not open a port on the GPU. Plan, tests, the branch, and review all use that one path.")
-            }
-            onMouseMove={(event) =>
-              showTip(event, "The coding model", "The model proxy is the only caller. The sandbox does not open a port on the GPU. Plan, tests, the branch, and review all use that one path.")
-            }
-            onMouseLeave={hideTip}
-            onClick={(event) =>
-              pressTip(event, "The coding model", "The model proxy is the only caller. The sandbox does not open a port on the GPU. Plan, tests, the branch, and review all use that one path.")
-            }
+            role="switch"
+            aria-checked={examples}
+            aria-label="Show hover examples"
+            className="cursor-pointer"
+            onClick={() => {
+              setExamples((open) => !open);
+              setTip(null);
+            }}
           >
-            <rect x={model.x - 228} y="508" width="456" height="34" fill="#ffffff" stroke="#FF5C00" />
-            <text x={model.x} y="530" textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-              Model proxy → the coding model only
-            </text>
-          </g>
-
-          <g fill="none" stroke="#101010" strokeWidth="1.25">
-            {[humanX - 44, humanX, humanX + 44].map((x) => (
-              <g key={`human-${x}`} transform={`translate(${x} 28)`}>
-                <circle cx="0" cy="0" r="5" />
-                <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
-              </g>
-            ))}
-            {[appsX - 44, appsX, appsX + 44].map((x) => (
-              <g key={`screen-${x}`} transform={`translate(${x} 30)`}>
-                <rect x="-9" y="-7" width="18" height="12" />
-                <path d="M0 5v4M-5 9h10" />
-              </g>
-            ))}
-          </g>
-          <text x={humanX} y="62" textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-            A human · Task
-          </text>
-          <text x={appsX} y="62" textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-            Git host · API
-          </text>
-
-          <PlaneNode {...proxy} {...node} label="Proxy" detail="TLS entry point" info="The entry on the internal network. It terminates HTTPS and sends the task to the task UI and the API to the gateway." />
-          <PlaneNode {...task} {...node} label="Task UI" detail="where the job is written" info="Where a person writes the task, or where a ticket is opened. The UI calls the gateway." />
-          <PlaneNode {...gateway} {...node} label="Gateway ×2" detail="policy and budget" accent info="Checks the person, the policy, and the budget before a repository is opened." />
-          <PlaneNode {...otel} {...node} label="OTel" detail="session traces" info="The trace of the run goes to the monitoring the enterprise already uses." />
-          <PlaneNode {...ticket} {...node} label="Ticket" detail="the tracker" info="The job in the tracker. The task is this ticket. The agent does not start from a blank editor." />
-          <PlaneNode {...tools} {...node} label="Tools" detail="shell, editor, browser" info="The tools run in the sandbox, as the person who started the task. They do not get that person’s laptop." />
-          <PlaneNode {...sandbox} {...node} label="Sandbox ×2" detail="clone and run" info="A clone of the repository. Two sandboxes so two tasks do not share a machine." />
-          <PlaneNode {...redis} {...node} label="Redis 7" detail="budgets and cache" info="The token budget for the session. The gateway is what talks to it." />
-          <PlaneNode {...postgres} {...node} label="Postgres 16" detail="sessions and logs" info="The session, the job queue, and the log of every tool call. A run can be replayed from here." />
-          <PlaneNode {...model} {...node} label="Model proxy" detail="sole path to the model" accent info="The only path to the model. The sandbox does not call a model directly." />
-          <PlaneNode {...plan} {...node} label="Plan" detail="steps in code" subdetail="a person can stop it" info="The ordered steps. A person can edit them or stop the run before files change." />
-          <PlaneNode {...tests} {...node} label="Tests" detail="the repo’s suite" subdetail="a red check stays" info="The sandbox runs the tests the repository already has. A failure stays on the session." />
-          <PlaneNode {...branch} {...node} label="Branch" detail="the change" subdetail="not a silent write" info="The edit is a branch. The repository itself is not rewritten in place." />
-          <PlaneNode {...review} {...node} label="Review" detail="a person merges" subdetail="the agent does not" info="The pull request waits. A person reads the diff and merges. The agent does not." />
-
-          <g
-            className="cursor-help"
-            onMouseEnter={(event) => showTip(event, "Git host", "The repository stays on the git host. The sandbox clones it. The only thing sent back is a pull request.")}
-            onMouseMove={(event) => showTip(event, "Git host", "The repository stays on the git host. The sandbox clones it. The only thing sent back is a pull request.")}
-            onMouseLeave={hideTip}
-            onClick={(event) => pressTip(event, "Git host", "The repository stays on the git host. The sandbox clones it. The only thing sent back is a pull request.")}
-          >
-            <rect x={gitX} y="548" width="160" height="72" fill="#ffffff" stroke="#101010" />
-            <text x={gitCenter} y="580" textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-              Git
-            </text>
-            <text x={gitCenter} y="598" textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-              host
-            </text>
-          </g>
-          <path d={`M${gitCenter},620 v22`} fill="none" stroke="#101010" strokeWidth="1.25" />
-          <path d={`M${gitCenter - 3.5},636 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.25" />
-          <g
-            className="cursor-help"
-            onMouseEnter={(event) => showTip(event, "Pull request", "The change leaves as a pull request. It names the ticket. A person reviews it. Nothing merges until that person says so.")}
-            onMouseMove={(event) => showTip(event, "Pull request", "The change leaves as a pull request. It names the ticket. A person reviews it. Nothing merges until that person says so.")}
-            onMouseLeave={hideTip}
-            onClick={(event) => pressTip(event, "Pull request", "The change leaves as a pull request. It names the ticket. A person reviews it. Nothing merges until that person says so.")}
-          >
-            <rect x={gitX} y="648" width="160" height="64" fill="#ffffff" stroke="#101010" strokeDasharray={dash} />
-            <text x={gitCenter} y="674" textAnchor="middle" className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase">
-              Pull request
-            </text>
-            <text x={gitCenter} y="692" textAnchor="middle" className="fill-faint font-mono text-[12px] tracking-[-0.01em]">
-              a person merges
-            </text>
+            <rect x="960" y="500" width="34" height="16" rx="8" fill={examples ? "#101010" : "#f4f3f2"} stroke="#101010" />
+            <circle cx={examples ? 985 : 969} cy="508" r="5" fill={examples ? "#ffffff" : "#101010"} />
+            <text x="1004" y="512" className="fill-muted font-mono text-[11px] uppercase">Example</text>
           </g>
         </svg>
       </div>
       {tip ? (
-        <div role="tooltip" className="pointer-events-none absolute z-20 w-72 border border-line bg-surface px-3 py-2.5" style={{ left: tip.x, top: tip.y }}>
-          <p className="font-mono text-[0.7rem] tracking-[-0.01em] uppercase">{tip.title}</p>
-          <p className="mt-1.5 text-sm leading-snug text-faint">{tip.body}</p>
+        <div
+          className="pointer-events-none absolute z-10 w-72 border border-line bg-surface px-4 py-3 shadow-sm"
+          style={{ left: tip.x, top: tip.y }}
+        >
+          <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">{tip.title}</p>
+          {tip.info.split("\n\n").filter(Boolean).map((para) => (
+            <p key={para} className="mt-2 text-sm leading-snug text-faint first:mt-1">{para}</p>
+          ))}
+          {tip.example ? (
+            <>
+              {tip.info ? (
+                <p className="mt-3 font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">Example</p>
+              ) : null}
+              <p className="mt-1 text-sm leading-snug text-faint">{tip.example}</p>
+            </>
+          ) : null}
         </div>
       ) : null}
     </section>
@@ -538,18 +619,18 @@ export function CodingSwitch({
       {view === "agent" ? (
         <Section eyebrow="Agent">
           <p className="mt-5 max-w-xl text-base leading-snug text-faint">
-            The coding agent is a versioned, bounded program for one task. Code fixes the steps.
-            A model reasons inside each step, within limits, with the caller’s permissions. It
-            returns a change a person can check.
+            The agent is the program you open in the IDE. It runs in that window, on your machine,
+            in the folder already open. Code fixes the steps. A model reasons inside each step,
+            through the gateway, on your machines. The diff stays in the editor until you accept it.
           </p>
           <Table
             columns={["Part", "What it is", "What it is not"]}
             rows={[
-              ["Contract", "A task in, a pull request out", "A chat with no artifact"],
-              ["Steps", "Read, plan, edit, test, open", "A free loop the model invents"],
-              ["Tools", "Shell, editor, browser, and search", "The person’s whole machine"],
-              ["Models", "Called through the gateway", "A direct port on the GPU"],
-              ["Controls", "A plan check, a token limit, a human review", "A merge the agent makes alone"],
+              ["The agent", "The program in the IDE for one task", "A person, or a second computer"],
+              ["Where it runs", "That window, on your machine, in the open folder", "A clone on another host"],
+              ["Steps", "Read, plan, edit, check", "A free loop the model invents"],
+              ["The model", "Called through the gateway, on your machines", "A GPU inside the editor"],
+              ["The result", "A diff you accept in the IDE", "A commit or a push the agent makes"],
             ]}
           />
         </Section>
@@ -575,6 +656,27 @@ export function CodingSwitch({
         </Section>
       ) : null}
 
+      {view === "implementation" ? (
+        <Section eyebrow="Implementation">
+          <p className="mt-5 max-w-xl text-base leading-snug text-faint">
+            Use OpenCode as the runtime in the IDE, and send the model call to OpenRouter.
+          </p>
+          <Table
+            columns={["Step", "What you do", "What it connects"]}
+            rows={[
+              ["1. The runtime", "Use the OpenCode runtime. The extension is a branded package around it, under its own publisher.", "VS Code stays the editor. OpenCode owns the session."],
+              ["2. The license", "Ship the MIT license and the notices OpenCode requires, including bundled dependencies and assets.", "The package can carry its own name on the Marketplace."],
+              ["3. The IDE", "Add OpenCode as a terminal command or a sidebar. The OpenCode CLI is the dependency either way.", "The person types the task in the window already open."],
+              ["4. The session", "OpenCode opens one session in that folder, on the build agent. Allow edit. Refuse shell until the program allows it.", "Code answers permissions. The model does not."],
+              ["5. OpenRouter", "Set the OpenCode provider to OpenRouter. Pick a model id it publishes, such as openai/gpt-4.1.", "The editor does not open a port on the GPU."],
+              ["6. Sign-in", "The person signs in with the enterprise account. Keep OPENROUTER_API_KEY on the machine that runs OpenCode.", "The key goes to OpenRouter only, as a bearer token."],
+              ["7. Ship", "Publish the extension to the VS Code Marketplace and Open VSX. Install and update the OpenCode CLI with it.", "Cursor and Windsurf are checked on their own."],
+              ["8. The diff", "OpenCode edits the open files and streams text, tool, status, and error events back. Accept writes the file. Reject leaves it.", "OpenCode does not commit or push."],
+            ]}
+          />
+        </Section>
+      ) : null}
+
       {view === "demo" ? (
         enabled ? (
           <CodingAgent enabled initialReady={initialReady} />
@@ -587,21 +689,21 @@ export function CodingSwitch({
 
       {view === "setup" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
-          <CodingDiagram />
+          <CodeConnectDiagram />
           <Section eyebrow="What moves, and what stays">
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <article className="border border-line bg-surface p-5">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Stays</p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
-                  The repository, the tickets, the docs, and the secrets. Weights stay on the
-                  enterprise’s machines. The session log stays with the run.
+                  The agent, in the IDE on your machine. The open folder. The files, until you
+                  accept the diff. Weights stay on your machines. The session log stays with the run.
                 </p>
               </article>
               <article className="border border-line bg-surface p-5">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Moves</p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
-                  A branch and a pull request. The person reviews that change. The agent does not
-                  merge it, and the company’s code is not used to train a model.
+                  The model call, through the gateway. The diff, into the open files, after you
+                  accept it. The agent does not commit or push, and the code is not used to train a model.
                 </p>
               </article>
             </div>

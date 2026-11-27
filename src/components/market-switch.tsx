@@ -18,13 +18,17 @@ function isView(value: string | null): value is View {
 const cases: Record<
   View,
   {
+    name: string;
+    href: string;
     lede: string;
     rows: [string, string, string][];
     close: string;
   }
 > = {
   databricks: {
-    lede: "Databricks is the market case for the data module. It is the system a company buys when tables, pipelines, and the question asked of them have to live in one governed place.",
+    name: "Databricks",
+    href: "https://www.databricks.com",
+    lede: "is the market case for the data module. It is the system a company buys when tables, pipelines, and the question asked of them have to live in one governed place.",
     rows: [
       ["Lakehouse", "Delta tables on object storage, read by SQL and by Spark", "The warehouse and the lake are the same store"],
       ["Unity Catalog", "One catalog for tables, files, models, and who may open them", "A query runs only on what that person can already read"],
@@ -35,7 +39,9 @@ const cases: Record<
     close: "The data module is this job on the enterprise’s machines. The catalog, the warehouse, and the text-to-SQL path stay inside the company.",
   },
   glean: {
-    lede: "Glean is the market case for the documents module. It is the system a company buys when people search across the apps they already use, and only see what they can open.",
+    name: "Glean",
+    href: "https://www.glean.com",
+    lede: "is the market case for the documents module. It is the system a company buys when people search across the apps they already use, and only see what they can open.",
     rows: [
       ["Connectors", "Crawl content, permissions, people, and activity from each app", "The file stays in the source"],
       ["Index", "A tenant-isolated copy for search: terms, embeddings, and the access list", "A result the person cannot open is not returned"],
@@ -46,7 +52,9 @@ const cases: Record<
     close: "The documents module is this job on the enterprise’s machines. Search and the assistant read an index the company holds, and the file stays put.",
   },
   baseten: {
-    lede: "Baseten is the market case for the inference module. It is the system a company buys when a model has to answer production traffic without the company running the GPU fleet.",
+    name: "Baseten",
+    href: "https://www.baseten.co",
+    lede: "is the market case for the inference module. It is the system a company buys when a model has to answer production traffic without the company running the GPU fleet.",
     rows: [
       ["Deployment", "A model packaged once and served as its own endpoint", "Weights, runtime, and scale are one unit"],
       ["API", "An OpenAI-compatible call for chat, embeddings, and custom models", "Applications do not learn a new client"],
@@ -57,7 +65,9 @@ const cases: Record<
     close: "The inference module is this job on the enterprise’s GPUs. The model proxy is the only door, and the weights stay on those machines.",
   },
   cognition: {
-    lede: "Cognition is the market case for the coding module. Devin is the agent a company points at a repository when the task is a change, not a chat.",
+    name: "Cognition",
+    href: "https://cognition.ai",
+    lede: "is the market case for the coding module. Devin is the agent a company points at a repository when the task is a change, not a chat.",
     rows: [
       ["Task", "A written job: fix, feature, or investigation", "The agent starts from the task, not from a blank editor"],
       ["Workspace", "A sandbox with the repo, a shell, and a browser", "The work happens off the person’s laptop"],
@@ -116,7 +126,12 @@ export function MarketSwitch() {
           <span className="size-1.5 bg-accent" aria-hidden />
           Market case
         </p>
-        <p className="mt-5 max-w-3xl text-base leading-relaxed text-faint">{current.lede}</p>
+        <p className="mt-5 max-w-3xl text-base leading-relaxed text-faint">
+          <a href={current.href} target="_blank" rel="noreferrer" className="text-foreground underline">
+            {current.name}
+          </a>{" "}
+          {current.lede}
+        </p>
         <div className="mt-8 overflow-x-auto border border-line">
           <table className="w-full min-w-[40rem] border-collapse text-left">
             <thead className="bg-[#f4f3f2] font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">

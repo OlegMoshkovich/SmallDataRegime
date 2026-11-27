@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "@/components/button";
 import { AgentsPanel } from "@/components/agents-panel";
@@ -28,6 +28,121 @@ function viewFromParam(value: string | null): View {
   return match?.id ?? "summary";
 }
 
+const hostingLinks: Record<string, string[]> = {
+  humans: ["url"],
+  apps: ["url"],
+  url: ["humans", "apps", "proxy"],
+  proxy: ["url", "chat", "gateway"],
+  chat: ["proxy", "gateway"],
+  gateway: ["proxy", "chat", "otel", "redis", "worker", "postgres", "model"],
+  otel: ["gateway"],
+  redis: ["gateway"],
+  worker: ["gateway", "mcp", "postgres"],
+  mcp: ["worker"],
+  postgres: ["gateway", "worker", "ingestion"],
+  ingestion: ["postgres"],
+  model: ["gateway", "ports", "egress", "qwen", "deepseek", "embeddings", "reranker"],
+  ports: ["model", "qwen", "deepseek", "embeddings", "reranker"],
+  qwen: ["ports", "model"],
+  deepseek: ["ports", "model"],
+  embeddings: ["ports", "model"],
+  reranker: ["ports", "model"],
+  egress: ["model", "external"],
+  external: ["egress"],
+};
+
+const hostingGpus = ["qwen", "deepseek", "embeddings", "reranker"];
+
+const hostingEdgeEnds: Record<string, { ends: string[]; also?: string[] }> = {
+  "proxy-chat": { ends: ["proxy", "chat"] },
+  "chat-gateway": { ends: ["chat", "gateway"] },
+  "proxy-gateway": { ends: ["proxy", "gateway"] },
+  "gateway-otel": { ends: ["gateway", "otel"] },
+  "gateway-redis": { ends: ["gateway", "redis"] },
+  "gateway-worker": { ends: ["gateway", "worker"] },
+  "gateway-postgres": { ends: ["gateway", "postgres"] },
+  "worker-mcp": { ends: ["worker", "mcp"] },
+  "worker-postgres": { ends: ["worker", "postgres"] },
+  "ingestion-postgres": { ends: ["ingestion", "postgres"] },
+  "gateway-model": { ends: ["gateway", "model"] },
+  "model-egress": { ends: ["model", "egress"] },
+  "humans-url": { ends: ["humans", "url"] },
+  "apps-url": { ends: ["apps", "url"] },
+  "url-proxy": { ends: ["url", "proxy"] },
+  "model-ports": { ends: ["model", "ports"], also: hostingGpus },
+  "egress-external": { ends: ["egress", "external"] },
+};
+
+type HostPick = { kind: "node"; id: string } | { kind: "edge"; id: string } | null;
+
+function hostingActive(id: string) {
+  return new Set([id, ...(hostingLinks[id] ?? [])]);
+}
+
+function hostingMark(picked: HostPick, id: string): "idle" | "on" | "off" {
+  if (!picked) return "idle";
+  if (picked.kind === "edge") {
+    const spec = hostingEdgeEnds[picked.id];
+    const ids = spec ? [...spec.ends, ...(spec.also ?? [])] : [];
+    return ids.includes(id) ? "on" : "off";
+  }
+  return hostingActive(picked.id).has(id) ? "on" : "off";
+}
+
+function hostingEdge(picked: HostPick, edgeId: string, ends: string[], via: string[] = []) {
+  if (!picked) return false;
+  if (picked.kind === "edge") return picked.id === edgeId;
+  if (via.includes(picked.id)) return true;
+  const active = hostingActive(picked.id);
+  if (!ends.includes(picked.id)) return false;
+  return ends.every((end) => active.has(end));
+}
+
+function hostingStroke(picked: HostPick, on: boolean, idle: string, width: number) {
+  if (!picked) return { stroke: idle, strokeWidth: width };
+  if (on) return { stroke: "#FF5C00", strokeWidth: Math.max(width, 1.8) };
+  return { stroke: "#e4e1df", strokeWidth: width };
+}
+
+function HostLink({
+  id,
+  picked,
+  onPick,
+  idle,
+  width,
+  dashed = false,
+  via = [],
+  children,
+}: {
+  id: string;
+  picked: HostPick;
+  onPick: (id: string) => void;
+  idle: string;
+  width: number;
+  dashed?: boolean;
+  via?: string[];
+  children: ReactNode;
+}) {
+  const ends = hostingEdgeEnds[id]?.ends ?? [];
+  const paint = hostingStroke(picked, hostingEdge(picked, id, ends, via), idle, width);
+  return (
+    <g
+      className="cursor-pointer"
+      onClick={(event) => {
+        event.stopPropagation();
+        onPick(id);
+      }}
+    >
+      <g fill="none" stroke="transparent" strokeWidth={14} pointerEvents="stroke">
+        {children}
+      </g>
+      <g fill="none" pointerEvents="none" strokeDasharray={dashed ? "5 4" : undefined} {...paint}>
+        {children}
+      </g>
+    </g>
+  );
+}
+
 function IsoCube({ x, y, accent = false }: { x: number; y: number; accent?: boolean }) {
   const top = `${x},${y - 20} ${x + 11},${y - 14} ${x},${y - 8} ${x - 11},${y - 14}`;
   const left = `${x - 11},${y - 14} ${x},${y - 8} ${x},${y + 4} ${x - 11},${y - 2}`;
@@ -50,9 +165,11 @@ function PlaneNode({
   info,
   accent = false,
   compact = false,
+  mark = "idle",
   onShow,
   onPress,
   onHide,
+  onChoose,
 }: {
   x: number;
   y: number;
@@ -62,19 +179,27 @@ function PlaneNode({
   info: string;
   accent?: boolean;
   compact?: boolean;
+  mark?: "idle" | "on" | "off";
   onShow: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onPress: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onHide: () => void;
+  onChoose?: () => void;
 }) {
   const hit = compact ? 132 : 156;
   const extraLines = (detail ? 1 : 0) + (subdetail ? 1 : 0);
+  const lit = mark === "on" || (mark !== "off" && accent);
   return (
     <g
-      className="cursor-help"
+      opacity={mark === "off" ? 0.28 : 1}
+      className="cursor-pointer"
       onMouseEnter={(event) => onShow(event, label, info)}
       onMouseMove={(event) => onShow(event, label, info)}
       onMouseLeave={onHide}
-      onClick={(event) => onPress(event, label, info)}
+      onClick={(event) => {
+        event.stopPropagation();
+        onChoose?.();
+        onPress(event, label, info);
+      }}
     >
       <rect
         x={x - hit / 2}
@@ -83,7 +208,7 @@ function PlaneNode({
         height={extraLines === 2 ? (compact ? 84 : 96) : extraLines === 1 ? (compact ? 70 : 80) : compact ? 58 : 62}
         fill="transparent"
       />
-      <IsoCube x={x} y={y} accent={accent} />
+      <IsoCube x={x} y={y} accent={lit} />
       <text
         x={x}
         y={y + 22}
@@ -121,11 +246,17 @@ function HostingMobile({
   onPress,
   onHide,
   onClear,
+  picked,
+  onPick,
+  onEdge,
 }: {
   onShow: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onPress: (event: ReactMouseEvent<SVGGElement>, title: string, body: string) => void;
   onHide: () => void;
   onClear: () => void;
+  picked: HostPick;
+  onPick: (id: string) => void;
+  onEdge: (id: string) => void;
 }) {
   const L = 86;
   const R = 250;
@@ -145,6 +276,29 @@ function HostingMobile({
     onHide,
   };
 
+  function mark(id: string) {
+    return hostingMark(picked, id);
+  }
+
+  function choose(id: string) {
+    return () => onPick(id);
+  }
+
+  function fade(id: string) {
+    return mark(id) === "off" ? 0.28 : 1;
+  }
+
+  function boxStroke(id: string, idle: string) {
+    const state = mark(id);
+    if (state === "on") return "#FF5C00";
+    if (state === "off") return "#d6d3d2";
+    return idle;
+  }
+
+  function link(id: string, idle: string, width: number, dashed = false, via: string[] = []) {
+    return { id, picked, onPick: onEdge, idle, width, dashed, via };
+  }
+
   return (
     <svg
       onClick={onClear}
@@ -153,29 +307,50 @@ function HostingMobile({
       role="img"
       aria-label="On premise hosting. The proxy serves the chat and the gateway. The gateway calls Redis, Postgres, the agent workers, and the model proxy. The model proxy is the only path to the GPU ports and to the egress proxy."
     >
-      <g fill="none" stroke="#101010" strokeWidth="1.25">
-        {[mid - 36, mid, mid + 36].map((x) => (
-          <g key={`human-${x}`} transform={`translate(${x} 16)`}>
-            <circle cx="0" cy="0" r="5" />
-            <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
-          </g>
-        ))}
-        {[mid - 36, mid, mid + 36].map((x) => (
-          <g key={`screen-${x}`} transform={`translate(${x} 64)`}>
-            <rect x="-9" y="-7" width="18" height="12" />
-            <path d="M0 5v4M-5 9h10" />
-          </g>
-        ))}
+      <g
+        opacity={fade("humans")}
+        className="cursor-pointer"
+        onClick={(event) => {
+          event.stopPropagation();
+          onPick("humans");
+        }}
+      >
+        <g fill="none" stroke={boxStroke("humans", "#101010")} strokeWidth="1.25">
+          {[mid - 36, mid, mid + 36].map((x) => (
+            <g key={`human-${x}`} transform={`translate(${x} 16)`}>
+              <circle cx="0" cy="0" r="5" />
+              <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
+            </g>
+          ))}
+        </g>
+        <text x={mid} y="46" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+          A human · Chat UI
+        </text>
       </g>
-      <text x={mid} y="46" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
-        A human · Chat UI
-      </text>
-      <text x={mid} y="94" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
-        Enterprise apps · API
-      </text>
+      <g
+        opacity={fade("apps")}
+        className="cursor-pointer"
+        onClick={(event) => {
+          event.stopPropagation();
+          onPick("apps");
+        }}
+      >
+        <g fill="none" stroke={boxStroke("apps", "#101010")} strokeWidth="1.25">
+          {[mid - 36, mid, mid + 36].map((x) => (
+            <g key={`screen-${x}`} transform={`translate(${x} 64)`}>
+              <rect x="-9" y="-7" width="18" height="12" />
+              <path d="M0 5v4M-5 9h10" />
+            </g>
+          ))}
+        </g>
+        <text x={mid} y="94" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
+          Enterprise apps · API
+        </text>
+      </g>
 
       <g
-        className="cursor-help"
+        opacity={fade("url")}
+        className="cursor-pointer"
         onMouseEnter={(event) =>
           onShow(
             event,
@@ -191,15 +366,17 @@ function HostingMobile({
           )
         }
         onMouseLeave={onHide}
-        onClick={(event) =>
+        onClick={(event) => {
+          event.stopPropagation();
+          onPick("url");
           onPress(
             event,
             "One URL",
             "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
-          )
-        }
+          );
+        }}
       >
-        <rect x={frameX} y="108" width={frameW} height="46" fill="#ffffff" stroke="#101010" />
+        <rect x={frameX} y="108" width={frameW} height="46" fill="#ffffff" stroke={boxStroke("url", "#101010")} />
         <text x={mid} y="127" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
           HTTPS · ai.enterprise.internal
         </text>
@@ -208,7 +385,7 @@ function HostingMobile({
         </text>
       </g>
 
-      <g fill="none" stroke="#101010" strokeWidth="1.25">
+      <HostLink {...link("url-proxy", "#101010", 1.25, false, ["humans", "apps"])}>
         {[L, R].map((x) => (
           <g key={x}>
             <path d={`M${x},160 v16`} />
@@ -216,44 +393,50 @@ function HostingMobile({
             <path d={`M${x - 3.5},171 l3.5,6 l3.5,-6`} />
           </g>
         ))}
-      </g>
+      </HostLink>
 
       <rect x={frameX} y="184" width={frameW} height="500" fill="#f4f3f2" stroke="#d6d3d2" />
       <rect x={frameX} y="760" width={frameW} height="214" fill="#f4f3f2" stroke="#d6d3d2" />
 
-      <g fill="none" stroke="#c8c4c2" strokeWidth="1.25" strokeDasharray={dash}>
+      <HostLink {...link("proxy-chat", "#c8c4c2", 1.25, true)}>
         <path d={`M${L + 14},${r0 - 14} H${R - 14}`} />
+      </HostLink>
+      <HostLink {...link("proxy-gateway", "#c8c4c2", 1.25, true, ["chat"])}>
         <path d={`M${mid},${r0 - 14} V${r1 - 22} H${L}`} />
+      </HostLink>
+      <HostLink {...link("gateway-otel", "#c8c4c2", 1.25, true)}>
         <path d={`M${L + 14},${r1 - 14} H${R - 14}`} />
+      </HostLink>
+      <HostLink {...link("gateway-postgres", "#c8c4c2", 1.25, true, ["redis", "worker"])}>
         <path d={`M${mid},${r1 + 8} V${r3 - 14}`} />
+      </HostLink>
+      <HostLink {...link("worker-mcp", "#c8c4c2", 1.25, true)}>
         <path d={`M${L + 14},${r2 - 14} H${R - 14}`} />
+      </HostLink>
+      <HostLink {...link("gateway-redis", "#c8c4c2", 1.25, true, ["postgres"])}>
         <path d={`M${L + 14},${r3 - 14} H${R - 14}`} />
+      </HostLink>
+      <HostLink {...link("ingestion-postgres", "#c8c4c2", 1.25, true)}>
         <path d={`M${mid},${r3 - 14} V${r4 - 14} H${L + 14}`} />
-      </g>
-      <path
-        d={`M${L + 14},${r1 - 8} H176 V${r4 - 22} H${R}`}
-        fill="none"
-        stroke="#FF5C00"
-        strokeWidth="1.6"
-      />
-      <path
-        d={`M${R + 14},${r4 - 2} H328 V996 H${frameX + frameW}`}
-        fill="none"
-        stroke="#FF5C00"
-        strokeWidth="1.5"
-        strokeDasharray={dash}
-      />
-      <g fill="none" stroke="#FF5C00" strokeWidth="1.35">
+      </HostLink>
+      <HostLink {...link("gateway-model", "#FF5C00", 1.6)}>
+        <path d={`M${L + 14},${r1 - 8} H176 V${r4 - 22} H${R}`} />
+      </HostLink>
+      <HostLink {...link("model-egress", "#FF5C00", 1.5, true)}>
+        <path d={`M${R + 14},${r4 - 2} H328 V996 H${frameX + frameW}`} />
+      </HostLink>
+      <HostLink {...link("model-ports", "#FF5C00", 1.35, false, hostingGpus)}>
         <path d={`M${R},${r4 + 34} V708`} />
         <path d={`M${R - 3.5},${r4 + 40} l3.5,-6 l3.5,6`} />
         <path d={`M${R - 3.5},702 l3.5,6 l3.5,-6`} />
         <path d={`M${mid},748 V776`} />
         <path d={`M${mid - 3.5},754 l3.5,-6 l3.5,6`} />
         <path d={`M${mid - 3.5},770 l3.5,6 l3.5,-6`} />
-      </g>
+      </HostLink>
 
       <g
-        className="cursor-help"
+        opacity={fade("ports")}
+        className="cursor-pointer"
         onMouseEnter={(event) =>
           onShow(
             event,
@@ -269,15 +452,17 @@ function HostingMobile({
           )
         }
         onMouseLeave={onHide}
-        onClick={(event) =>
+        onClick={(event) => {
+          event.stopPropagation();
+          onPick("ports");
           onPress(
             event,
             "Ports 8001–8004",
             "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
-          )
-        }
+          );
+        }}
       >
-        <rect x={frameX} y="708" width={frameW} height="36" fill="#ffffff" stroke="#FF5C00" />
+        <rect x={frameX} y="708" width={frameW} height="36" fill="#ffffff" stroke={boxStroke("ports", "#FF5C00")} />
         <text x={mid} y="730" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
           Ports 8001–8004 only
         </text>
@@ -289,6 +474,8 @@ function HostingMobile({
         label="Proxy"
         detail="TLS entry point"
         info="The single entry point on the internal network. It terminates HTTPS and sends the chat to the chat UI and the API to the gateway."
+        mark={mark("proxy")}
+        onChoose={choose("proxy")}
         {...node}
       />
       <PlaneNode
@@ -297,6 +484,8 @@ function HostingMobile({
         label="Chat UI"
         detail="SSO, human interface"
         info="Where a human signs in with the enterprise’s single sign-on and talks to the system. The chat calls the gateway."
+        mark={mark("chat")}
+        onChoose={choose("chat")}
         {...node}
       />
       <PlaneNode
@@ -306,6 +495,8 @@ function HostingMobile({
         detail="policy and routing"
         info="Two Fastify instances on port 8080. They check the request, enforce policy, and route it to a model, an agent, or a search."
         accent
+        mark={mark("gateway")}
+        onChoose={choose("gateway")}
         {...node}
       />
       <PlaneNode
@@ -314,6 +505,8 @@ function HostingMobile({
         label="OTel"
         detail="telemetry export"
         info="Sends OpenTelemetry traces out to the monitoring the enterprise already runs."
+        mark={mark("otel")}
+        onChoose={choose("otel")}
         {...node}
       />
       <PlaneNode
@@ -322,6 +515,8 @@ function HostingMobile({
         label="Agent worker ×2"
         detail="job queue workers"
         info="Two background workers. They run multi-step tasks from the pg-boss queue in Postgres, and call tools through the MCP servers."
+        mark={mark("worker")}
+        onChoose={choose("worker")}
         {...node}
       />
       <PlaneNode
@@ -330,6 +525,8 @@ function HostingMobile({
         label="MCP servers"
         detail="tool connectors"
         info="Three connectors. They are the tools an agent uses to reach SharePoint, a read-only database, and the sanctions list."
+        mark={mark("mcp")}
+        onChoose={choose("mcp")}
         {...node}
       />
       <PlaneNode
@@ -338,6 +535,8 @@ function HostingMobile({
         label="Postgres 16"
         detail="vectors, jobs, logs"
         info="Stores document vectors for search, runs the pg-boss job queue, and keeps the logs and the runs."
+        mark={mark("postgres")}
+        onChoose={choose("postgres")}
         {...node}
       />
       <PlaneNode
@@ -346,6 +545,8 @@ function HostingMobile({
         label="Redis 7"
         detail="budgets and cache"
         info="Tracks token budgets as they are spent, and caches frequent responses. The gateway is what talks to it."
+        mark={mark("redis")}
+        onChoose={choose("redis")}
         {...node}
       />
       <PlaneNode
@@ -354,6 +555,8 @@ function HostingMobile({
         label="Ingestion"
         detail="SharePoint sync"
         info="Syncs new and changed SharePoint files, and skips a file that has not changed. The vectors land in Postgres."
+        mark={mark("ingestion")}
+        onChoose={choose("ingestion")}
         {...node}
       />
       <PlaneNode
@@ -363,6 +566,8 @@ function HostingMobile({
         detail="sole path to models"
         info="The only path to the models. No other container calls a model directly. It is also the only service with a route out."
         accent
+        mark={mark("model")}
+        onChoose={choose("model")}
         {...node}
       />
 
@@ -373,6 +578,8 @@ function HostingMobile({
         detail="GPU 0 · 8001"
         subdetail="chat and routing"
         info="Qwen3-30B-A3B in FP8, about 31 GB. It handles chat, answers from retrieved documents, and chooses where a task goes. FP8 is 8-bit floating point, which shrinks the memory it needs."
+        mark={mark("qwen")}
+        onChoose={choose("qwen")}
         {...node}
       />
       <PlaneNode
@@ -382,6 +589,8 @@ function HostingMobile({
         detail="GPU 1 · 8002"
         subdetail="compliance reasoning"
         info="DeepSeek-R1-Distill-Qwen-32B in FP8, about 33 GB. It does the compliance reasoning that needs step-by-step logic."
+        mark={mark("deepseek")}
+        onChoose={choose("deepseek")}
         {...node}
       />
       <PlaneNode
@@ -391,6 +600,8 @@ function HostingMobile({
         detail="BGE-M3 · 8003"
         subdetail="document vectorization"
         info="BGE-M3, about 2 GB. It turns a document into vectors that can be searched."
+        mark={mark("embeddings")}
+        onChoose={choose("embeddings")}
         {...node}
       />
       <PlaneNode
@@ -400,11 +611,14 @@ function HostingMobile({
         detail="8004"
         subdetail="search result scoring"
         info="bge-reranker-v2-m3, about 2 GB. It scores the search results so the most relevant passages reach the model."
+        mark={mark("reranker")}
+        onChoose={choose("reranker")}
         {...node}
       />
 
       <g
-        className="cursor-help"
+        opacity={fade("egress")}
+        className="cursor-pointer"
         onMouseEnter={(event) =>
           onShow(
             event,
@@ -420,23 +634,28 @@ function HostingMobile({
           )
         }
         onMouseLeave={onHide}
-        onClick={(event) =>
+        onClick={(event) => {
+          event.stopPropagation();
+          onPick("egress");
           onPress(
             event,
             "Egress proxy",
             "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
-          )
-        }
+          );
+        }}
       >
-        <rect x={frameX} y="996" width={frameW} height="52" fill="#ffffff" stroke="#101010" />
+        <rect x={frameX} y="996" width={frameW} height="52" fill="#ffffff" stroke={boxStroke("egress", "#101010")} />
         <text x={mid} y="1026" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
           Egress proxy
         </text>
       </g>
-      <path d={`M${mid},1048 v16`} fill="none" stroke="#101010" strokeWidth="1.25" />
-      <path d={`M${mid - 3.5},1058 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.25" />
+      <HostLink {...link("egress-external", "#101010", 1.25)}>
+        <path d={`M${mid},1048 v16`} />
+        <path d={`M${mid - 3.5},1058 l3.5,6 l3.5,-6`} />
+      </HostLink>
       <g
-        className="cursor-help"
+        opacity={fade("external")}
+        className="cursor-pointer"
         onMouseEnter={(event) =>
           onShow(
             event,
@@ -452,15 +671,17 @@ function HostingMobile({
           )
         }
         onMouseLeave={onHide}
-        onClick={(event) =>
+        onClick={(event) => {
+          event.stopPropagation();
+          onPick("external");
           onPress(
             event,
             "External API",
             "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
-          )
-        }
+          );
+        }}
       >
-        <rect x={frameX} y="1072" width={frameW} height="56" fill="#ffffff" stroke="#101010" strokeDasharray={dash} />
+        <rect x={frameX} y="1072" width={frameW} height="56" fill="#ffffff" stroke={boxStroke("external", "#101010")} strokeDasharray={dash} />
         <text x={mid} y="1094" textAnchor="middle" className="fill-foreground font-mono text-[12px] uppercase">
           External API
         </text>
@@ -498,6 +719,34 @@ function SummaryHosting() {
   const dash = "5 4";
   const sectionRef = useRef<HTMLElement>(null);
   const [tip, setTip] = useState<{ title: string; body: string; x: number; y: number } | null>(null);
+  const [picked, setPicked] = useState<HostPick>(null);
+
+  function pick(id: string) {
+    setPicked((current) => (current?.kind === "node" && current.id === id ? null : { kind: "node", id }));
+  }
+
+  function pickEdge(id: string) {
+    setPicked((current) => (current?.kind === "edge" && current.id === id ? null : { kind: "edge", id }));
+  }
+
+  function mark(id: string) {
+    return hostingMark(picked, id);
+  }
+
+  function link(id: string, idle: string, width: number, dashed = false, via: string[] = []) {
+    return { id, picked, onPick: pickEdge, idle, width, dashed, via };
+  }
+
+  function fade(id: string) {
+    return mark(id) === "off" ? 0.28 : 1;
+  }
+
+  function boxStroke(id: string, idle: string) {
+    const state = mark(id);
+    if (state === "on") return "#FF5C00";
+    if (state === "off") return "#d6d3d2";
+    return idle;
+  }
 
   function coarsePointer() {
     return window.matchMedia("(hover: none)").matches;
@@ -545,8 +794,12 @@ function SummaryHosting() {
           onShow={showTip}
           onPress={pressTip}
           onHide={hideTip}
+          picked={picked}
+          onPick={pick}
+          onEdge={pickEdge}
           onClear={() => {
             if (coarsePointer()) setTip(null);
+            setPicked(null);
           }}
         />
       </div>
@@ -554,6 +807,7 @@ function SummaryHosting() {
         <svg
           onClick={() => {
             if (coarsePointer()) setTip(null);
+            setPicked(null);
           }}
           viewBox="0 0 1120 760"
           className="block h-auto w-full min-w-[64rem]"
@@ -563,54 +817,64 @@ function SummaryHosting() {
           <rect x={frameX} y="176" width={frameW} height="292" fill="#f4f3f2" stroke="#d6d3d2" />
           <rect x={frameX} y="584" width={frameW} height="140" fill="#f4f3f2" stroke="#d6d3d2" />
 
-          <g fill="none" stroke="#c8c4c2" strokeWidth="1.25" strokeDasharray={dash}>
+          <HostLink {...link("proxy-chat", "#c8c4c2", 1.25, true)}>
             <path d={`M${proxy.x + 12},${proxy.y - 14} L${chat.x - 12},${chat.y - 14}`} />
+          </HostLink>
+          <HostLink {...link("chat-gateway", "#c8c4c2", 1.25, true)}>
             <path d={`M${chat.x + 12},${chat.y - 14} L${gateway.x - 12},${gateway.y - 14}`} />
-            <path
-              d={`M${proxy.x},${proxy.y - 22} C ${chat.x},${proxy.y - 64} ${chat.x},${gateway.y - 64} ${gateway.x},${gateway.y - 22}`}
-            />
+          </HostLink>
+          <HostLink {...link("proxy-gateway", "#c8c4c2", 1.25, true)}>
+            <path d={`M${proxy.x},${proxy.y - 22} C ${chat.x},${proxy.y - 64} ${chat.x},${gateway.y - 64} ${gateway.x},${gateway.y - 22}`} />
+          </HostLink>
+          <HostLink {...link("gateway-otel", "#c8c4c2", 1.25, true)}>
             <path d={`M${gateway.x + 12},${gateway.y - 14} L${otel.x - 12},${otel.y - 14}`} />
+          </HostLink>
+          <HostLink {...link("gateway-redis", "#c8c4c2", 1.25, true)}>
             <path d={`M${gateway.x + 8},${gateway.y + 2} L${redis.x - 8},${redis.y - 18}`} />
+          </HostLink>
+          <HostLink {...link("gateway-worker", "#c8c4c2", 1.25, true)}>
             <path d={`M${gateway.x},${gateway.y + 4} L${worker.x},${worker.y - 20}`} />
+          </HostLink>
+          <HostLink {...link("gateway-postgres", "#c8c4c2", 1.25, true)}>
             <path d={`M${gateway.x - 10},${gateway.y + 2} L${postgres.x + 8},${postgres.y - 20}`} />
+          </HostLink>
+          <HostLink {...link("worker-mcp", "#c8c4c2", 1.25, true)}>
             <path d={`M${worker.x - 12},${worker.y - 10} L${mcp.x + 12},${mcp.y - 10}`} />
+          </HostLink>
+          <HostLink {...link("worker-postgres", "#c8c4c2", 1.25, true)}>
             <path d={`M${worker.x - 8},${worker.y + 2} L${postgres.x + 10},${postgres.y - 18}`} />
+          </HostLink>
+          <HostLink {...link("ingestion-postgres", "#c8c4c2", 1.25, true)}>
             <path d={`M${ingestion.x + 6},${ingestion.y + 4} L${postgres.x - 8},${postgres.y - 18}`} />
-          </g>
-          <path
-            d={`M${gateway.x + 14},${gateway.y - 8} C ${gateway.x + 150},${gateway.y + 24} ${model.x + 150},${model.y - 80} ${model.x + 12},${model.y - 18}`}
-            fill="none"
-            stroke="#FF5C00"
-            strokeWidth="1.6"
-          />
-          <path
-            d={`M${model.x + 18},${model.y - 2} H ${egressCenter} V 548`}
-            fill="none"
-            stroke="#FF5C00"
-            strokeWidth="1.5"
-            strokeDasharray={dash}
-          />
-
-          <g fill="none" stroke="#101010" strokeWidth="1.25">
-            {[humanX, appsX].map((x) => (
-              <g key={x}>
-                <path d={`M${x},128 v18`} />
-                <path d={`M${x - 3.5},133 l3.5,-6 l3.5,6`} />
-                <path d={`M${x - 3.5},141 l3.5,6 l3.5,-6`} />
-              </g>
-            ))}
-          </g>
-          <g fill="none" stroke="#FF5C00" strokeWidth="1.35">
+          </HostLink>
+          <HostLink {...link("gateway-model", "#FF5C00", 1.6)}>
+            <path d={`M${gateway.x + 14},${gateway.y - 8} C ${gateway.x + 150},${gateway.y + 24} ${model.x + 150},${model.y - 80} ${model.x + 12},${model.y - 18}`} />
+          </HostLink>
+          <HostLink {...link("model-egress", "#FF5C00", 1.5, true)}>
+            <path d={`M${model.x + 18},${model.y - 2} H ${egressCenter} V 548`} />
+          </HostLink>
+          <HostLink {...link("humans-url", "#101010", 1.25)}>
+            <path d={`M${humanX},128 v18`} />
+            <path d={`M${humanX - 3.5},133 l3.5,-6 l3.5,6`} />
+            <path d={`M${humanX - 3.5},141 l3.5,6 l3.5,-6`} />
+          </HostLink>
+          <HostLink {...link("apps-url", "#101010", 1.25)}>
+            <path d={`M${appsX},128 v18`} />
+            <path d={`M${appsX - 3.5},133 l3.5,-6 l3.5,6`} />
+            <path d={`M${appsX - 3.5},141 l3.5,6 l3.5,-6`} />
+          </HostLink>
+          <HostLink {...link("model-ports", "#FF5C00", 1.35, false, hostingGpus)}>
             <path d={`M${model.x},456 v36`} />
             <path d={`M${model.x - 3.5},462 l3.5,-6 l3.5,6`} />
             <path d={`M${model.x - 3.5},486 l3.5,6 l3.5,-6`} />
             <path d={`M${model.x},552 v24`} />
             <path d={`M${model.x - 3.5},558 l3.5,-6 l3.5,6`} />
             <path d={`M${model.x - 3.5},570 l3.5,6 l3.5,-6`} />
-          </g>
+          </HostLink>
 
           <g
-            className="cursor-help"
+            opacity={fade("url")}
+            className="cursor-pointer"
             onMouseEnter={(event) =>
               showTip(
                 event,
@@ -626,15 +890,17 @@ function SummaryHosting() {
               )
             }
             onMouseLeave={hideTip}
-            onClick={(event) =>
+            onClick={(event) => {
+              event.stopPropagation();
+              pick("url");
               pressTip(
                 event,
                 "One URL",
                 "ai.enterprise.internal on TLS 443. A human and enterprise apps both arrive here, and sign in with corporate single sign-on.",
-              )
-            }
+              );
+            }}
           >
-            <rect x={frameX} y="78" width={frameW} height="36" fill="#ffffff" stroke="#101010" />
+            <rect x={frameX} y="78" width={frameW} height="36" fill="#ffffff" stroke={boxStroke("url", "#101010")} />
             <text
               x={frameCenter}
               y="101"
@@ -645,7 +911,8 @@ function SummaryHosting() {
             </text>
           </g>
           <g
-            className="cursor-help"
+            opacity={fade("ports")}
+            className="cursor-pointer"
             onMouseEnter={(event) =>
               showTip(
                 event,
@@ -661,15 +928,17 @@ function SummaryHosting() {
               )
             }
             onMouseLeave={hideTip}
-            onClick={(event) =>
+            onClick={(event) => {
+              event.stopPropagation();
+              pick("ports");
               pressTip(
                 event,
                 "Ports 8001–8004",
                 "The model proxy is the only caller of these ports. 8001 is Qwen, 8002 is DeepSeek, 8003 is the embedding model, and 8004 is the reranker.",
-              )
-            }
+              );
+            }}
           >
-            <rect x={model.x - 228} y="508" width="456" height="34" fill="#ffffff" stroke="#FF5C00" />
+            <rect x={model.x - 228} y="508" width="456" height="34" fill="#ffffff" stroke={boxStroke("ports", "#FF5C00")} />
             <text
               x={model.x}
               y="530"
@@ -680,36 +949,56 @@ function SummaryHosting() {
             </text>
           </g>
 
-          <g fill="none" stroke="#101010" strokeWidth="1.25">
-            {[humanX - 44, humanX, humanX + 44].map((x) => (
-              <g key={`human-${x}`} transform={`translate(${x} 28)`}>
-                <circle cx="0" cy="0" r="5" />
-                <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
-              </g>
-            ))}
-            {[appsX - 44, appsX, appsX + 44].map((x) => (
-              <g key={`screen-${x}`} transform={`translate(${x} 30)`}>
-                <rect x="-9" y="-7" width="18" height="12" />
-                <path d="M0 5v4M-5 9h10" />
-              </g>
-            ))}
+          <g
+            opacity={fade("humans")}
+            className="cursor-pointer"
+            onClick={(event) => {
+              event.stopPropagation();
+              pick("humans");
+            }}
+          >
+            <g fill="none" stroke={boxStroke("humans", "#101010")} strokeWidth="1.25">
+              {[humanX - 44, humanX, humanX + 44].map((x) => (
+                <g key={`human-${x}`} transform={`translate(${x} 28)`}>
+                  <circle cx="0" cy="0" r="5" />
+                  <path d="M-8 16c1.4-5 4-7.5 8-7.5s6.6 2.5 8 7.5" />
+                </g>
+              ))}
+            </g>
+            <text
+              x={humanX}
+              y="62"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+            >
+              A human · Chat UI
+            </text>
           </g>
-          <text
-            x={humanX}
-            y="62"
-            textAnchor="middle"
-            className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+          <g
+            opacity={fade("apps")}
+            className="cursor-pointer"
+            onClick={(event) => {
+              event.stopPropagation();
+              pick("apps");
+            }}
           >
-            A human · Chat UI
-          </text>
-          <text
-            x={appsX}
-            y="62"
-            textAnchor="middle"
-            className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
-          >
-            Enterprise apps · API
-          </text>
+            <g fill="none" stroke={boxStroke("apps", "#101010")} strokeWidth="1.25">
+              {[appsX - 44, appsX, appsX + 44].map((x) => (
+                <g key={`screen-${x}`} transform={`translate(${x} 30)`}>
+                  <rect x="-9" y="-7" width="18" height="12" />
+                  <path d="M0 5v4M-5 9h10" />
+                </g>
+              ))}
+            </g>
+            <text
+              x={appsX}
+              y="62"
+              textAnchor="middle"
+              className="fill-foreground font-mono text-[13px] tracking-[-0.01em] uppercase"
+            >
+              Enterprise apps · API
+            </text>
+          </g>
 
           <PlaneNode
             {...proxy}
@@ -719,6 +1008,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("proxy")}
+            onChoose={() => pick("proxy")}
           />
           <PlaneNode
             {...chat}
@@ -728,6 +1019,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("chat")}
+            onChoose={() => pick("chat")}
           />
           <PlaneNode
             {...gateway}
@@ -738,6 +1031,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("gateway")}
+            onChoose={() => pick("gateway")}
           />
           <PlaneNode
             {...otel}
@@ -747,6 +1042,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("otel")}
+            onChoose={() => pick("otel")}
           />
           <PlaneNode
             {...ingestion}
@@ -756,6 +1053,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("ingestion")}
+            onChoose={() => pick("ingestion")}
           />
           <PlaneNode
             {...mcp}
@@ -765,6 +1064,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("mcp")}
+            onChoose={() => pick("mcp")}
           />
           <PlaneNode
             {...worker}
@@ -774,6 +1075,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("worker")}
+            onChoose={() => pick("worker")}
           />
           <PlaneNode
             {...redis}
@@ -783,6 +1086,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("redis")}
+            onChoose={() => pick("redis")}
           />
           <PlaneNode
             {...postgres}
@@ -792,6 +1097,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("postgres")}
+            onChoose={() => pick("postgres")}
           />
           <PlaneNode
             {...model}
@@ -802,6 +1109,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("model")}
+            onChoose={() => pick("model")}
           />
 
           <PlaneNode
@@ -813,6 +1122,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("qwen")}
+            onChoose={() => pick("qwen")}
           />
           <PlaneNode
             {...deepseek}
@@ -823,6 +1134,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("deepseek")}
+            onChoose={() => pick("deepseek")}
           />
           <PlaneNode
             {...embeddings}
@@ -833,6 +1146,8 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("embeddings")}
+            onChoose={() => pick("embeddings")}
           />
           <PlaneNode
             {...reranker}
@@ -843,10 +1158,13 @@ function SummaryHosting() {
             onShow={showTip}
             onHide={hideTip}
             onPress={pressTip}
+            mark={mark("reranker")}
+            onChoose={() => pick("reranker")}
           />
 
           <g
-            className="cursor-help"
+            opacity={fade("egress")}
+            className="cursor-pointer"
             onMouseEnter={(event) =>
               showTip(
                 event,
@@ -862,15 +1180,17 @@ function SummaryHosting() {
               )
             }
             onMouseLeave={hideTip}
-            onClick={(event) =>
+            onClick={(event) => {
+              event.stopPropagation();
+              pick("egress");
               pressTip(
                 event,
                 "Egress proxy",
                 "The enterprise egress proxy. Only the model proxy is allowed to leave through it, and only when the use case policy allows an external model.",
-              )
-            }
+              );
+            }}
           >
-            <rect x={egressX} y="548" width="160" height="72" fill="#ffffff" stroke="#101010" />
+            <rect x={egressX} y="548" width="160" height="72" fill="#ffffff" stroke={boxStroke("egress", "#101010")} />
             <text
               x={egressCenter}
               y="580"
@@ -888,10 +1208,13 @@ function SummaryHosting() {
               proxy
             </text>
           </g>
-          <path d={`M${egressCenter},620 v22`} fill="none" stroke="#101010" strokeWidth="1.25" />
-          <path d={`M${egressCenter - 3.5},636 l3.5,6 l3.5,-6`} fill="none" stroke="#101010" strokeWidth="1.25" />
+          <HostLink {...link("egress-external", "#101010", 1.25)}>
+            <path d={`M${egressCenter},620 v22`} />
+            <path d={`M${egressCenter - 3.5},636 l3.5,6 l3.5,-6`} />
+          </HostLink>
           <g
-            className="cursor-help"
+            opacity={fade("external")}
+            className="cursor-pointer"
             onMouseEnter={(event) =>
               showTip(
                 event,
@@ -907,13 +1230,15 @@ function SummaryHosting() {
               )
             }
             onMouseLeave={hideTip}
-            onClick={(event) =>
+            onClick={(event) => {
+              event.stopPropagation();
+              pick("external");
               pressTip(
                 event,
                 "External API",
                 "An external frontier API. A request reaches it only when that use case’s policy allows it, and the sensitivity check passes.",
-              )
-            }
+              );
+            }}
           >
             <rect
               x={egressX}
@@ -921,7 +1246,7 @@ function SummaryHosting() {
               width="160"
               height="64"
               fill="#ffffff"
-              stroke="#101010"
+              stroke={boxStroke("external", "#101010")}
               strokeDasharray={dash}
             />
             <text

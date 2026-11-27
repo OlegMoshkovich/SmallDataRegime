@@ -36,16 +36,17 @@ function CodeCube({ x, y, accent = false }: { x: number; y: number; accent?: boo
 }
 
 function CodeNode({
-  x, y, accent = false, label, label2, sublabel, detail, more, info, example, onShow, onHide, onPress, onSelect,
+  x, y, accent = false, mark = "idle", label, label2, sublabel, detail, more, info, example, onShow, onHide, onPress, onSelect,
 }: {
-  x: number; y: number; accent?: boolean; label: string; label2?: string; sublabel?: string;
+  x: number; y: number; accent?: boolean; mark?: "idle" | "on" | "off"; label: string; label2?: string; sublabel?: string;
   detail?: string; more?: string; info?: string; example?: string;
   onShow?: (e: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) => void;
   onHide?: () => void;
   onPress?: (e: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) => void;
   onSelect?: () => void;
 }) {
-  const cls = `font-mono text-[11px] tracking-tight uppercase ${accent ? "fill-accent" : "fill-foreground"}`;
+  const lit = mark === "on" || (mark !== "off" && accent);
+  const cls = `font-mono text-[11px] tracking-tight uppercase ${accent && mark !== "off" ? "fill-accent" : "fill-foreground"}`;
   const l1y = label2 ? y + 16 : y + 22;
   const nodeLabel = label2 ? `${label} ${label2}` : label;
   const handlers = (info || example) && onShow && onHide && onPress ? {
@@ -54,20 +55,301 @@ function CodeNode({
     onMouseMove: (e: ReactMouseEvent<SVGGElement>) => onShow(e, nodeLabel, info ?? "", example ?? ""),
     onMouseLeave: onHide,
     onClick: (e: ReactMouseEvent<SVGGElement>) => {
+      e.stopPropagation();
       onPress(e, nodeLabel, info ?? "", example ?? "");
       onSelect?.();
     },
   } : {};
   return (
-    <g {...handlers}>
+    <g opacity={mark === "off" ? 0.28 : 1} {...handlers}>
       <rect x={x - 70} y={y - 26} width={140} height={label2 ? (more ? 100 : detail ? 86 : 68) : (more ? 90 : detail ? 72 : 56)} fill="transparent" />
-      <CodeCube x={x} y={y} accent={accent} />
+      <CodeCube x={x} y={y} accent={lit} />
       <text x={x} y={l1y} textAnchor="middle" className={cls}>{label}</text>
       {label2 ? <text x={x} y={l1y + 13} textAnchor="middle" className={cls}>{label2}</text> : null}
       {sublabel ? <text x={x} y={l1y + (label2 ? 26 : 13)} textAnchor="middle" className="fill-muted font-mono text-[10px]">{sublabel}</text> : null}
       {detail ? <text x={x} y={l1y + (label2 ? 39 : 26)} textAnchor="middle" className="fill-faint font-mono text-[10px]">{detail}</text> : null}
       {more ? <text x={x} y={l1y + (label2 ? 51 : 38)} textAnchor="middle" className="fill-faint font-mono text-[10px]">{more}</text> : null}
     </g>
+  );
+}
+
+const runLinks: Record<string, string[]> = {
+  ide: ["chat", "server"],
+  chat: ["ide", "server"],
+  server: ["ide", "chat", "trace", "cache", "loop", "index", "model"],
+  trace: ["server"],
+  sync: ["index"],
+  tools: ["loop"],
+  loop: ["server", "tools", "index"],
+  cache: ["server"],
+  index: ["server", "loop", "sync"],
+  model: ["server"],
+};
+
+const runEdgeEnds: Record<string, string[]> = {
+  "ide-chat": ["ide", "chat"],
+  "chat-server": ["chat", "server"],
+  "ide-server": ["ide", "server"],
+  "server-trace": ["server", "trace"],
+  "server-cache": ["server", "cache"],
+  "server-loop": ["server", "loop"],
+  "server-index": ["server", "index"],
+  "loop-tools": ["loop", "tools"],
+  "loop-index": ["loop", "index"],
+  "sync-index": ["sync", "index"],
+  "server-model": ["server", "model"],
+};
+
+type RunPick = { kind: "node"; id: string } | { kind: "edge"; id: string } | null;
+
+function runActive(id: string) {
+  return new Set([id, ...(runLinks[id] ?? [])]);
+}
+
+function runMark(picked: RunPick, id: string): "idle" | "on" | "off" {
+  if (!picked) return "idle";
+  if (picked.kind === "edge") return (runEdgeEnds[picked.id] ?? []).includes(id) ? "on" : "off";
+  return runActive(picked.id).has(id) ? "on" : "off";
+}
+
+function runEdgeOn(picked: RunPick, edgeId: string) {
+  if (!picked) return false;
+  if (picked.kind === "edge") return picked.id === edgeId;
+  const ends = runEdgeEnds[edgeId] ?? [];
+  if (!ends.includes(picked.id)) return false;
+  const active = runActive(picked.id);
+  return ends.every((end) => active.has(end));
+}
+
+function runStroke(picked: RunPick, on: boolean, idle: string, width: number) {
+  if (!picked) return { stroke: idle, strokeWidth: width };
+  if (on) return { stroke: "#FF5C00", strokeWidth: Math.max(width, 1.8) };
+  return { stroke: "#e4e1df", strokeWidth: width };
+}
+
+function RunLink({
+  id, d, picked, onPick, idle, width, dashed = false,
+}: {
+  id: string; d: string; picked: RunPick; onPick: (id: string) => void; idle: string; width: number; dashed?: boolean;
+}) {
+  const paint = runStroke(picked, runEdgeOn(picked, id), idle, width);
+  return (
+    <g
+      className="cursor-pointer"
+      onClick={(event) => {
+        event.stopPropagation();
+        onPick(id);
+      }}
+    >
+      <path d={d} fill="none" stroke="transparent" strokeWidth={14} pointerEvents="stroke" />
+      <path d={d} fill="none" pointerEvents="none" strokeDasharray={dashed ? "5 4" : undefined} {...paint} />
+    </g>
+  );
+}
+
+function CursorRunDiagram() {
+  const col = [170, 360, 554, 744];
+  const ide = { x: col[0], y: 118 };
+  const chat = { x: col[1], y: 118 };
+  const server = { x: col[2], y: 118 };
+  const trace = { x: col[3], y: 118 };
+  const sync = { x: col[0], y: 212 };
+  const tools = { x: col[1], y: 212 };
+  const loop = { x: col[2], y: 212 };
+  const cache = { x: col[3], y: 212 };
+  const index = { x: (col[0] + col[1]) / 2, y: 306 };
+  const model = { x: col[2], y: 306 };
+  const sectionRef = useRef<HTMLElement>(null);
+  const [tip, setTip] = useState<{ title: string; info: string; example: string; x: number; y: number } | null>(null);
+  const [tips, setTips] = useState(false);
+  const [examples, setExamples] = useState(false);
+  const [picked, setPicked] = useState<RunPick>(null);
+
+  function pick(id: string) {
+    setPicked((current) => (current?.kind === "node" && current.id === id ? null : { kind: "node", id }));
+  }
+
+  function pickEdge(id: string) {
+    setPicked((current) => (current?.kind === "edge" && current.id === id ? null : { kind: "edge", id }));
+  }
+
+  function mark(id: string) {
+    return runMark(picked, id);
+  }
+
+  function coarsePointer() {
+    return window.matchMedia("(hover: none)").matches;
+  }
+
+  function placeTip(event: { clientX: number; clientY: number }, title: string, info: string, example: string) {
+    const bounds = sectionRef.current?.getBoundingClientRect();
+    if (!bounds) return null;
+    const width = 288;
+    const height = 220;
+    let x = event.clientX - bounds.left + 14;
+    let y = event.clientY - bounds.top + 18;
+    if (x + width > bounds.width - 8) x = event.clientX - bounds.left - width - 10;
+    if (y + height > bounds.height - 8) y = event.clientY - bounds.top - height - 10;
+    return {
+      title,
+      info: tips ? info : "",
+      example: examples ? example : "",
+      x: Math.max(8, x),
+      y: Math.max(8, y),
+    };
+  }
+
+  function showTip(event: { clientX: number; clientY: number }, title: string, info: string, example: string) {
+    if (coarsePointer() || (!tips && !examples)) return;
+    const next = placeTip(event, title, info, example);
+    if (next && (next.info || next.example)) setTip(next);
+  }
+
+  function pressTip(event: ReactMouseEvent<SVGGElement>, title: string, info: string, example: string) {
+    if (!coarsePointer() || (!tips && !examples)) return;
+    const next = placeTip(event, title, info, example);
+    if (!next || (!next.info && !next.example)) return;
+    setTip((current) => (current?.title === title ? null : next));
+  }
+
+  function hideTip() {
+    if (coarsePointer()) return;
+    setTip(null);
+  }
+
+  const node = { onShow: showTip, onHide: hideTip, onPress: pressTip };
+
+  return (
+    <section ref={sectionRef} className="relative border border-line bg-surface px-4 py-8 lg:px-8 lg:py-10">
+      <p className="flex items-center gap-2 font-mono text-[0.75rem] tracking-[-0.015rem] text-accent uppercase">
+        <span className="size-1.5 bg-accent" aria-hidden />
+        How Cursor runs
+      </p>
+      <div className="mt-6 max-w-full min-w-0 overflow-x-auto">
+        <svg
+          onClick={() => {
+            if (coarsePointer()) setTip(null);
+            setPicked(null);
+          }}
+          viewBox="0 0 860 448"
+          className="block h-auto w-full min-w-[40rem]"
+          role="img"
+          aria-label="How Cursor runs. The IDE and the chat stay on this machine. Every request goes to Cursor’s server, which builds the prompt. The agent loop calls tools locally. The index keeps the path and the lines. The chat log is the trace of the run. The model call leaves through that server."
+        >
+          <rect x="76" y="64" width="760" height="326" fill="#f4f3f2" stroke="#d6d3d2" />
+
+          <RunLink id="ide-chat" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${ide.x + 12},${ide.y - 14} L${chat.x - 12},${chat.y - 14}`} />
+          <RunLink id="chat-server" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${chat.x + 12},${chat.y - 14} L${server.x - 12},${server.y - 14}`} />
+          <RunLink id="ide-server" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${ide.x},${ide.y - 22} C ${chat.x},${ide.y - 64} ${chat.x},${server.y - 64} ${server.x},${server.y - 22}`} />
+          <RunLink id="server-trace" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${server.x + 12},${server.y - 14} L${trace.x - 12},${trace.y - 14}`} />
+          <RunLink id="server-cache" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${server.x + 8},${server.y + 2} L${cache.x - 8},${cache.y - 18}`} />
+          <RunLink id="server-loop" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${server.x},${server.y + 4} L${loop.x},${loop.y - 20}`} />
+          <RunLink id="server-index" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${server.x - 10},${server.y + 2} L${index.x + 8},${index.y - 20}`} />
+          <RunLink id="loop-tools" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${loop.x - 12},${loop.y - 10} L${tools.x + 12},${tools.y - 10}`} />
+          <RunLink id="loop-index" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${loop.x - 8},${loop.y + 2} L${index.x + 10},${index.y - 18}`} />
+          <RunLink id="sync-index" picked={picked} onPick={pickEdge} idle="#c8c4c2" width={1.25} dashed d={`M${sync.x + 6},${sync.y + 4} L${index.x - 8},${index.y - 18}`} />
+          <RunLink id="server-model" picked={picked} onPick={pickEdge} idle="#FF5C00" width={1.6} d={`M${server.x + 14},${server.y - 8} C ${server.x + 150},${server.y + 24} ${model.x + 150},${model.y - 80} ${model.x + 12},${model.y - 18}`} />
+
+          <CodeNode x={ide.x} y={ide.y} mark={mark("ide")} label="IDE" detail="this machine" more="read, edit, shell"
+            info="You type the task here. Read, edit, search, and the terminal run in the IDE, on your machine."
+            example="A developer types the order status task in the IDE. Search, read, and edit of the schema, the API handler, and the page all run in that window, on this machine, in the folder already open."
+            onSelect={() => pick("ide")}
+            {...node} />
+          <CodeNode x={chat.x} y={chat.y} mark={mark("chat")} label="CHAT" detail="this thread" more="previous turns"
+            info="This thread holds the previous turns. The next request sends that thread with the task."
+            example="The thread already holds the schema read and the migration edit. The next turn sends that thread, so the API step starts from the order status work already done."
+            onSelect={() => pick("chat")}
+            {...node} />
+          <CodeNode x={server.x} y={server.y} mark={mark("server")} accent label="SERVER" detail="every request" more="builds the prompt"
+            info="Every request goes to Cursor’s server over HTTPS, including one that uses your own key. The server builds the prompt and calls the model."
+            example="Each step of the order status task goes to Cursor’s server. The server builds the prompt from the task, the thread, and the tool results for the schema, the API, and the page, then calls the model."
+            onSelect={() => pick("server")}
+            {...node} />
+          <CodeNode x={trace.x} y={trace.y} mark={mark("trace")} label="TRACE" detail="the chat log" more="on this machine"
+            info="The chat log on this machine is the trace of the run: the task, each tool call, and each model turn."
+            example="The chat log on this machine keeps the trace: the order status task, the search of the schema, the edit of the migration, the edit of the API, the edit of the page, and each model turn."
+            onSelect={() => pick("trace")}
+            {...node} />
+          <CodeNode x={sync.x} y={sync.y} mark={mark("sync")} label="SYNC" detail="changed files" more="a hash per file"
+            info="Cursor hashes the file tree. A changed file is chunked and embedded again. An unchanged chunk keeps the embedding it already has."
+            example="After the order status edits, sync hashes the tree again. The migration, the API handler, and the page are chunked and embedded. Every other file keeps the embedding it already has."
+            onSelect={() => pick("sync")}
+            {...node} />
+          <CodeNode x={tools.x} y={tools.y} mark={mark("tools")} label="TOOLS" detail="run in the IDE" more="read, edit, search"
+            info="The agent asks for a tool, and the IDE runs it. Read, edit, and search stay on your machine."
+            example="A developer asks for an order status stored in the database, returned by the API, and shown on the page. The loop calls search, then read, on the schema. The IDE returns the table. It then calls edit on the migration, the API handler, and the page. Each edit runs in the open folder, and the result is sent back before the next call."
+            onSelect={() => pick("tools")}
+            {...node} />
+          <CodeNode x={loop.x} y={loop.y} mark={mark("loop")} label="LOOP" detail="one step" more="then the result"
+            info="The loop takes one step, waits for the tool result, then asks the model again. You can stop the run before a file changes."
+            example="A developer asks to add an order status that is stored in the database, returned by the API, and shown in the front end. The loop searches for the schema, reads it, and waits. The next step edits the migration. The step after that reads the API handler and edits the response. The last step edits the page that renders the status. You stop it after the API edit, and the front end file stays as it was."
+            onSelect={() => pick("loop")}
+            {...node} />
+          <CodeNode x={cache.x} y={cache.y} mark={mark("cache")} label="CACHE" detail="this request" more="encrypted"
+            info="File text can be cached encrypted for that request. The cache lasts only as long as the request."
+            example="While the order status request is open, the text of the schema, the API handler, and the page can be cached encrypted for that request. The cache ends when the request ends."
+            onSelect={() => pick("cache")}
+            {...node} />
+          <CodeNode x={index.x} y={index.y} mark={mark("index")} label="INDEX" detail="embeddings" more="path and lines"
+            info="The index stores embeddings with the path and the line range. The source text stays in the repo. A later search returns the path and the lines, and the IDE reads the file when the text is needed."
+            example="A developer asks for an order status in the database, the API, and the front end. The index finds the schema, the API handler, and the page from their embeddings. Each hit is a path and a line range. The source text stays in the repo. The IDE then reads those three files at the lines the index named."
+            onSelect={() => pick("index")}
+            {...node} />
+          <CodeNode x={model.x} y={model.y} mark={mark("model")} accent label="MODEL" detail="the only call" more="out of the IDE"
+            info="The model call leaves the IDE only through Cursor’s server. The reply streams back into the same window."
+            example="The model call leaves the IDE only through Cursor’s server. It names the migration edit, then the API edit, then the page edit. Each reply streams back into the same window."
+            onSelect={() => pick("model")}
+            {...node} />
+
+          <g
+            role="switch"
+            aria-checked={tips}
+            aria-label="Show hover details"
+            className="cursor-pointer"
+            onClick={(event) => {
+              event.stopPropagation();
+              setTips((open) => !open);
+              setTip(null);
+            }}
+          >
+            <rect x="76" y="416" width="34" height="16" rx="8" fill={tips ? "#101010" : "#f4f3f2"} stroke="#101010" />
+            <circle cx={tips ? 101 : 85} cy="424" r="5" fill={tips ? "#ffffff" : "#101010"} />
+            <text x="118" y="428" className="fill-muted font-mono text-[11px] uppercase">Info</text>
+          </g>
+          <g
+            role="switch"
+            aria-checked={examples}
+            aria-label="Show hover examples"
+            className="cursor-pointer"
+            onClick={(event) => {
+              event.stopPropagation();
+              setExamples((open) => !open);
+              setTip(null);
+            }}
+          >
+            <rect x="178" y="416" width="34" height="16" rx="8" fill={examples ? "#101010" : "#f4f3f2"} stroke="#101010" />
+            <circle cx={examples ? 203 : 187} cy="424" r="5" fill={examples ? "#ffffff" : "#101010"} />
+            <text x="220" y="428" className="fill-muted font-mono text-[11px] uppercase">Example</text>
+          </g>
+        </svg>
+      </div>
+      {tip ? (
+        <div
+          role="tooltip"
+          className="pointer-events-none absolute z-20 w-72 border border-line bg-surface px-4 py-3 shadow-sm"
+          style={{ left: tip.x, top: tip.y }}
+        >
+          <p className="font-mono text-[0.65rem] tracking-[-0.01em] text-accent uppercase">{tip.title}</p>
+          {tip.info ? <p className="mt-1 text-sm leading-snug text-faint">{tip.info}</p> : null}
+          {tip.example ? (
+            <>
+              {tip.info ? <p className="mt-3 font-mono text-[0.65rem] tracking-[-0.01em] text-muted uppercase">Example</p> : null}
+              <p className="mt-1 text-sm leading-snug text-faint">{tip.example}</p>
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -689,6 +971,7 @@ export function CodingSwitch({
 
       {view === "setup" ? (
         <div className="grid min-w-0 gap-6 *:min-w-0">
+          <CursorRunDiagram />
           <CodeConnectDiagram />
           <Section eyebrow="What moves, and what stays">
             <div className="mt-8 grid gap-4 lg:grid-cols-2">

@@ -147,29 +147,29 @@ function CodeConnectDiagram() {
           viewBox="0 0 1120 640"
           className="block h-auto w-full min-w-[48rem]"
           role="img"
-          aria-label="The agent is the program you opened in the IDE. It runs in that window, on your machine, in the folder already open. You type a task, it plans and edits there, and the diff stays in the editor until you accept it."
+          aria-label="How Cursor is organized. Tools run in the IDE. Each request goes to Cursor’s server, which builds the prompt and calls the model. The repo index keeps embeddings, paths, and line numbers. Previous requests stay in the chat on this machine."
         >
           <rect x="90" y="152" width="722" height="136" fill="#f4f3f2" stroke="#d6d3d2" />
           <rect x="90" y="324" width="722" height="132" fill="#f4f3f2" stroke="#d6d3d2" />
           <rect x="90" y="492" width="722" height="124" fill="#f4f3f2" stroke="#d6d3d2" />
 
           <text x="5" y="66" className="fill-foreground font-mono text-[11px] uppercase">ACCESS</text>
-          <text x="5" y="81" className="fill-muted font-mono text-[10px]">Users, tools</text>
+          <text x="5" y="81" className="fill-muted font-mono text-[10px]">You, the IDE</text>
           <line x1="5" y1="96" x2="82" y2="96" stroke="#d6d3d2" strokeWidth="0.8" />
 
           <text x="5" y="187" className="fill-foreground font-mono text-[11px] uppercase">CONTROL</text>
-          <text x="5" y="202" className="fill-muted font-mono text-[10px]">Run on</text>
-          <text x="5" y="215" className="fill-muted font-mono text-[10px]">your machines</text>
+          <text x="5" y="202" className="fill-muted font-mono text-[10px]">The request</text>
+          <text x="5" y="215" className="fill-muted font-mono text-[10px]">and the tools</text>
           <line x1="5" y1="276" x2="82" y2="276" stroke="#d6d3d2" strokeWidth="0.8" />
 
           <text x="5" y="359" className="fill-foreground font-mono text-[11px] uppercase">COMPUTE</text>
-          <text x="5" y="374" className="fill-muted font-mono text-[10px]">In the</text>
-          <text x="5" y="387" className="fill-muted font-mono text-[10px]">editor</text>
+          <text x="5" y="374" className="fill-muted font-mono text-[10px]">Search and</text>
+          <text x="5" y="387" className="fill-muted font-mono text-[10px]">the model</text>
           <line x1="5" y1="444" x2="82" y2="444" stroke="#d6d3d2" strokeWidth="0.8" />
 
           <text x="5" y="526" className="fill-foreground font-mono text-[11px] uppercase">STORAGE</text>
-          <text x="5" y="541" className="fill-muted font-mono text-[10px]">The files</text>
-          <text x="5" y="554" className="fill-muted font-mono text-[10px]">you have open</text>
+          <text x="5" y="541" className="fill-muted font-mono text-[10px]">What is</text>
+          <text x="5" y="554" className="fill-muted font-mono text-[10px]">kept</text>
           <line x1="5" y1="604" x2="82" y2="604" stroke="#d6d3d2" strokeWidth="0.8" />
 
           {c.map((cx, i) => (
@@ -179,13 +179,13 @@ function CodeConnectDiagram() {
             </g>
           ))}
 
-          {[c[0], c[3]].map((cx) => (
+          {[c[0]].map((cx) => (
             <g key={cx} fill="none" stroke="#101010" strokeWidth="1.2" transform={`translate(${cx} 44)`}>
               <circle cx="0" cy="0" r="6" />
               <path d="M-9 18c1.5-6 4.5-9 9-9s7.5 3 9 9" />
             </g>
           ))}
-          {[c[1], c[2]].map((cx) => (
+          {[c[1], c[2], c[3]].map((cx) => (
             <g key={cx} fill="none" stroke="#101010" strokeWidth="1.2" transform={`translate(${cx} 44)`}>
               <rect x="-10" y="-8" width="20" height="14" />
               <path d="M0 6v5M-6 11h12" />
@@ -193,10 +193,10 @@ function CodeConnectDiagram() {
           ))}
 
           {([
-            [c[0], "YOU", "IN THE IDE"],
-            [c[1], "AGENT", "PLAN"],
-            [c[2], "AGENT", "EDIT"],
-            [c[3], "YOU", "THE DIFF"],
+            [c[0], "YOU", "IN CURSOR"],
+            [c[1], "AGENT", "LOOP"],
+            [c[2], "INDEX", "REPO"],
+            [c[3], "CHAT", "HISTORY"],
           ] as [number, string, string][]).map(([cx, l1, l2]) => (
             <g key={cx}>
               <text x={cx} y="84" textAnchor="middle" fill="#101010" fontSize="11" className="font-mono uppercase">{l1}</text>
@@ -206,27 +206,27 @@ function CodeConnectDiagram() {
           {([
             {
               id: "ide",
-              title: "You in the IDE",
-              info: "You open the agent inside the editor and type the task. The files already open stay the files it works on.",
-              example: "In VS Code you type: change this function so the empty case returns early.",
+              title: "You in Cursor",
+              info: "You type the task in Cursor. Read, edit, search, and the terminal run in that IDE, on your machine.",
+              example: "You ask it to change a function. The file it opens is the file in the folder you already have open.",
             },
             {
               id: "plan",
-              title: "The plan",
-              info: "The agent reads the open files and writes the steps. You can stop it before a file changes.",
-              example: "It names the function, the test it will run, and waits.",
+              title: "The agent loop",
+              info: "The agent takes one step, asks for a tool, waits for the result, then asks the model again. You can stop it before a file changes.",
+              example: "It reads the function, then asks to edit it. You stop the run. The file stays as it was.",
             },
             {
               id: "edit",
-              title: "The edit",
-              info: "It changes the code in the workspace and runs the check from the terminal.",
-              example: "It edits the function, runs the test, and the red check stays in the session.",
+              title: "The repo index",
+              info: "Cursor chunks the repo and embeds the chunks. The index keeps the path and the line range. The source text is not stored in the index.",
+              example: "A later question finds the same function from the index, without reading every file again.",
             },
             {
               id: "diff",
-              title: "The diff",
-              info: "The change appears in the editor. Nothing is saved as the new code until you accept it.",
-              example: "You keep the edit. The file on disk updates. Rejecting it leaves the file as it was.",
+              title: "Chat history",
+              info: "Previous requests in this project stay on this machine. The next turn sends that thread, so the model can see what already happened.",
+              example: "You ask a follow-up. The earlier read and the earlier edit are already in the thread.",
             },
           ] as const).map((item, i) => (
             <rect
@@ -264,94 +264,94 @@ function CodeConnectDiagram() {
             <line x1={c[1]} y1="478" x2={c[0]} y2="478" {...pick(["plan", "steps", "model", "edit", "apply", "check", "diff", "accept", "files", "workspace", "gateway"])} />
           </g>
 
-          <CodeNode x={gateX} y={cY} accent label="GATEWAY" label2="CHECK"
-            detail="who and budget"
-            more="before a file opens"
-            info={"The task hits the gateway first. It checks the person, the policy, and the budget.\n\nThe editor does not call a model on its own. That call goes through the gateway, then the model proxy."}
-            example="You are signed in. The gateway allows the task. A person without access to the folder never gets a plan."
+          <CodeNode x={gateX} y={cY} accent label="SERVER" label2="BUILD"
+            detail="prompt and model"
+            more="every request"
+            info={"Every request goes to Cursor’s server over HTTPS, including a request that uses your own key. The server builds the prompt and calls the model.\n\nFile text can be cached encrypted for that request. The cache key lasts only as long as the request. With privacy mode on, the request is not used for training."}
+            example="You ask for a change. The IDE sends the task and the tool results. The model reply streams back into the same window."
             onSelect={() => choose("gateway")}
             {...node} />
-          <CodeNode x={c[0]} y={cY} label="TASK" label2="WORDS"
-            detail="what you typed"
-            more="change the code"
-            info={"The task is the sentence in the IDE. It names the change. It does not name a new repository.\n\nThe files already open are the files the agent is allowed to read."}
-            example="You type: change this function so the empty case returns early."
+          <CodeNode x={c[0]} y={cY} label="IDE" label2="CLIENT"
+            detail="tools run here"
+            more="read, edit, shell"
+            info={"Cursor is the editor. Read, search, edit, and the terminal run on your machine, in the folder you opened.\n\nThe model does not open those files itself. It asks, and the IDE runs the tool."}
+            example="The agent asks to read a file. The IDE reads it locally and sends the passage back."
             onSelect={() => choose("task")}
             {...node} />
-          <CodeNode x={c[1]} y={cY} label="PLAN" label2="STEPS"
-            detail="what it will touch"
+          <CodeNode x={c[1]} y={cY} label="AGENT" label2="LOOP"
+            detail="one step, then wait"
             more="you can stop it"
-            info={"The agent writes the steps before it edits: which file, which function, which check.\n\nYou can edit the plan or stop the run. A file it did not name stays closed."}
-            example="The plan says: read the function, change the empty case, run the test. You remove the test. It does not run."
+            info={"The loop is the organization. One step, one tool, then the result goes back to the model.\n\nRules in the repo, such as AGENTS.md, are read into the prompt with the task."}
+            example="It searches, reads one file, then edits. You stop it after the read. The edit does not happen."
             onSelect={() => choose("steps")}
             {...node} />
-          <CodeNode x={c[2]} y={cY} label="EDIT" label2="APPLY"
-            detail="in the open folder"
-            more="not a second repo"
-            info={"The agent edits the file in the workspace you already have open. It uses the terminal in that same editor.\n\nIt does not clone the project somewhere else, and it does not commit."}
-            example="The function changes in the buffer. The terminal runs the test. The file on disk is still the old one."
+          <CodeNode x={c[2]} y={cY} label="INDEX" label2="SYNC"
+            detail="only what changed"
+            more="a hash per file"
+            info={"Cursor hashes the file tree. A changed file is chunked and sent to be embedded. An unchanged chunk reuses the embedding already stored.\n\nThe sync does not rewrite the files on your machine."}
+            example="You edit one file. Only that file’s chunks are embedded again."
             onSelect={() => choose("apply")}
             {...node} />
-          <CodeNode x={c[3]} y={cY} label="DIFF" label2="ACCEPT"
-            detail="shown in the IDE"
-            more="you keep or reject"
-            info={"The change is a diff in the editor. Accept writes it. Reject throws it away.\n\nThe agent does not save over the file, and it does not push."}
-            example="You accept. The file updates. Rejecting leaves the function as it was when you typed the task."
+          <CodeNode x={c[3]} y={cY} label="CHAT" label2="THREAD"
+            detail="this conversation"
+            more="sent with the turn"
+            info={"The thread is the memory of previous requests in this chat: the task, each tool result, and each reply.\n\nThe next turn sends that thread to the server. It is not a second copy of the repo."}
+            example="You say “do the same for the other function.” The thread already holds the first edit."
             onSelect={() => choose("accept")}
             {...node} />
 
           <CodeNode x={c[0]} y={pY} label="READ" label2="FILES"
-            detail="what is open"
-            more="nothing else"
-            info={"The agent reads the files in the workspace, and the ones the plan names.\n\nA file outside that folder is not opened. The model sees the passages the read step returned."}
-            example="It reads the function you pointed at, and the test file next to it. It does not open the rest of the disk."
+            detail="a passage, locally"
+            more="then sent back"
+            info={"A read runs in the IDE. The model sees the passage the tool returned.\n\nA file outside the workspace is not opened."}
+            example="It reads the function you named, and the test next to it."
             onSelect={() => choose("read")}
             {...node} />
           <CodeNode x={c[1]} y={pY} label="MODEL" label2="CALL"
-            detail="through the proxy"
-            more="this task only"
-            info={"The model decides how to read the code, which edit to try, and when it has enough.\n\nThe call goes through the model proxy. The editor does not open a port on the GPU. Your code is not used to train the model."}
-            example="The model proposes the early return. The weights stay on the enterprise’s machines."
+            detail="from the server"
+            more="this turn only"
+            info={"The model call leaves the IDE only through Cursor’s server. The editor does not open a port on the GPU.\n\nThe reply streams back. The weights are not copied into the project."}
+            example="The model names the edit. The IDE applies it in the open file."
             onSelect={() => choose("model")}
             {...node} />
-          <CodeNode x={c[2]} y={pY} label="CHECK" label2="TERMINAL"
-            detail="the command you use"
-            more="a red check stays"
-            info={"The terminal runs the check the project already has. The agent does not invent a new definition of done.\n\nA failure stays on the session, next to the diff."}
-            example="The test fails on the empty case. The diff still appears, with that failure named."
+          <CodeNode x={c[2]} y={pY} label="SEARCH" label2="INDEX"
+            detail="path and lines"
+            more="not the source"
+            info={"Semantic search uses the index. A hit is a path and a line range.\n\nThe source text is not kept in the index. The IDE still reads the file when the agent needs the text."}
+            example="Search returns the file and the lines. The read tool then opens that file locally."
             onSelect={() => choose("check")}
             {...node} />
 
-          <CodeNode x={c[0]} y={sY} label="WORKSPACE" label2="FOLDER"
-            sublabel="the files you opened"
-            detail="stays in the IDE"
-            more="not copied out"
-            info={"The folder open in the editor is the place the agent reads and the place the diff is about.\n\nThe files are not uploaded as a second copy. The plan, the edit, and the diff all point back here."}
-            example="VS Code has the project open. The agent works in that window. Closing the task does not move the folder."
+          <CodeNode x={c[0]} y={sY} label="REPO" label2="FOLDER"
+            sublabel="the working copy"
+            detail="stays on disk"
+            more="the files you open"
+            info={"The folder you opened is the working copy. Reads and edits point here.\n\nThe index and the chat point back at these files. They do not replace them."}
+            example="Closing the chat leaves the folder where it was."
             onSelect={() => choose("workspace")}
             {...node} />
-          <CodeNode x={c[2]} y={sY} label="SESSION" label2="LOG"
-            detail="each step"
-            more="replay, not a copy"
-            info={"The log keeps the task, the plan, each edit, and each model call. You can read a run that went wrong.\n\nIt is not a second copy of the folder."}
-            example="You open the log and see the test command and the red check, in order."
+          <CodeNode x={c[2]} y={sY} label="CODE" label2="INDEX"
+            detail="embeddings"
+            more="path and lines"
+            info={"The index stores embeddings with the relative path and the start and end lines. The source text is not stored there.\n\nA teammate’s index can be reused when the file trees match. A result is returned only for a file you already have."}
+            example="The next session finds the function from the index, then reads it from the repo."
             onSelect={() => choose("log")}
             {...node} />
-          <CodeNode x={c[3]} y={sY} label="FILES" label2="ON DISK"
-            sublabel="after you accept"
-            detail="the saved change"
-            more="reject leaves them"
-            info={"Accept writes the diff into the files. Reject does not.\n\nA commit and a push are still yours. The agent stops at the diff."}
-            example="You accept. The function on disk has the early return. You commit when you are ready."
+          <CodeNode x={c[3]} y={sY} label="CHAT" label2="LOG"
+            sublabel="previous requests"
+            detail="on this machine"
+            more="scoped to the project"
+            info={"The trace of a run is the chat: the task, each tool call, and each model turn. It is stored on this machine, for this workspace.\n\nA later chat in the same project can be reopened from that log. During a live turn, the thread is sent to the server for the model. With privacy mode on, it is not kept for training."}
+            example="You reopen yesterday’s chat and the earlier reads are still in it."
             onSelect={() => choose("files")}
             {...node} />
 
           <text x="845" y="166" className="fill-muted font-mono text-[11px] uppercase">HOW TO READ IT</text>
           {([
-            { y: 192, lines: ["The agent is the program", "in the IDE. Code fixes", "its steps. You type the task."] },
-            { y: 260, lines: ["It runs in that window,", "on your machine, in the", "folder you have open."] },
-            { y: 328, lines: ["Plan and edit stay there.", "Only the model call leaves,", "through the gateway,", "on your machines."] },
-            { y: 410, lines: ["The diff stays in the IDE.", "Accept writes the file.", "The agent does not push."] },
+            { y: 192, lines: ["You type in Cursor.", "Read, edit, and search", "run in the IDE."] },
+            { y: 260, lines: ["Each step goes to", "Cursor’s server. It builds", "the prompt and calls", "the model."] },
+            { y: 328, lines: ["The repo is chunked.", "The index keeps the path", "and the lines, not the", "source text."] },
+            { y: 410, lines: ["Past requests stay", "on this machine. The next", "turn sends that thread."] },
           ] as { y: number; lines: string[] }[]).map((item, i) => (
             <g key={item.y}>
               <circle cx="855" cy={item.y} r="9" fill="#101010" />
@@ -695,15 +695,16 @@ export function CodingSwitch({
               <article className="border border-line bg-surface p-5">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Stays</p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
-                  The agent, in the IDE on your machine. The open folder. The files, until you
-                  accept the diff. Weights stay on your machines. The session log stays with the run.
+                  The repo on disk. The chat log of previous requests, on this machine, for this
+                  project. Rules in the repo, such as AGENTS.md.
                 </p>
               </article>
               <article className="border border-line bg-surface p-5">
                 <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">Moves</p>
                 <p className="mt-3 text-base leading-relaxed text-faint">
-                  The model call, through the gateway. The diff, into the open files, after you
-                  accept it. The agent does not commit or push, and the code is not used to train a model.
+                  The request, to Cursor’s server, which builds the prompt and calls the model.
+                  Changed chunks, long enough to embed. The index keeps the path and the lines.
+                  With privacy mode on, the request is not kept for training.
                 </p>
               </article>
             </div>

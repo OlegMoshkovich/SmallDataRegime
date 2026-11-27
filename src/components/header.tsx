@@ -106,7 +106,7 @@ export function Header() {
   }, [open]);
 
   useEffect(() => {
-    setFontSize(readFontSize());
+    setFontSize(applyFontSize(readFontSize()));
   }, []);
 
   function changeFont(px: number) {

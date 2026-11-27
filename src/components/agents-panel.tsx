@@ -21,7 +21,7 @@ export function AgentsPanel() {
           <div>
             <p className="font-mono text-[0.75rem] tracking-[-0.015rem] uppercase">The agent</p>
             <p className="mt-2 max-w-xl text-base leading-relaxed text-faint">
-              An agent is a named, versioned procedure. It takes a typed input, walks a fixed list of steps, calls a model through the gateway, and uses tools as the person who started it. The result is a typed output a human can approve, edit, or reject.
+              We use the word agent narrowly. An agent is a versioned, bounded program for one task. Code fixes the steps. A model reasons inside each step, within limits, with the caller’s permissions. It returns a typed result that a person can check.
             </p>
           </div>
           <div className="border border-line-strong px-4 py-4">

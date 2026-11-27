@@ -1026,7 +1026,80 @@ export function ArchitectureSwitch() {
               <span className="size-1.5 bg-accent" aria-hidden />
               Modules
             </p>
-            <div className="mt-8 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-10 lg:grid-cols-2">
+              <div>
+                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                  Gateway
+                </p>
+                <p className="mt-3 text-base leading-relaxed text-faint">
+                  The gateway is an agentic system. It is the door for every model call, agent
+                  run, and document lookup. Applications call the gateway. The gateway calls the
+                  model. It checks the sign-in,
+                  the person and their team, the policy for that use case, and how sensitive the
+                  request is. It then picks a model, an agent, or a search, reserves the budget, and
+                  runs the call. It blocks an answer that leaks an identifier or breaks its schema,
+                  and it logs the route, the model, the cost, and the latency.
+                </p>
+              </div>
+              <div>
+                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                  Agent
+                </p>
+                <p className="mt-3 text-base leading-relaxed text-faint">
+                  An agent is a versioned, bounded program for one task. Code fixes the steps. A
+                  model reasons inside each step, within limits, with the caller’s permissions. It
+                  returns a typed result that a person can check. The compliance agent turns an
+                  alert into an evidence pack that an analyst approves. It reads the checklist,
+                  screens names against the sanctions list without a model, pulls recent
+                  transactions from a read-only view, searches case notes, and reasons on a local
+                  model. The pack holds findings, citations, a recommended action, and open
+                  questions. Escalation, filing, and contacting a customer wait for that person.
+                </p>
+                <p className="mt-3 text-base leading-relaxed text-faint">
+                  An agent calls models only through the gateway, and its tools act with the
+                  original human’s permissions. A run is a durable job. It survives a restart,
+                  can wait for a human, and can be replayed step by step. Text-to-SQL comes after
+                  the pilot and writes against named definitions, so the same question returns the
+                  same number.
+                </p>
+              </div>
+            </div>
+            <div className="mt-12 grid gap-10 lg:grid-cols-2">
+              <div>
+                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                  Models
+                </p>
+                <p className="mt-3 text-base leading-relaxed text-faint">
+                  Qwen serves chat, retrieval answers, and the router. DeepSeek serves the
+                  compliance agent’s reasoning. A small embedding model and a reranker share a GPU
+                  or run on CPU. Each model is its own container on the GPU machine, and only the
+                  gateway calls those containers. Weights are mirrored into the enterprise’s
+                  artifact store and mounted read-only, so nothing downloads at runtime.
+                  Interactive requests go first. Batch work, nightly evaluations, and re-indexing
+                  wait for off-hours.
+                </p>
+              </div>
+              <div>
+                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                  Machines
+                </p>
+                <p className="mt-3 text-base leading-relaxed text-faint">
+                  The application machine holds the chat, the gateway, the workers, the connectors,
+                  Postgres, and Redis. The GPU machine serves the models, and its firewall accepts
+                  traffic only from the application machine. The only route out of the enterprise
+                  leaves from the gateway, through the enterprise’s egress proxy, and only for a
+                  use case whose policy allows an external model. A human reaches one internal
+                  URL. The API sits on the same URL. People sign in with the enterprise’s single
+                  sign-on. Applications use client credentials. The same signed images move to the
+                  enterprise’s Kubernetes later, with no code change.
+                </p>
+              </div>
+            </div>
+            <div className="mt-12">
+              <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
+                Principles
+              </p>
+              <div className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
               {[
                 [
                   "Single access point",
@@ -1058,6 +1131,7 @@ export function ArchitectureSwitch() {
                   <p className="mt-3 text-sm leading-relaxed text-faint">{body}</p>
                 </article>
               ))}
+              </div>
             </div>
 
             <div className="mt-12">
@@ -1084,74 +1158,6 @@ export function ArchitectureSwitch() {
                   </li>
                 ))}
               </ol>
-            </div>
-
-            <div className="mt-12 grid gap-10 lg:grid-cols-2">
-              <div>
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  Gateway
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  The gateway is the door for every model call, agent run, and document lookup.
-                  Applications call the gateway. The gateway calls the model. It checks the sign-in,
-                  the person and their team, the policy for that use case, and how sensitive the
-                  request is. It then picks a model, an agent, or a search, reserves the budget, and
-                  runs the call. It blocks an answer that leaks an identifier or breaks its schema,
-                  and it logs the route, the model, the cost, and the latency.
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  Agent
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  The compliance agent is a versioned harness. It reads the checklist, screens
-                  names against the sanctions list without a model, pulls recent transactions from
-                  a read-only view, searches case notes, and reasons on a local model. The output
-                  is an evidence pack: findings, citations, a recommended action, and open
-                  questions. A human approves, edits, or rejects. Escalation, filing, and
-                  contacting a customer wait for that human.
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  An agent calls models only through the gateway, and its tools act with the
-                  original human’s permissions. A run is a durable job. It survives a restart,
-                  can wait for a human, and can be replayed step by step. Text-to-SQL comes after
-                  the pilot and writes against named definitions, so the same question returns the
-                  same number.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-12 grid gap-10 lg:grid-cols-2">
-              <div>
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  Models
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  Qwen serves chat, retrieval answers, and the router. DeepSeek serves the
-                  compliance agent’s reasoning. A small embedding model and a reranker share a GPU
-                  or run on CPU. Each model is its own container on the GPU machine, and only the
-                  gateway calls those containers. Weights are mirrored into the enterprise’s
-                  artifact store and mounted read-only, so nothing downloads at runtime.
-                  Interactive requests go first. Batch work, nightly evaluations, and re-indexing
-                  wait for off-hours.
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-[0.75rem] tracking-[-0.015rem] text-muted uppercase">
-                  Machines
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-faint">
-                  The application machine holds the chat, the gateway, the workers, the connectors,
-                  Postgres, and Redis. The GPU machine serves the models, and its firewall accepts
-                  traffic only from the application machine. The only route out of the enterprise
-                  leaves from the gateway, through the enterprise’s egress proxy, and only for a
-                  use case whose policy allows an external model. A human reaches one internal
-                  URL. The API sits on the same URL. People sign in with the enterprise’s single
-                  sign-on. Applications use client credentials. The same signed images move to the
-                  enterprise’s Kubernetes later, with no code change.
-                </p>
-              </div>
             </div>
           </section>
           <section className="border-t border-line pt-8">
